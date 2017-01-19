@@ -10,7 +10,7 @@ project(RhythmRunner CXX)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "src/*.h")
-file(GLOB_RECURSE GLSL "resources/*.glsl")
+file(GLOB_RECURSE GLSL "assets/shaders/*.glsl")
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
 set(THREADS_PREFER_PTHREAD_FLAG ON)

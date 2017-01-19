@@ -42,9 +42,27 @@
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"
 
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
+#define RESOURCE_DIR "../assets/"
+#define RESOURCE_ARG 1
+
 using namespace std;
 
 int main(int argc, char **argv) {
+   string resource_dir;
+
+   if (argc < 2) {
+      cout << "Looking for resources in " << RESOURCE_DIR << endl;
+      resource_dir = RESOURCE_DIR;
+   } else {
+      resource_dir = argv[RESOURCE_ARG];
+   }
+
+   if (resource_dir.back() != '/') {
+      resource_dir.append("/");
+   }
+
    cout << "RhythmRunner" << endl;
    return EXIT_SUCCESS;
 }
