@@ -42,18 +42,22 @@
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"
 
+/*local stuff*/
+#include "Engine.h"
+
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 #define RESOURCE_DIR "../assets/"
 #define RESOURCE_ARG 1
+#define TITLE "LAB1"
 
 using namespace std;
 
 int main(int argc, char **argv) {
    string resource_dir;
+   Engine *engine;
 
    if (argc < 2) {
-      cout << "Looking for resources in " << RESOURCE_DIR << endl;
       resource_dir = RESOURCE_DIR;
    } else {
       resource_dir = argv[RESOURCE_ARG];
@@ -62,7 +66,15 @@ int main(int argc, char **argv) {
    if (resource_dir.back() != '/') {
       resource_dir.append("/");
    }
+#ifdef DEBUG
+   cerr << "Looking for resources in " << resource_dir << endl;
+#endif
 
-   cout << "RhythmRunner" << endl;
+   engine = new Engine(new World(new Window(WINDOW_HEIGHT, WINDOW_WIDTH, TITLE)));
+   engine->init();
+   engine->run();
+
+   delete engine;
+
    return EXIT_SUCCESS;
 }

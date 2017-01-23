@@ -51,14 +51,6 @@ if(WIN32)
    endif()
 endif()
 
-# Get the Eigen environment variable. Since Eigen is a header-only library, we
-# just need to add it to the include directory.
-set(EIGEN3_INCLUDE_DIR "$ENV{EIGEN3_INCLUDE_DIR}")
-if(NOT EIGEN3_INCLUDE_DIR)
-   MESSAGE(FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
-endif()
-include_directories(${EIGEN3_INCLUDE_DIR})
-
 # Get the GLFW environment variable. There should be a CMakeLists.txt in the
 # specified directory.
 set(GLFW_DIR "$ENV{GLFW_DIR}")
@@ -75,6 +67,11 @@ if(NOT APPLE)
       add_subdirectory(${GLFW_DIR} ${GLFW_DIR}/debug)
    endif()
 endif()
+
+if(NOT CMAKE_BUILD_TYPE MATCHES Release)
+   add_definitions(-DDEBUG)
+endif()
+
 include_directories(${GLFW_DIR}/include)
 target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES})
 
