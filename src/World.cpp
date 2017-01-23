@@ -8,6 +8,9 @@ GLuint World::GIndxBuffObj;
 
 shared_ptr<Program> prog2;
 shared_ptr<Texture> texture2;
+vec3 eyePos(0,0,0);
+vec3 lookAtPos(0,0,-5);
+vec3 up(0, 1 ,0);
 
 World::World(Window *window) {
    this->window = window;
@@ -109,12 +112,15 @@ void World::update() {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       auto P = MatrixStack();
-      auto MV = MatrixStack();
+      auto M = MatrixStack();
+      auto V = MatrixStack();
       P.pushMatrix();
       P.perspective(45.0f, window->getAspect(), 0.01f, 100.0f);
+      V.pushMatrix();
+      V.lookAt(eyePos, lookAtPos, up);
 
       prog2->bind();
-      MV.pushMatrix();
+      M.pushMatrix();
       texture2->bind(prog2->getUniform("Texture2"));
       glUniformMatrix4fv(prog2->getUniform("P"), 1, GL_FALSE, value_ptr(P.topMatrix()));
       glUniformMatrix4fv(prog2->getUniform("MV"), 1, GL_FALSE, value_ptr(MV.topMatrix()));
