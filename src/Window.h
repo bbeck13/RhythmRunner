@@ -24,6 +24,7 @@ public:
    static bool shouldClose();
    static void setClose(bool toSet);
    static void swapBuffers();
+   static float getAspect();
 
 private:
    static bool close;

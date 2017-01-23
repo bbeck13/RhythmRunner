@@ -1,7 +1,13 @@
 #include "World.h"
 
 int World::GiboLen;
-GLuint World::GrndBuffObj, World::GrndNorBuffObj, World::GrndTexBuffObj, World::GIndxBuffObj;
+GLuint World::GrndBuffObj;
+GLuint World::GrndNorBuffObj;
+GLuint World::GrndTexBuffObj;
+GLuint World::GIndxBuffObj;
+
+shared_ptr<Program> prog2;
+shared_ptr<Texture> texture2;
 
 World::World(Window *window) {
    this->window = window;
@@ -17,7 +23,8 @@ World::~World() {
 
 void World::init() {
    GLSL::checkVersion();
-   glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
+   glClearColor(0.30f, 0.5f, 0.78f, 1.0f);
+
    glEnable(GL_DEPTH_TEST);
 
    //gameObjects.add();
@@ -72,6 +79,24 @@ void World::init() {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
 
+   prog2 = make_shared<Program>();
+   prog2->setVerbose(true);
+   prog2->setShaderNames("../assets/shaders/tex_vert.glsl", "../assets/shaders/tex_frag2.glsl");
+   prog2->init();
+
+   texture2 = make_shared<Texture>();
+   texture2->setFilename("../assets/textures/grass.jpg");
+   texture2->init();
+   texture2->setUnit(2);
+   texture2->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+   prog2->addUniform("P");
+   prog2->addUniform("MV");
+   prog2->addAttribute("vertPos");
+   prog2->addAttribute("vertNor");
+   prog2->addAttribute("vertTex");
+   prog2->addUniform("Texture2");
+
    GlobalData::insertCallback(GLFW_KEY_ESCAPE, [] (int scancode, int action, int mods) {
       if (action == GLFW_PRESS) {
          Window::setClose(true);
@@ -83,7 +108,46 @@ void World::update() {
    while (!window->shouldClose()) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+      auto P = MatrixStack();
+      auto MV = MatrixStack();
+      P.pushMatrix();
+      P.perspective(45.0f, window->getAspect(), 0.01f, 100.0f);
+
+      prog2->bind();
+      MV.pushMatrix();
+      texture2->bind(prog2->getUniform("Texture2"));
+      glUniformMatrix4fv(prog2->getUniform("P"), 1, GL_FALSE, value_ptr(P.topMatrix()));
+      glUniformMatrix4fv(prog2->getUniform("MV"), 1, GL_FALSE, value_ptr(MV.topMatrix()));
+
+      glEnableVertexAttribArray(0);
+      glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+      glEnableVertexAttribArray(1);
+      glBindBuffer(GL_ARRAY_BUFFER, GrndNorBuffObj);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+      glEnableVertexAttribArray(2);
+      glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+      // draw!
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
+      glDrawElements(GL_TRIANGLES, GiboLen, GL_UNSIGNED_SHORT, 0);
+
+      glDisableVertexAttribArray(0);
+      glDisableVertexAttribArray(1);
+      glDisableVertexAttribArray(2);
+
+      MV.popMatrix();
+      prog2->unbind();
+
+      P.popMatrix();
+
       window->swapBuffers();
       glfwPollEvents();
+      if (glGetError() != GL_NO_ERROR) {
+         window->setClose(true);
+      }
    }
 }

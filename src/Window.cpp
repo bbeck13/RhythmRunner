@@ -51,6 +51,10 @@ Window::Window(int height, int width, string title) {
    glfwSetKeyCallback(window, GlobalData::keyCallback);
 
    glfwSetFramebufferSizeCallback(window, Window::resizeCallback);
+
+   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+   glfwSetCursorPos(window, width / 2.0f, height / 2.0f);
 }
 
 Window::~Window() {
@@ -73,6 +77,10 @@ void Window::swapBuffers() {
 
 bool Window::shouldClose() {
    return glfwWindowShouldClose(window) || close;
+}
+
+float Window::getAspect() {
+   return width / height;
 }
 
 void Window::setClose(bool toSet) {

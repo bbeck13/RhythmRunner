@@ -29,10 +29,6 @@ public:
    GameObject(Graphics *graphics, string mesh);
    GameObject(Graphics *graphics, string mesh, string texture);
    ~GameObject();
-
-   //PhysicsComponent   *physics;
-   //Component          *input;
-   //CollisionComponent *collision;
 private:
    Graphics *graphics;
    Shape *shape;
