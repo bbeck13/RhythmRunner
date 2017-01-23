@@ -22,8 +22,11 @@ public:
    static void resize(int width, int height);
    static void resizeCallback(GLFWwindow *window, int width, int height);
    static bool shouldClose();
+   static void setClose(bool toSet);
+   static void swapBuffers();
 
 private:
+   static bool close;
    static int height;
    static int width;
    static GLFWwindow *window;

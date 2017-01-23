@@ -8,6 +8,9 @@ void GlobalData::errorCallback(int error, const char *description) {
 
 void GlobalData::keyCallback(GLFWwindow *window, int key, int scancode,
                              int action, int mods) {
+#ifdef DEBUG
+   cerr << "Got key " << key << endl;
+#endif
    if(GlobalData::keyMap.find(key) != GlobalData::keyMap.end()) {
       GlobalData::keyMap[key](scancode, action, mods);
    }

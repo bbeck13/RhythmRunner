@@ -9,7 +9,10 @@ Engine::~Engine() {
 }
 
 void Engine::init() {
+   GLSL::checkVersion();
+   world->init();
 }
 
 void Engine::run() {
+   world->update();
 }

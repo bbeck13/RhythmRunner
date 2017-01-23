@@ -5,10 +5,12 @@ using namespace std;
 int Window::height;
 int Window::width;
 GLFWwindow* Window::window;
+bool Window::close = false;
 
 Window::Window(int height, int width, string title) {
    Window::height = height;
    Window::width = width;
+   Window::close = false;
 
    glfwSetErrorCallback(GlobalData::errorCallback);
    if (!glfwInit()) {
@@ -65,7 +67,14 @@ void Window::resizeCallback(GLFWwindow *window, int width, int height) {
    Window::resize(width, height);
 }
 
-bool Window::shouldClose() {
-   return glfwWindowShouldClose(window);
+void Window::swapBuffers() {
+   glfwSwapBuffers(window);
 }
 
+bool Window::shouldClose() {
+   return glfwWindowShouldClose(window) || close;
+}
+
+void Window::setClose(bool toSet) {
+   Window::close = toSet;
+}
