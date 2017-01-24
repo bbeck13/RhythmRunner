@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "Engine.h"
 
 using namespace std;
 
@@ -6,13 +7,15 @@ int Window::height;
 int Window::width;
 GLFWwindow* Window::window;
 bool Window::close = false;
+Camera* Window::camera;
 
 Window::Window(int height, int width, string title) {
    Window::height = height;
    Window::width = width;
    Window::close = false;
+   Window::camera = new Camera();
 
-   glfwSetErrorCallback(GlobalData::errorCallback);
+   glfwSetErrorCallback(Engine::errorCallback);
    if (!glfwInit()) {
       cerr << "Could not initialize glfw!" << endl;
       exit(EXIT_FAILURE);
@@ -23,7 +26,8 @@ Window::Window(int height, int width, string title) {
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
-   Window::window = glfwCreateWindow(this->width, this->height, title.c_str(), NULL, NULL);
+   Window::window = glfwCreateWindow(this->width, this->height, title.c_str(),
+                                     NULL, NULL);
 
    if (!window) {
       glfwTerminate();
@@ -48,17 +52,19 @@ Window::Window(int height, int width, string title) {
    // Set vsync.
    glfwSwapInterval(1);
    // Set keyboard callback.
-   glfwSetKeyCallback(window, GlobalData::keyCallback);
+   glfwSetKeyCallback(window, Engine::keyCallback);
 
-   glfwSetFramebufferSizeCallback(window, Window::resizeCallback);
+   glfwSetFramebufferSizeCallback(window, resizeCallback);
 
    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
    glfwSetCursorPos(window, width / 2.0f, height / 2.0f);
+   glfwSetCursorPosCallback(window, cursorCallback);
 }
 
 Window::~Window() {
    glfwDestroyWindow(window);
+   delete camera;
 }
 
 void Window::resize(int width, int height) {
@@ -85,4 +91,21 @@ float Window::getAspect() {
 
 void Window::setClose(bool toSet) {
    Window::close = toSet;
+}
+
+int Window::getHeight() {
+   return height;
+}
+
+int Window::getWidth() {
+   return width;
+}
+
+void Window::cursorCallback(GLFWwindow *window, double x, double y) {
+   camera->pivot(width, height, x, y);
+   glfwSetCursorPos(window, width / 2, height / 2);
+}
+
+MatrixStack Window::getView() {
+   return camera->getView();
 }

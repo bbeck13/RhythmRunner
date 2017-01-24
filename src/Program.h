@@ -8,6 +8,11 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
+#define AMBIENT "AmbientColor"
+#define DIFFUSE "DiffuseColor"
+#define SPECULAR "SpecularColor"
+#define SHINE "ShineComponent"
+
 class Program {
 public:
    Program();

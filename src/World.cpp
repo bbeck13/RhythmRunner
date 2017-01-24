@@ -1,19 +1,15 @@
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 #include "World.h"
-
-int World::GiboLen;
-GLuint World::GrndBuffObj;
-GLuint World::GrndNorBuffObj;
-GLuint World::GrndTexBuffObj;
-GLuint World::GIndxBuffObj;
-
-shared_ptr<Program> prog2;
-shared_ptr<Texture> texture2;
-vec3 eyePos(0,0,0);
-vec3 lookAtPos(0,0,-5);
-vec3 up(0, 1 ,0);
+#include "Renderer.h"
+#include "Engine.h"
+#include "GroundRenderer.h"
+#include "BallRenderer.h"
 
 World::World(Window *window) {
    this->window = window;
+   this->renderer = new Renderer();
 }
 
 void World::setClearColor(vec4 clearColor) {
@@ -29,78 +25,13 @@ void World::init() {
    glClearColor(0.30f, 0.5f, 0.78f, 1.0f);
 
    glEnable(GL_DEPTH_TEST);
+   GroundRenderer *gr = new GroundRenderer();
+   gr->setMaterial(BLUE_PLASTIC);
+   BallRenderer *br = new BallRenderer();
+   br->setMaterial(BLUE_PLASTIC);
+   renderer->init();
 
-   //gameObjects.add();
-   float g_groundSize = 20;
-   float g_groundY = -1.5;
-
-   // A x-z plane at y = g_groundY of dimension [-g_groundSize, g_groundSize]^2
-   float GrndPos[] = {
-      -g_groundSize, g_groundY, -g_groundSize,
-      -g_groundSize, g_groundY,  g_groundSize,
-      g_groundSize, g_groundY,  g_groundSize,
-      g_groundSize, g_groundY, -g_groundSize
-   };
-
-   float GrndNorm[] = {
-      0, 1, 0,
-      0, 1, 0,
-      0, 1, 0,
-      0, 1, 0,
-      0, 1, 0,
-      0, 1, 0
-   };
-
-   static GLfloat GrndTex[] = {
-      0, 0, // back
-      0, 1,
-      1, 1,
-      1, 0
-   };
-
-   unsigned short idx[] = {0, 1, 2, 0, 2, 3};
-
-   GLuint VertexArrayID;
-   //generate the VAO
-   glGenVertexArrays(1, &VertexArrayID);
-   glBindVertexArray(VertexArrayID);
-
-   GiboLen = 6;
-   glGenBuffers(1, &GrndBuffObj);
-   glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GrndPos), GrndPos, GL_STATIC_DRAW);
-
-   glGenBuffers(1, &GrndNorBuffObj);
-   glBindBuffer(GL_ARRAY_BUFFER, GrndNorBuffObj);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GrndNorm), GrndNorm, GL_STATIC_DRAW);
-
-   glGenBuffers(1, &GrndTexBuffObj);
-   glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GrndTex), GrndTex, GL_STATIC_DRAW);
-
-   glGenBuffers(1, &GIndxBuffObj);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
-
-   prog2 = make_shared<Program>();
-   prog2->setVerbose(true);
-   prog2->setShaderNames("../assets/shaders/tex_vert.glsl", "../assets/shaders/tex_frag2.glsl");
-   prog2->init();
-
-   texture2 = make_shared<Texture>();
-   texture2->setFilename("../assets/textures/grass.jpg");
-   texture2->init();
-   texture2->setUnit(2);
-   texture2->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-   prog2->addUniform("P");
-   prog2->addUniform("MV");
-   prog2->addAttribute("vertPos");
-   prog2->addAttribute("vertNor");
-   prog2->addAttribute("vertTex");
-   prog2->addUniform("Texture2");
-
-   GlobalData::insertCallback(GLFW_KEY_ESCAPE, [] (int scancode, int action, int mods) {
+   Engine::insertCallback(GLFW_KEY_ESCAPE, [] (int scancode, int action, int mods) {
       if (action == GLFW_PRESS) {
          Window::setClose(true);
       }
@@ -108,49 +39,32 @@ void World::init() {
 }
 
 void World::update() {
+   double clock = glfwGetTime();
+
+#ifdef DEBUG
+   float elapsed[25] = {1};
+   int pos = 0;
+#endif
    while (!window->shouldClose()) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      double nextTime = glfwGetTime();
+      if (nextTime - clock > SEC_PER_FRAME) {
+         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+         renderer->render();
+         window->swapBuffers();
 
-      auto P = MatrixStack();
-      auto M = MatrixStack();
-      auto V = MatrixStack();
-      P.pushMatrix();
-      P.perspective(45.0f, window->getAspect(), 0.01f, 100.0f);
-      V.pushMatrix();
-      V.lookAt(eyePos, lookAtPos, up);
+#ifdef DEBUG
+         elapsed[pos++] = SEC_PER_FRAME;
+         pos %= 25;
+         float tot = 0;
+         for (int i = 0; i < 25; i ++)
+            tot += elapsed[i];
 
-      prog2->bind();
-      M.pushMatrix();
-      texture2->bind(prog2->getUniform("Texture2"));
-      glUniformMatrix4fv(prog2->getUniform("P"), 1, GL_FALSE, value_ptr(P.topMatrix()));
-      glUniformMatrix4fv(prog2->getUniform("MV"), 1, GL_FALSE, value_ptr(MV.topMatrix()));
+         cout << "\r" << setw(10) << setprecision(3)
+              << "FPS: " << 25.0f / tot;
+#endif
+         clock = nextTime;
+      }
 
-      glEnableVertexAttribArray(0);
-      glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-      glEnableVertexAttribArray(1);
-      glBindBuffer(GL_ARRAY_BUFFER, GrndNorBuffObj);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-      glEnableVertexAttribArray(2);
-      glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-      // draw!
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
-      glDrawElements(GL_TRIANGLES, GiboLen, GL_UNSIGNED_SHORT, 0);
-
-      glDisableVertexAttribArray(0);
-      glDisableVertexAttribArray(1);
-      glDisableVertexAttribArray(2);
-
-      MV.popMatrix();
-      prog2->unbind();
-
-      P.popMatrix();
-
-      window->swapBuffers();
       glfwPollEvents();
       if (glGetError() != GL_NO_ERROR) {
          window->setClose(true);

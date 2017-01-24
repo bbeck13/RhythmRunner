@@ -7,7 +7,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
-#include "GlobalData.h"
+#include "MatrixStack.h"
+#include "Camera.h"
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -25,12 +26,17 @@ public:
    static void setClose(bool toSet);
    static void swapBuffers();
    static float getAspect();
+   static int getHeight();
+   static int getWidth();
+   static void cursorCallback(GLFWwindow *window, double x, double y);
+   static MatrixStack getView();
 
 private:
    static bool close;
    static int height;
    static int width;
    static GLFWwindow *window;
+   static Camera *camera;
 };
 
 #endif

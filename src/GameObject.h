@@ -17,7 +17,6 @@
 /* to use glee */
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"
-#include "Graphics.h"
 #include "HitBox.h"
 
 using namespace glm;
@@ -25,17 +24,9 @@ using namespace std;
 
 class GameObject {
 public:
-   GameObject(Graphics *graphics);
-   GameObject(Graphics *graphics, string mesh);
-   GameObject(Graphics *graphics, string mesh, string texture);
+   GameObject();
    ~GameObject();
 private:
-   Graphics *graphics;
-   Shape *shape;
-   Texture *texture;
-   HitBox *hitbox;
-   vec3 rotation;
-   string mesh;
 };
 
 #endif /*__GAME_OBJECT_H__*/

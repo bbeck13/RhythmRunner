@@ -24,7 +24,7 @@
 ///
 ///     GLEE compiles with GNU C++ (##__VA_ARGS__ is the culprit). So just about
 /// every compiler supports it, and any warnings you get about GNU should be
-/// able to be silenced by -Wgnu. 
+/// able to be silenced by -Wgnu.
 ///
 /// USAGE
 ///
@@ -124,10 +124,10 @@
 /// files that use OpenGL include that file instead.
 
 namespace GL_include {
-    //i.e. #include "gl_include.h"
-    //i.e. #include <OpenGL/gl.h>
-    //i.e. #include <GL/glut.h>
-    //i.e. #include <GL/glew.h>
+//i.e. #include "gl_include.h"
+//i.e. #include <OpenGL/gl.h>
+//i.e. #include <GL/glut.h>
+//i.e. #include <GL/glew.h>
 }
 
 /// macro: GLEE_GL_HEADER_PATH
@@ -139,7 +139,7 @@ namespace GL_include {
 
 #if defined(GLEE_GL_HEADER_PATH)
 namespace GL_include {
-    #include GLEE_GL_HEADER_PATH
+#include GLEE_GL_HEADER_PATH
 }
 #endif // defined(GLEE_GL_HEADER_PATH)
 
@@ -193,497 +193,458 @@ struct glee_api {
 
 #ifdef GLEE_OVERWRITE_GL_FUNCTIONS
 
-    /// DESCRIPTION
-    ///
-    ///     Checks to see if any OpenGL errors exists, and if so the program will crash and an error will
-    /// be printed out including the location of where this function was called. If `oglFuncName` is
-    /// supplied, then OpenGLAPIDocRequester will be used to try and find the documentation for that
-    /// function and print out the specific descriptions for the errors. Otherwise, the generic errors
-    /// are printed instead. Ideally this function is called before and after every OpenGL API call
-    /// in order to make debugging a lot easier.
-    ///
-    /// NOTES:
-    ///
-    ///     Call this to stop program execution if an OpenGL error has occurred. If an
-    /// error has occurred, `message` will be displayed with the additionally
-    /// formatted information: `functionName` (the function that called this assert),
-    /// `fileName` (the file of the source where `functionName` was written),
-    /// and `lineNumber` (the line file `fileName` in `functionName` that this assert
-    /// call was made).
-    ///
-    ///     Optionally, the caller can specify `oglFuncName` to state which function they
-    /// expected to be the source of the OpenGL error if one occurs. If an error does
-    /// occur, a network query will be performed and will attempt to look up the error
-    /// description on the OpenGL website.
-    static void
-    AssertNoOpenGLErrors(
-        const std::string & message,
-        const std::string & functionName,
-        const std::string & fileName,
-        const int lineNumber,
-        const std::string & oglFuncName)
-    {
+   /// DESCRIPTION
+   ///
+   ///     Checks to see if any OpenGL errors exists, and if so the program will crash and an error will
+   /// be printed out including the location of where this function was called. If `oglFuncName` is
+   /// supplied, then OpenGLAPIDocRequester will be used to try and find the documentation for that
+   /// function and print out the specific descriptions for the errors. Otherwise, the generic errors
+   /// are printed instead. Ideally this function is called before and after every OpenGL API call
+   /// in order to make debugging a lot easier.
+   ///
+   /// NOTES:
+   ///
+   ///     Call this to stop program execution if an OpenGL error has occurred. If an
+   /// error has occurred, `message` will be displayed with the additionally
+   /// formatted information: `functionName` (the function that called this assert),
+   /// `fileName` (the file of the source where `functionName` was written),
+   /// and `lineNumber` (the line file `fileName` in `functionName` that this assert
+   /// call was made).
+   ///
+   ///     Optionally, the caller can specify `oglFuncName` to state which function they
+   /// expected to be the source of the OpenGL error if one occurs. If an error does
+   /// occur, a network query will be performed and will attempt to look up the error
+   /// description on the OpenGL website.
+   static void
+   AssertNoOpenGLErrors(
+      const std::string & message,
+      const std::string & functionName,
+      const std::string & fileName,
+      const int lineNumber,
+      const std::string & oglFuncName) {
 
-        OpenGLStateErrorInfo stateErrors = GetOpenGLStateErrors();
-        if (stateErrors.encounteredError) {
-            
-            std::cerr << "{" << fileName << ":" << lineNumber
-             << " (" << functionName << ")} opengl assertion failure: "
-             << message << std::endl << std::endl;
-            
-            if (oglFuncName.length() > 0) {
-                std::string causeMessages = "";
-                OpenGLAdditionalErrorInfo additionalInfo = RequestOpenGLAPIErrorInfoForFunction(oglFuncName);
-                for (std::vector<OpenGLEnumInfo>::iterator itr  = stateErrors.rawErrors.begin();
-                    itr != stateErrors.rawErrors.end(); itr++) {
-                    
-                    std::vector<std::string> errorStrings
-                     = additionalInfo.errorsForEnumInfo(*itr);
-                    for (std::vector<std::string>::iterator strItr = errorStrings.begin();
-                        strItr != errorStrings.end(); strItr++) {
-                        
-                        causeMessages += *strItr;
-                    }
-                }
-                
-                /// General causes
-                std::cerr << "General Information: " << stateErrors.description << std::endl << std::endl;
-                
-                if (causeMessages.length() > 0) {
-                    /// Specific possible causes
-                    std::cerr << "Possible causes: " << causeMessages << std::endl << std::endl;
-                }
-                
-                if (additionalInfo.url.length() > 0) {
-                    std::cerr << "For more information visit: " << additionalInfo.url << std::endl << std::endl;
-                }
+      OpenGLStateErrorInfo stateErrors = GetOpenGLStateErrors();
+      if (stateErrors.encounteredError) {
+
+         std::cerr << "{" << fileName << ":" << lineNumber
+                   << " (" << functionName << ")} opengl assertion failure: "
+                   << message << std::endl << std::endl;
+
+         if (oglFuncName.length() > 0) {
+            std::string causeMessages = "";
+            OpenGLAdditionalErrorInfo additionalInfo = RequestOpenGLAPIErrorInfoForFunction(oglFuncName);
+            for (std::vector<OpenGLEnumInfo>::iterator itr  = stateErrors.rawErrors.begin();
+                  itr != stateErrors.rawErrors.end(); itr++) {
+
+               std::vector<std::string> errorStrings
+                  = additionalInfo.errorsForEnumInfo(*itr);
+               for (std::vector<std::string>::iterator strItr = errorStrings.begin();
+                     strItr != errorStrings.end(); strItr++) {
+
+                  causeMessages += *strItr;
+               }
             }
 
-            assert(false);
-        }
-    }
-    
-    ///
-    static inline std::string
-    joinStringsWithSeperator(
-        const std::vector<std::string> & strings,
-        const std::string & separator)
-    {
-        std::string result = "";
-        for (std::vector<std::string>::const_iterator itr = strings.begin();
-         itr != strings.end(); itr++) {
-            result += *itr + separator;
-        }
-        return result;
-    }
+            /// General causes
+            std::cerr << "General Information: " << stateErrors.description << std::endl << std::endl;
 
-    /// Takes the enum value given by |glGetError| and turns it into a parsed
-    /// string based on the descriptions for each error available here:
-    /// https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetError.xml
-    struct OpenGLEnumInfo {
-        
-        /// The OpenGL error enumeration we seek to get information about.
-        GLenum enumValue;
-        
-        /// Constructs an OpenGLEnumInfo with an enum value.
-        OpenGLEnumInfo(GLenum _enumValue) : enumValue(_enumValue) {}
-        
-        /// Returns whether `enumValue` contains `value` in its bits.
-        bool
-        enumMatches(GLenum value) const
-        {
-            return enumValue == value;
-        }
-        
-        
-        /// The error message to append to any given error.
-        static const std::string
-        kGeneralErrorDescription()
-        {
-            return std::string("The offending command is ignored and has no other side effect than to set the error flag.");
-        }
-        
-        /// The generic meaning to GL_INVALID_ENUM
-        static const std::string
-        kInvalidEnumDescription()
-        {
-            return std::string("(GL_INVALID_ENUM) An unacceptable value is specified for an enumerated argument.");
-        }
-        
-        /// The generic meaning to GL_INVALID_VALUE
-        static const std::string
-        kInvalidValueDescription()
-        {
-            return std::string("(GL_INVALID_VALUE) A numeric argument is out of range.");
-        }
-        
-        /// The generic meaning to GL_INVALID_OPERATION
-        static const std::string
-        kInvalidOperationDescription()
-        {
-            return std::string("(GL_INVALID_OPERATION) The specified operation is not allowed in the current state.");
-        }
-        
-        /// The generic meaning to GL_INVALID_FRAMEBUFFER_OPERATION
-        static const std::string
-        kInvalidFramebufferOperationDescription()
-        {
-            return std::string("(GL_INVALID_FRAMEBUFFER_OPERATION) The command is trying to render to or read from the framebuffer while the currently bound framebuffer is not framebuffer complete (i.e. the return value from glCheckFramebufferStatus is not GL_FRAMEBUFFER_COMPLETE).");
-        }
-        
-        /// The generic meaning to GL_OUT_OF_MEMORY
-        static const std::string
-        kOutOfMemoryDescription()
-        {
-            return std::string("(GL_OUT_OF_MEMORY) There is not enough memory left to execute the command. The state of the GL is undefined.");
-        }
-        
-        /// The meaning of GL_NO_ERROR
-        static const std::string
-        kNoErrorDescription()
-        {
-            return std::string("(GL_NO_ERROR) No error has been recorded.");
-        }
-        
-        /// Whether this error contains GL_INVALID_ENUM
-        bool
-        invalidEnum() const
-        {
-            return enumMatches(GLenum(GL_INVALID_ENUM));
-        }
-        
-        /// Whether this error contains GL_INVALID_VALUE
-        bool
-        invalidValue() const
-        {
-            return enumMatches(GLenum(GL_INVALID_VALUE));
-        }
-        
-        /// Whether this error contains GL_INVALID_OPERATION
-        bool
-        invalidOperation() const
-        {
-            return enumMatches(GLenum(GL_INVALID_OPERATION));
-        }
-        
-        /// Whether this error contains GL_INVALID_FRAMEBUFFER_OPERATION
-        bool
-        invalidFramebufferOperation() const
-        {
-            return enumMatches(GLenum(GL_INVALID_FRAMEBUFFER_OPERATION));
-        }
-        
-        /// Whether this error contains GL_OUT_OF_MEMORY
-        bool
-        outOfMemory() const
-        {
-            return enumMatches(GLenum(GL_OUT_OF_MEMORY));
-        }
-        
-        /// Whether this error is GL_NO_ERROR
-        bool
-        noError() const
-        {
-            return enumValue == GLenum(GL_NO_ERROR);
-        }
-        
-        /// The concatenated result of each error and its generic description.
-        std::string
-        generalErrorDescription() const
-        {
-            std::string result = "";
-            if (invalidEnum()) {
-                result += kInvalidEnumDescription() + " ";
+            if (causeMessages.length() > 0) {
+               /// Specific possible causes
+               std::cerr << "Possible causes: " << causeMessages << std::endl << std::endl;
             }
-            if (invalidValue()) {
-                result += kInvalidValueDescription() + " ";
-            }
-            if (invalidOperation()) {
-                result += kInvalidOperationDescription() + " ";
-            }
-            if (invalidFramebufferOperation()) {
-                result += kInvalidFramebufferOperationDescription() + " ";
-            }
-            if (outOfMemory()) {
-                result += kOutOfMemoryDescription() + " ";
-            }
-            
-            if (noError()) {
-                result += kNoErrorDescription();
-            }
-            else {
-                result += kGeneralErrorDescription();
-            }
-            
-            return result;
-        }
-    };
 
-    struct OpenGLStateErrorInfo {
-        bool encounteredError;
-        std::string description;
-        std::vector<OpenGLEnumInfo> rawErrors;
-    };
+            if (additionalInfo.url.length() > 0) {
+               std::cerr << "For more information visit: " << additionalInfo.url << std::endl << std::endl;
+            }
+         }
 
-    /// A wrapper struct used to collect specific information about a particular OpenGL function.
-    /// In particular, the list of errors for each type is given and then can be used in other areas.
-    /// The intention of this class is to be used with OpenGLAPIDocRequester to encapsulate, in a 
-    /// generic way, the data present in the OpenGL documentation.
-    struct OpenGLAdditionalErrorInfo {
+         assert(false);
+      }
+   }
 
-        /// The name of the function that each error property refers to.
-        std::string functionName;
-        ///
-        std::string url;
-        ///
-        std::vector<std::string> errorNotes;
+   static inline std::string
+   joinStringsWithSeperator(
+      const std::vector<std::string> & strings,
+      const std::string & separator) {
+      std::string result = "";
+      for (std::vector<std::string>::const_iterator itr = strings.begin();
+            itr != strings.end(); itr++) {
+         result += *itr + separator;
+      }
+      return result;
+   }
 
-        /// A map of various OpenGL errors and a list of error descriptions that accompany each.
-        std::map< GLenum, std::vector<std::string> > errorDescriptions;
-        
-        /// The errors for GL_INVALID_ENUM
-        const std::vector<std::string> &
-        invalidEnum() const
-        {
-            return errorDescriptions.at(GLenum(GL_INVALID_ENUM));
-        }
-        
-        /// The errors for GL_INVALID_VALUE
-        const std::vector<std::string> &
-        invalidValue() const
-        {
-            return errorDescriptions.at(GLenum(GL_INVALID_VALUE));
-        }
-        
-        /// The errors for GL_INVALID_OPERATION
-        const std::vector<std::string> &
-        invalidOperation() const
-        {
-            return errorDescriptions.at(GLenum(GL_INVALID_OPERATION));
-        }
-        
-        /// The errors for GL_INVALID_FRAMEBUFFER_OPERATION
-        const std::vector<std::string> &
-        invalidFramebufferOperation() const
-        {
-            return errorDescriptions.at(GLenum(GL_INVALID_FRAMEBUFFER_OPERATION));
-        }
-        
-        /// The errors for GL_OUT_OF_MEMORY
-        const std::vector<std::string> &
-        outOfMemory() const
-        {
-            return errorDescriptions.at(GLenum(GL_OUT_OF_MEMORY));
-        }
-        
-        
-        
-        /// The concatenated result of all the strings in `invalidEnum`
-        std::string
-        invalidEnumDescription() const
-        {
-            return joinStringsWithSeperator(invalidEnum(), " ");
-        }
-        
-        /// The concatenated result of all the strings in `invalidValue`
-        std::string
-        invalidValueDescription() const {
-            return joinStringsWithSeperator(invalidValue(), " ");
-        }
-        
-        /// The concatenated result of all the strings in `invalidOperation`
-        std::string
-        invalidOperationDescription() const
-        {
-            return joinStringsWithSeperator(invalidOperation(), " ");
-        }
-        
-        /// The concatenated result of all the strings in `invalidFramebufferOperation`
-        std::string
-        invalidFramebufferOperationDescription() const
-        {
-            return joinStringsWithSeperator(invalidFramebufferOperation(), " ");
-        }
-        
-        /// The concatenated result of all the strings in `outOfMemory`
-        std::string
-        outOfMemoryDescription() const
-        {
-            return joinStringsWithSeperator(outOfMemory(), " ");
-        }
-        
-        /// Constructs this type with a function and all of its associated error descriptions.
-        OpenGLAdditionalErrorInfo(
-            const std::string & _functionName,
-            const std::string & _url,
-            const std::vector<std::string> & invalidEnum,
-            const std::vector<std::string> & invalidValue,
-            const std::vector<std::string> & invalidOperation,
-            const std::vector<std::string> & invalidFramebufferOperation,
-            const std::vector<std::string> & outOfMemory,
-            const std::vector<std::string> & _errorNotes)
-        {
-            this->functionName = _functionName;
-            this->url = _url;
-            this->errorNotes = _errorNotes;
-            errorDescriptions[GLenum(GL_INVALID_ENUM)] = invalidEnum;
-            errorDescriptions[GLenum(GL_INVALID_VALUE)] = invalidValue;
-            errorDescriptions[GLenum(GL_INVALID_OPERATION)] = invalidOperation;
-            errorDescriptions[GLenum(GL_INVALID_FRAMEBUFFER_OPERATION)] = invalidFramebufferOperation;
-            errorDescriptions[GLenum(GL_OUT_OF_MEMORY)] = outOfMemory;
-        }
-        
-        /// Returns the the list of errors correlate to the enums found in `info`
-        std::vector<std::string>
-        errorsForEnumInfo(const OpenGLEnumInfo & info) const
-        {
-            std::vector<std::string> result;
-            if (info.invalidEnum()) {
-                result.insert(result.end(), invalidEnum().begin(), invalidEnum().end());
-            }
-            if (info.invalidValue()) {
-                result.insert(result.end(), invalidValue().begin(), invalidValue().end());
-            }
-            if (info.invalidOperation()) {
-                result.insert(result.end(), invalidOperation().begin(), invalidOperation().end());
-            }
-            if (info.invalidFramebufferOperation()) {
-                result.insert(result.end(), invalidFramebufferOperation().begin(), invalidFramebufferOperation().end());
-            }
-            if (info.outOfMemory()) {
-                result.insert(result.end(), outOfMemory().begin(), outOfMemory().end());
-            }
-            
-            return result;
-        }
-        
-        /// Returns all of error messages congealed together into a single string.
-        std::string
-        description() const
-        {
-            return invalidEnumDescription()
-             + " " + invalidValueDescription()
-             + " " + invalidOperationDescription()
-             + " " + invalidFramebufferOperationDescription()
-             + " " + outOfMemoryDescription()
-             + " " + joinStringsWithSeperator(errorNotes, " ");
-        }
-    };
+   /// Takes the enum value given by |glGetError| and turns it into a parsed
+   /// string based on the descriptions for each error available here:
+   /// https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetError.xml
+   struct OpenGLEnumInfo {
 
-    /// Returns whether an OpenGL error has occurred, and a general error description
-    /// for all of the errors found, as well as all of the error enums in an array.
-    /// After this function is called the caller is guaranteed that
-    /// glGetError() == GL_NO_ERROR (basically this function clears the error state
-    /// for OpenGL)
-    static OpenGLStateErrorInfo
-    GetOpenGLStateErrors()
-    {
-        std::string toRet = "";
-        GLenum error = glGetError();
-        std::vector<OpenGLEnumInfo> rawErrors;
-        bool foundError = false;
-        
-        if (error != GLenum(GL_NO_ERROR)) {
-            foundError = true;
-        }
-        
-        while (error != GLenum(GL_NO_ERROR)) {
-            OpenGLEnumInfo info = OpenGLEnumInfo(error);
-            toRet += info.generalErrorDescription();
-            rawErrors.push_back(info);
-            
-            error = glGetError();
-        }
-        
-        OpenGLStateErrorInfo toReturn;
-        
-        toReturn.encounteredError = foundError;
-        toReturn.description = toRet;
-        toReturn.rawErrors = rawErrors;
-        
-        return toReturn;
-    }
-    
-    /// Tries to query the OpenGL website https://www.opengl.org for the
-    /// documentation of `function`.
-    static OpenGLAdditionalErrorInfo
-    RequestOpenGLAPIErrorInfoForFunction(
-        const std::string & function)
-    {
-        std::vector<std::string> invalidEnum, invalidValue, invalidOperation, invalidFramebufferOperation, outOfMemory, errorNotes;
-        std::string url;
-        
+      /// The OpenGL error enumeration we seek to get information about.
+      GLenum enumValue;
+
+      /// Constructs an OpenGLEnumInfo with an enum value.
+      OpenGLEnumInfo(GLenum _enumValue) : enumValue(_enumValue) {}
+
+      /// Returns whether `enumValue` contains `value` in its bits.
+      bool
+      enumMatches(GLenum value) const {
+         return enumValue == value;
+      }
+
+
+      /// The error message to append to any given error.
+      static const std::string
+      kGeneralErrorDescription() {
+         return std::string("The offending command is ignored and has no other side effect than to set the error flag.");
+      }
+
+      /// The generic meaning to GL_INVALID_ENUM
+      static const std::string
+      kInvalidEnumDescription() {
+         return std::string("(GL_INVALID_ENUM) An unacceptable value is specified for an enumerated argument.");
+      }
+
+      /// The generic meaning to GL_INVALID_VALUE
+      static const std::string
+      kInvalidValueDescription() {
+         return std::string("(GL_INVALID_VALUE) A numeric argument is out of range.");
+      }
+
+      /// The generic meaning to GL_INVALID_OPERATION
+      static const std::string
+      kInvalidOperationDescription() {
+         return std::string("(GL_INVALID_OPERATION) The specified operation is not allowed in the current state.");
+      }
+
+      /// The generic meaning to GL_INVALID_FRAMEBUFFER_OPERATION
+      static const std::string
+      kInvalidFramebufferOperationDescription() {
+         return std::string("(GL_INVALID_FRAMEBUFFER_OPERATION) The command is trying to render to or read from the framebuffer while the currently bound framebuffer is not framebuffer complete (i.e. the return value from glCheckFramebufferStatus is not GL_FRAMEBUFFER_COMPLETE).");
+      }
+
+      /// The generic meaning to GL_OUT_OF_MEMORY
+      static const std::string
+      kOutOfMemoryDescription() {
+         return std::string("(GL_OUT_OF_MEMORY) There is not enough memory left to execute the command. The state of the GL is undefined.");
+      }
+
+      /// The meaning of GL_NO_ERROR
+      static const std::string
+      kNoErrorDescription() {
+         return std::string("(GL_NO_ERROR) No error has been recorded.");
+      }
+
+      /// Whether this error contains GL_INVALID_ENUM
+      bool
+      invalidEnum() const {
+         return enumMatches(GLenum(GL_INVALID_ENUM));
+      }
+
+      /// Whether this error contains GL_INVALID_VALUE
+      bool
+      invalidValue() const {
+         return enumMatches(GLenum(GL_INVALID_VALUE));
+      }
+
+      /// Whether this error contains GL_INVALID_OPERATION
+      bool
+      invalidOperation() const {
+         return enumMatches(GLenum(GL_INVALID_OPERATION));
+      }
+
+      /// Whether this error contains GL_INVALID_FRAMEBUFFER_OPERATION
+      bool
+      invalidFramebufferOperation() const {
+         return enumMatches(GLenum(GL_INVALID_FRAMEBUFFER_OPERATION));
+      }
+
+      /// Whether this error contains GL_OUT_OF_MEMORY
+      bool
+      outOfMemory() const {
+         return enumMatches(GLenum(GL_OUT_OF_MEMORY));
+      }
+
+      /// Whether this error is GL_NO_ERROR
+      bool
+      noError() const {
+         return enumValue == GLenum(GL_NO_ERROR);
+      }
+
+      /// The concatenated result of each error and its generic description.
+      std::string
+      generalErrorDescription() const {
+         std::string result = "";
+         if (invalidEnum()) {
+            result += kInvalidEnumDescription() + " ";
+         }
+         if (invalidValue()) {
+            result += kInvalidValueDescription() + " ";
+         }
+         if (invalidOperation()) {
+            result += kInvalidOperationDescription() + " ";
+         }
+         if (invalidFramebufferOperation()) {
+            result += kInvalidFramebufferOperationDescription() + " ";
+         }
+         if (outOfMemory()) {
+            result += kOutOfMemoryDescription() + " ";
+         }
+
+         if (noError()) {
+            result += kNoErrorDescription();
+         } else {
+            result += kGeneralErrorDescription();
+         }
+
+         return result;
+      }
+   };
+
+   struct OpenGLStateErrorInfo {
+      bool encounteredError;
+      std::string description;
+      std::vector<OpenGLEnumInfo> rawErrors;
+   };
+
+   /// A wrapper struct used to collect specific information about a particular OpenGL function.
+   /// In particular, the list of errors for each type is given and then can be used in other areas.
+   /// The intention of this class is to be used with OpenGLAPIDocRequester to encapsulate, in a
+   /// generic way, the data present in the OpenGL documentation.
+   struct OpenGLAdditionalErrorInfo {
+
+      /// The name of the function that each error property refers to.
+      std::string functionName;
+      ///
+      std::string url;
+      ///
+      std::vector<std::string> errorNotes;
+
+      /// A map of various OpenGL errors and a list of error descriptions that accompany each.
+      std::map< GLenum, std::vector<std::string> > errorDescriptions;
+
+      /// The errors for GL_INVALID_ENUM
+      const std::vector<std::string> &
+      invalidEnum() const {
+         return errorDescriptions.at(GLenum(GL_INVALID_ENUM));
+      }
+
+      /// The errors for GL_INVALID_VALUE
+      const std::vector<std::string> &
+      invalidValue() const {
+         return errorDescriptions.at(GLenum(GL_INVALID_VALUE));
+      }
+
+      /// The errors for GL_INVALID_OPERATION
+      const std::vector<std::string> &
+      invalidOperation() const {
+         return errorDescriptions.at(GLenum(GL_INVALID_OPERATION));
+      }
+
+      /// The errors for GL_INVALID_FRAMEBUFFER_OPERATION
+      const std::vector<std::string> &
+      invalidFramebufferOperation() const {
+         return errorDescriptions.at(GLenum(GL_INVALID_FRAMEBUFFER_OPERATION));
+      }
+
+      /// The errors for GL_OUT_OF_MEMORY
+      const std::vector<std::string> &
+      outOfMemory() const {
+         return errorDescriptions.at(GLenum(GL_OUT_OF_MEMORY));
+      }
+
+
+
+      /// The concatenated result of all the strings in `invalidEnum`
+      std::string
+      invalidEnumDescription() const {
+         return joinStringsWithSeperator(invalidEnum(), " ");
+      }
+
+      /// The concatenated result of all the strings in `invalidValue`
+      std::string
+      invalidValueDescription() const {
+         return joinStringsWithSeperator(invalidValue(), " ");
+      }
+
+      /// The concatenated result of all the strings in `invalidOperation`
+      std::string
+      invalidOperationDescription() const {
+         return joinStringsWithSeperator(invalidOperation(), " ");
+      }
+
+      /// The concatenated result of all the strings in `invalidFramebufferOperation`
+      std::string
+      invalidFramebufferOperationDescription() const {
+         return joinStringsWithSeperator(invalidFramebufferOperation(), " ");
+      }
+
+      /// The concatenated result of all the strings in `outOfMemory`
+      std::string
+      outOfMemoryDescription() const {
+         return joinStringsWithSeperator(outOfMemory(), " ");
+      }
+
+      /// Constructs this type with a function and all of its associated error descriptions.
+      OpenGLAdditionalErrorInfo(
+         const std::string & _functionName,
+         const std::string & _url,
+         const std::vector<std::string> & invalidEnum,
+         const std::vector<std::string> & invalidValue,
+         const std::vector<std::string> & invalidOperation,
+         const std::vector<std::string> & invalidFramebufferOperation,
+         const std::vector<std::string> & outOfMemory,
+         const std::vector<std::string> & _errorNotes) {
+         this->functionName = _functionName;
+         this->url = _url;
+         this->errorNotes = _errorNotes;
+         errorDescriptions[GLenum(GL_INVALID_ENUM)] = invalidEnum;
+         errorDescriptions[GLenum(GL_INVALID_VALUE)] = invalidValue;
+         errorDescriptions[GLenum(GL_INVALID_OPERATION)] = invalidOperation;
+         errorDescriptions[GLenum(GL_INVALID_FRAMEBUFFER_OPERATION)] = invalidFramebufferOperation;
+         errorDescriptions[GLenum(GL_OUT_OF_MEMORY)] = outOfMemory;
+      }
+
+      /// Returns the the list of errors correlate to the enums found in `info`
+      std::vector<std::string>
+      errorsForEnumInfo(const OpenGLEnumInfo & info) const {
+         std::vector<std::string> result;
+         if (info.invalidEnum()) {
+            result.insert(result.end(), invalidEnum().begin(), invalidEnum().end());
+         }
+         if (info.invalidValue()) {
+            result.insert(result.end(), invalidValue().begin(), invalidValue().end());
+         }
+         if (info.invalidOperation()) {
+            result.insert(result.end(), invalidOperation().begin(), invalidOperation().end());
+         }
+         if (info.invalidFramebufferOperation()) {
+            result.insert(result.end(), invalidFramebufferOperation().begin(), invalidFramebufferOperation().end());
+         }
+         if (info.outOfMemory()) {
+            result.insert(result.end(), outOfMemory().begin(), outOfMemory().end());
+         }
+
+         return result;
+      }
+
+      /// Returns all of error messages congealed together into a single string.
+      std::string
+      description() const {
+         return invalidEnumDescription()
+                + " " + invalidValueDescription()
+                + " " + invalidOperationDescription()
+                + " " + invalidFramebufferOperationDescription()
+                + " " + outOfMemoryDescription()
+                + " " + joinStringsWithSeperator(errorNotes, " ");
+      }
+   };
+
+   /// Returns whether an OpenGL error has occurred, and a general error description
+   /// for all of the errors found, as well as all of the error enums in an array.
+   /// After this function is called the caller is guaranteed that
+   /// glGetError() == GL_NO_ERROR (basically this function clears the error state
+   /// for OpenGL)
+   static OpenGLStateErrorInfo
+   GetOpenGLStateErrors() {
+      std::string toRet = "";
+      GLenum error = glGetError();
+      std::vector<OpenGLEnumInfo> rawErrors;
+      bool foundError = false;
+
+      if (error != GLenum(GL_NO_ERROR)) {
+         foundError = true;
+      }
+
+      while (error != GLenum(GL_NO_ERROR)) {
+         OpenGLEnumInfo info = OpenGLEnumInfo(error);
+         toRet += info.generalErrorDescription();
+         rawErrors.push_back(info);
+
+         error = glGetError();
+      }
+
+      OpenGLStateErrorInfo toReturn;
+
+      toReturn.encounteredError = foundError;
+      toReturn.description = toRet;
+      toReturn.rawErrors = rawErrors;
+
+      return toReturn;
+   }
+
+   /// Tries to query the OpenGL website https://www.opengl.org for the
+   /// documentation of `function`.
+   static OpenGLAdditionalErrorInfo
+   RequestOpenGLAPIErrorInfoForFunction(
+      const std::string & function) {
+      std::vector<std::string> invalidEnum, invalidValue, invalidOperation, invalidFramebufferOperation, outOfMemory, errorNotes;
+      std::string url;
+
 #ifdef GLEE_NETWORKING
-        URL_FILE * urlDataStream = NULL;
-        int subStringLen = (int) function.length();
-        std::string functionGroupName;
-        
-        while (urlDataStream == NULL && subStringLen > 0) {
-            functionGroupName = function.substr(0, (std::string::size_type)subStringLen);
-            url = "https://www.opengl.org/sdk/docs/man/html/" + functionGroupName + ".xhtml";
-            
-            urlDataStream = url_fopen(url.c_str(), "r");
-            if (urlDataStream == NULL) {
-                subStringLen--;
+      URL_FILE * urlDataStream = NULL;
+      int subStringLen = (int) function.length();
+      std::string functionGroupName;
+
+      while (urlDataStream == NULL && subStringLen > 0) {
+         functionGroupName = function.substr(0, (std::string::size_type)subStringLen);
+         url = "https://www.opengl.org/sdk/docs/man/html/" + functionGroupName + ".xhtml";
+
+         urlDataStream = url_fopen(url.c_str(), "r");
+         if (urlDataStream == NULL) {
+            subStringLen--;
+         }
+      }
+
+      if (urlDataStream != NULL) {
+         std::string urlData = "";
+         xmlChar buffer[256] = {'\0'};
+         while (url_fread(buffer, sizeof(buffer), sizeof(char), urlDataStream) > 0) {
+            for (int i = 0; i < 256; i++) {
+               /// We intentionally skip over all of the non-ASCII characters
+               if (buffer[i] > 0 && buffer[i] < 128) {
+                  urlData.push_back((char)buffer[i]);
+               }
             }
-        }
-        
-        if (urlDataStream != NULL) {
-            std::string urlData = "";
-            xmlChar buffer[256] = {'\0'};
-            while (url_fread(buffer, sizeof(buffer), sizeof(char), urlDataStream) > 0) {
-                for (int i = 0; i < 256; i++) {
-                    /// We intentionally skip over all of the non-ASCII characters
-                    if (buffer[i] > 0 && buffer[i] < 128) {
-                        urlData.push_back((char)buffer[i]);
-                    }
-                }
+         }
+         htmlDocPtr doc = htmlReadDoc((xmlChar*)urlData.c_str(), NULL, NULL,
+                                      HTML_PARSE_RECOVER | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
+         xmlNodePtr root = xmlDocGetRootElement(doc);
+         std::vector<xmlNodePtr> errorSearch
+            = findXMLNodeChildrenForXPath("//div[@id='errors']/p", root);
+         for (std::vector<xmlNodePtr>::iterator itr = errorSearch.begin();
+               itr != errorSearch.end(); itr++) {
+
+            std::string content = unannotedXMLNodeContent(*itr);
+            if (content.find("GL_INVALID_ENUM") != std::string::npos) {
+               invalidEnum.push_back(content);
+            } else if (content.find("GL_INVALID_VALUE") != std::string::npos) {
+               invalidValue.push_back(content);
+            } else if (content.find("GL_INVALID_OPERATION") != std::string::npos) {
+               invalidOperation.push_back(content);
+            } else if (content.find("GL_INVALID_FRAMEBUFFER_OPERATION") != std::string::npos) {
+               invalidFramebufferOperation.push_back(content);
+            } else if (content.find("GL_OUT_OF_MEMORY") != std::string::npos) {
+               outOfMemory.push_back(content);
+            } else {
+               errorNotes.push_back(content);
             }
-            htmlDocPtr doc = htmlReadDoc((xmlChar*)urlData.c_str(), NULL, NULL,
-             HTML_PARSE_RECOVER | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
-            xmlNodePtr root = xmlDocGetRootElement(doc);
-            std::vector<xmlNodePtr> errorSearch
-             = findXMLNodeChildrenForXPath("//div[@id='errors']/p", root);
-            for (std::vector<xmlNodePtr>::iterator itr = errorSearch.begin();
-                itr != errorSearch.end(); itr++) {
-                
-                std::string content = unannotedXMLNodeContent(*itr);
-                if (content.find("GL_INVALID_ENUM") != std::string::npos) {
-                    invalidEnum.push_back(content);
-                }
-                else if (content.find("GL_INVALID_VALUE") != std::string::npos) {
-                    invalidValue.push_back(content);
-                }
-                else if (content.find("GL_INVALID_OPERATION") != std::string::npos) {
-                    invalidOperation.push_back(content);
-                }
-                else if (content.find("GL_INVALID_FRAMEBUFFER_OPERATION") != std::string::npos) {
-                    invalidFramebufferOperation.push_back(content);
-                }
-                else if (content.find("GL_OUT_OF_MEMORY") != std::string::npos) {
-                    outOfMemory.push_back(content);
-                }
-                else {
-                    errorNotes.push_back(content);
-                }
-            }
-            
-            xmlFreeDoc(doc);
-            url_fclose(urlDataStream);
-        }
-        else {
-            std::cerr << "{" << __FILE__ << ":" << __LINE__
-             << " (" << __FUNCTION__ << ")} "
-             << "Could not find documentation for function " << function
-             << std::endl;
-        }
+         }
+
+         xmlFreeDoc(doc);
+         url_fclose(urlDataStream);
+      } else {
+         std::cerr << "{" << __FILE__ << ":" << __LINE__
+                   << " (" << __FUNCTION__ << ")} "
+                   << "Could not find documentation for function " << function
+                   << std::endl;
+      }
 #endif // GLEE_NETWORKING
-        
-        return OpenGLAdditionalErrorInfo(function, url, invalidEnum,
-         invalidValue, invalidOperation, invalidFramebufferOperation,
-         outOfMemory, errorNotes);
-    }
-    
+
+      return OpenGLAdditionalErrorInfo(function, url, invalidEnum,
+                                       invalidValue, invalidOperation, invalidFramebufferOperation,
+                                       outOfMemory, errorNotes);
+   }
+
 #endif // GLEE_OVERWRITE_GL_FUNCTIONS
 
 
@@ -693,393 +654,379 @@ struct glee_api {
 ///
 
 #if defined(GLEE_NETWORKING)
-    
-    ///
-    enum fcurl_type_e {
-        CFTYPE_NONE=0,
-        CFTYPE_FILE=1,
-        CFTYPE_CURL=2
-    };
 
-    ///
-    struct fcurl_data
-    {
-        enum fcurl_type_e type;     /* type of handle */
-        union {
-            CURL *curl;
-            FILE *file;
-        } handle;                   /* handle */
-        
-        char *buffer;               /* buffer to store cached data*/
-        size_t buffer_len;          /* currently allocated buffers length */
-        size_t buffer_pos;          /* end of data in buffer*/
-        int still_running;          /* Is background url fetch still in progress */
-    };
+   ///
+   enum fcurl_type_e {
+      CFTYPE_NONE=0,
+      CFTYPE_FILE=1,
+      CFTYPE_CURL=2
+   };
 
-    ///
-    typedef struct fcurl_data URL_FILE;
-    
-    /// Adapted from "node.cc" in the C++ libxml wrapper found here:
-    ///     http://ftp.gnome.org/pub/GNOME/sources/libxml++/3.0/
-    static std::vector<xmlNodePtr>
-    findXMLNodeChildrenForXPath(
-        const std::string & xpath,
-        xmlNode * node)
-    {
-        
-        std::vector<xmlNodePtr> nodes;
-        xmlXPathContextPtr ctxt = xmlXPathNewContext(node->doc);
-        assert(ctxt != NULL);
-        ctxt->node = node;
-        
-        xmlXPathObjectPtr result = xmlXPathEval((const xmlChar*)xpath.c_str(), ctxt);
-        assert(result != NULL); // Bad path given
-        assert(result->type == XPATH_NODESET); // Only nodeset result types are supported.
-        
-        xmlNodeSetPtr nodeset = result->nodesetval;
-        if (nodeset && !xmlXPathNodeSetIsEmpty(nodeset)) {
-            const int count = xmlXPathNodeSetGetLength(nodeset);
-            nodes.reserve((std::vector<xmlNodePtr>::size_type)count);
-            for (int i = 0; i != count; ++i) {
-                xmlNodePtr cnode = xmlXPathNodeSetItem(nodeset, i);
-                
-                if (!cnode) {
-                    std::cerr << "{" << __FILE__ << ":" << __LINE__
-                     << " (" << __FUNCTION__ << ")} "
-                     << "The xmlNode found was null???" << std::endl;
-                    continue;
-                }
-                
-                if (cnode->type == XML_NAMESPACE_DECL) {
-                    continue;
-                }
-                nodes.push_back(cnode);
-            }
-        }
-        
-        xmlXPathFreeObject(result);
-        xmlXPathFreeContext(ctxt);
-        return nodes;
-    }
+   ///
+   struct fcurl_data {
+      enum fcurl_type_e type;     /* type of handle */
+      union {
+         CURL *curl;
+         FILE *file;
+      } handle;                   /* handle */
 
-    ///
-    static std::string
-    unannotedXMLNodeContent(xmlNode * node)
-    {
-        std::string result = "";
-        xmlChar * encodedString = node->content; ///xmlNodeListGetString(node->doc, node, true);
-        if (encodedString != NULL) {
-            xmlChar * content = encodedString;
-            while (*content != '\0') {
-                xmlChar val = *content;
-                if (val > 0 && val < 128 && val != '\n' && val != '\t' && !(val == ' ' && content[1] == ' ')) {
-                    result += char(val);
-                }
-                content++;
-            }
-        }
-        xmlNodePtr child = node->children;
-        while (child != NULL) {
-            result += unannotedXMLNodeContent(child);
-            child = child->next;
-        }
-        
-        return result;
-    }
+      char *buffer;               /* buffer to store cached data*/
+      size_t buffer_len;          /* currently allocated buffers length */
+      size_t buffer_pos;          /* end of data in buffer*/
+      int still_running;          /* Is background url fetch still in progress */
+   };
 
-    ///
-    static CURLM **
-    multi_handle_addr()
-    {
-        static CURLM * __multi_handle = NULL;
-        return &__multi_handle;
-    }
-    
-    ///
-    static CURLM *
-    multi_handle()
-    {
-        return *multi_handle_addr();
-    }
+   ///
+   typedef struct fcurl_data URL_FILE;
 
-    /// curl calls this routine to get more data
-    static size_t
-    write_callback(
-        char *buffer,
-        size_t size,
-        size_t nitems,
-        void *userp)
-    {
-        char *newbuff;
-        size_t rembuff;
-        
-        URL_FILE *url = (URL_FILE *)userp;
-        size *= nitems;
-        
-        rembuff=url->buffer_len - url->buffer_pos; /* remaining space in buffer */
-        
-        if(size > rembuff) {
-            /* not enough space in buffer */
-            newbuff = (char *) realloc(url->buffer, url->buffer_len + (size - rembuff));
-            if(newbuff==NULL) {
-                fprintf(stderr, "callback buffer grow failed\n");
-                size=rembuff;
-            }
-            else {
-                /* realloc succeeded increase buffer size*/
-                url->buffer_len+=size - rembuff;
-                url->buffer=newbuff;
-            }
-        }
-        
-        memcpy(&url->buffer[url->buffer_pos], buffer, size);
-        url->buffer_pos += size;
-        
-        return size;
-    }
+   /// Adapted from "node.cc" in the C++ libxml wrapper found here:
+   ///     http://ftp.gnome.org/pub/GNOME/sources/libxml++/3.0/
+   static std::vector<xmlNodePtr>
+   findXMLNodeChildrenForXPath(
+      const std::string & xpath,
+      xmlNode * node) {
 
-    /// use to attempt to fill the read buffer up to requested number of bytes
-    static int
-    fill_buffer(
-        URL_FILE *file,
-        size_t want)
-    {
-        fd_set fdread;
-        fd_set fdwrite;
-        fd_set fdexcep;
-        struct timeval timeout;
-        int rc;
-        CURLMcode mc; /* curl_multi_fdset() return code */
-        
-        /* only attempt to fill buffer if transactions still running and buffer
-         * doesn't exceed required size already
-         */
-        if((!file->still_running) || (file->buffer_pos > want))
-            return 0;
-        
-        /* attempt to fill buffer */
-        do {
-            int maxfd = -1;
-            long curl_timeo = -1;
-            
-            FD_ZERO(&fdread);
-            FD_ZERO(&fdwrite);
-            FD_ZERO(&fdexcep);
-            
-            /* set a suitable timeout to fail on */
-            timeout.tv_sec = 60; /* 1 minute */
-            timeout.tv_usec = 0;
-            
-            curl_multi_timeout(multi_handle(), &curl_timeo);
-            if(curl_timeo >= 0) {
-                timeout.tv_sec = curl_timeo / 1000;
-                if(timeout.tv_sec > 1)
-                    timeout.tv_sec = 1;
-                else
-                    timeout.tv_usec = (curl_timeo % 1000) * 1000;
-            }
-            
-            /* get file descriptors from the transfers */
-            mc = curl_multi_fdset(multi_handle(), &fdread, &fdwrite, &fdexcep, &maxfd);
-            
-            if(mc != CURLM_OK) {
-                fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
-                break;
-            }
-            
-            /* On success the value of maxfd is guaranteed to be >= -1. We call
-             select(maxfd + 1, ...); specially in case of (maxfd == -1) there are
-             no fds ready yet so we call select(0, ...) --or Sleep() on Windows--
-             to sleep 100ms, which is the minimum suggested value in the
-             curl_multi_fdset() doc. */
-            
-            if(maxfd == -1) {
-    #ifdef _WIN32
-                Sleep(100);
-                rc = 0;
-    #else
-                /* Portable sleep for platforms other than Windows. */
-                struct timeval wait = { 0, 100 * 1000 }; /* 100ms */
-                rc = select(0, NULL, NULL, NULL, &wait);
-    #endif
-            }
-            else {
-                /* Note that on some platforms 'timeout' may be modified by select().
-                 If you need access to the original value save a copy beforehand. */
-                rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
-            }
-            
-            switch(rc) {
-                case -1:
-                    /* select error */
-                    break;
-                    
-                case 0:
-                default:
-                    /* timeout or readable/writable sockets */
-                    curl_multi_perform(multi_handle(), &file->still_running);
-                    break;
-            }
-        } while(file->still_running && (file->buffer_pos < want));
-        return 1;
-    }
+      std::vector<xmlNodePtr> nodes;
+      xmlXPathContextPtr ctxt = xmlXPathNewContext(node->doc);
+      assert(ctxt != NULL);
+      ctxt->node = node;
 
-    /// use to remove want bytes from the front of a files buffer
-    static int
-    use_buffer(
-        URL_FILE *file,
-        size_t want)
-    {
-        /* sort out buffer */
-        if((file->buffer_pos - want) <=0) {
-            /* ditch buffer - write will recreate */
-            free(file->buffer);
-            file->buffer=NULL;
-            file->buffer_pos=0;
-            file->buffer_len=0;
-        }
-        else {
-            /* move rest down make it available for later */
-            memmove(file->buffer,
-                    &file->buffer[want],
-                    (file->buffer_pos - want));
-            
-            file->buffer_pos -= want;
-        }
-        return 0;
-    }
+      xmlXPathObjectPtr result = xmlXPathEval((const xmlChar*)xpath.c_str(), ctxt);
+      assert(result != NULL); // Bad path given
+      assert(result->type == XPATH_NODESET); // Only nodeset result types are supported.
 
-    static URL_FILE *
-    url_fopen(
-        const char *url,
-        const char *operation)
-    {
-        /* this code could check for URLs or types in the 'url' and
-         basically use the real fopen() for standard files */
-        
-        URL_FILE *file;
-        (void)operation;
-        
-        file = (URL_FILE *) malloc(sizeof(URL_FILE));
-        if(!file)
-            return NULL;
-        
-        memset(file, 0, sizeof(URL_FILE));
-        
-        if((file->handle.file=fopen(url, operation)))
-            file->type = CFTYPE_FILE; /* marked as URL */
-        
-        else {
-            file->type = CFTYPE_CURL; /* marked as URL */
-            file->handle.curl = curl_easy_init();
-            
-            curl_easy_setopt(file->handle.curl, CURLOPT_URL, url);
-            curl_easy_setopt(file->handle.curl, CURLOPT_WRITEDATA, file);
-            curl_easy_setopt(file->handle.curl, CURLOPT_VERBOSE, 0L);
-            curl_easy_setopt(file->handle.curl, CURLOPT_WRITEFUNCTION, write_callback);
-            
-            if(!multi_handle())
-                *multi_handle_addr() = curl_multi_init();
-            
-            curl_multi_add_handle(multi_handle(), file->handle.curl);
-            
-            /* lets start the fetch */
+      xmlNodeSetPtr nodeset = result->nodesetval;
+      if (nodeset && !xmlXPathNodeSetIsEmpty(nodeset)) {
+         const int count = xmlXPathNodeSetGetLength(nodeset);
+         nodes.reserve((std::vector<xmlNodePtr>::size_type)count);
+         for (int i = 0; i != count; ++i) {
+            xmlNodePtr cnode = xmlXPathNodeSetItem(nodeset, i);
+
+            if (!cnode) {
+               std::cerr << "{" << __FILE__ << ":" << __LINE__
+                         << " (" << __FUNCTION__ << ")} "
+                         << "The xmlNode found was null???" << std::endl;
+               continue;
+            }
+
+            if (cnode->type == XML_NAMESPACE_DECL) {
+               continue;
+            }
+            nodes.push_back(cnode);
+         }
+      }
+
+      xmlXPathFreeObject(result);
+      xmlXPathFreeContext(ctxt);
+      return nodes;
+   }
+
+   ///
+   static std::string
+   unannotedXMLNodeContent(xmlNode * node) {
+      std::string result = "";
+      xmlChar * encodedString = node->content; ///xmlNodeListGetString(node->doc, node, true);
+      if (encodedString != NULL) {
+         xmlChar * content = encodedString;
+         while (*content != '\0') {
+            xmlChar val = *content;
+            if (val > 0 && val < 128 && val != '\n' && val != '\t' && !(val == ' ' && content[1] == ' ')) {
+               result += char(val);
+            }
+            content++;
+         }
+      }
+      xmlNodePtr child = node->children;
+      while (child != NULL) {
+         result += unannotedXMLNodeContent(child);
+         child = child->next;
+      }
+
+      return result;
+   }
+
+   ///
+   static CURLM **
+   multi_handle_addr() {
+      static CURLM * __multi_handle = NULL;
+      return &__multi_handle;
+   }
+
+   ///
+   static CURLM *
+   multi_handle() {
+      return *multi_handle_addr();
+   }
+
+   /// curl calls this routine to get more data
+   static size_t
+   write_callback(
+      char *buffer,
+      size_t size,
+      size_t nitems,
+      void *userp) {
+      char *newbuff;
+      size_t rembuff;
+
+      URL_FILE *url = (URL_FILE *)userp;
+      size *= nitems;
+
+      rembuff=url->buffer_len - url->buffer_pos; /* remaining space in buffer */
+
+      if(size > rembuff) {
+         /* not enough space in buffer */
+         newbuff = (char *) realloc(url->buffer, url->buffer_len + (size - rembuff));
+         if(newbuff==NULL) {
+            fprintf(stderr, "callback buffer grow failed\n");
+            size=rembuff;
+         } else {
+            /* realloc succeeded increase buffer size*/
+            url->buffer_len+=size - rembuff;
+            url->buffer=newbuff;
+         }
+      }
+
+      memcpy(&url->buffer[url->buffer_pos], buffer, size);
+      url->buffer_pos += size;
+
+      return size;
+   }
+
+   /// use to attempt to fill the read buffer up to requested number of bytes
+   static int
+   fill_buffer(
+      URL_FILE *file,
+      size_t want) {
+      fd_set fdread;
+      fd_set fdwrite;
+      fd_set fdexcep;
+      struct timeval timeout;
+      int rc;
+      CURLMcode mc; /* curl_multi_fdset() return code */
+
+      /* only attempt to fill buffer if transactions still running and buffer
+       * doesn't exceed required size already
+       */
+      if((!file->still_running) || (file->buffer_pos > want))
+         return 0;
+
+      /* attempt to fill buffer */
+      do {
+         int maxfd = -1;
+         long curl_timeo = -1;
+
+         FD_ZERO(&fdread);
+         FD_ZERO(&fdwrite);
+         FD_ZERO(&fdexcep);
+
+         /* set a suitable timeout to fail on */
+         timeout.tv_sec = 60; /* 1 minute */
+         timeout.tv_usec = 0;
+
+         curl_multi_timeout(multi_handle(), &curl_timeo);
+         if(curl_timeo >= 0) {
+            timeout.tv_sec = curl_timeo / 1000;
+            if(timeout.tv_sec > 1)
+               timeout.tv_sec = 1;
+            else
+               timeout.tv_usec = (curl_timeo % 1000) * 1000;
+         }
+
+         /* get file descriptors from the transfers */
+         mc = curl_multi_fdset(multi_handle(), &fdread, &fdwrite, &fdexcep, &maxfd);
+
+         if(mc != CURLM_OK) {
+            fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+            break;
+         }
+
+         /* On success the value of maxfd is guaranteed to be >= -1. We call
+          select(maxfd + 1, ...); specially in case of (maxfd == -1) there are
+          no fds ready yet so we call select(0, ...) --or Sleep() on Windows--
+          to sleep 100ms, which is the minimum suggested value in the
+          curl_multi_fdset() doc. */
+
+         if(maxfd == -1) {
+#ifdef _WIN32
+            Sleep(100);
+            rc = 0;
+#else
+            /* Portable sleep for platforms other than Windows. */
+            struct timeval wait = { 0, 100 * 1000 }; /* 100ms */
+            rc = select(0, NULL, NULL, NULL, &wait);
+#endif
+         } else {
+            /* Note that on some platforms 'timeout' may be modified by select().
+             If you need access to the original value save a copy beforehand. */
+            rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+         }
+
+         switch(rc) {
+         case -1:
+            /* select error */
+            break;
+
+         case 0:
+         default:
+            /* timeout or readable/writable sockets */
             curl_multi_perform(multi_handle(), &file->still_running);
-            
-            if((file->buffer_pos == 0) && (!file->still_running)) {
-                /* if still_running is 0 now, we should return NULL */
-                
-                /* make sure the easy handle is not in the multi handle anymore */
-                curl_multi_remove_handle(multi_handle(), file->handle.curl);
-                
-                /* cleanup */
-                curl_easy_cleanup(file->handle.curl);
-                
-                free(file);
-                
-                file = NULL;
-            }
-        }
-        return file;
-    }
+            break;
+         }
+      } while(file->still_running && (file->buffer_pos < want));
+      return 1;
+   }
 
-    ///
-    static int
-    url_fclose(URL_FILE *file)
-    {
-        int ret=0;/* default is good return */
-        
-        switch(file->type) {
-            case CFTYPE_FILE:
-                ret=fclose(file->handle.file); /* passthrough */
-                break;
-                
-            case CFTYPE_CURL:
-                /* make sure the easy handle is not in the multi handle anymore */
-                curl_multi_remove_handle(multi_handle(), file->handle.curl);
-                
-                /* cleanup */
-                curl_easy_cleanup(file->handle.curl);
-                break;
-                
-            default: /* unknown or supported type - oh dear */
-                ret=EOF;
-                errno=EBADF;
-                break;
-        }
-        
-        free(file->buffer);/* free any allocated buffer space */
-        free(file);
-        
-        return ret;
-    }
+   /// use to remove want bytes from the front of a files buffer
+   static int
+   use_buffer(
+      URL_FILE *file,
+      size_t want) {
+      /* sort out buffer */
+      if((file->buffer_pos - want) <=0) {
+         /* ditch buffer - write will recreate */
+         free(file->buffer);
+         file->buffer=NULL;
+         file->buffer_pos=0;
+         file->buffer_len=0;
+      } else {
+         /* move rest down make it available for later */
+         memmove(file->buffer,
+                 &file->buffer[want],
+                 (file->buffer_pos - want));
 
-    ///
-    static size_t
-    url_fread(
-        void *ptr,
-        size_t size,
-        size_t nmemb,
-        URL_FILE *file)
-    {
-        size_t want;
-        
-        switch(file->type) {
-            case CFTYPE_FILE:
-                want = fread(ptr, size, nmemb, file->handle.file);
-                break;
-                
-            case CFTYPE_CURL:
-                want = nmemb * size;
-                
-                fill_buffer(file, want);
-                
-                /* check if theres data in the buffer - if not fill_buffer()
-                 * either errored or EOF */
-                if(!file->buffer_pos)
-                    return 0;
-                
-                /* ensure only available data is considered */
-                if(file->buffer_pos < want)
-                    want = file->buffer_pos;
-                
-                /* xfer data to caller */
-                memcpy(ptr, file->buffer, want);
-                
-                use_buffer(file, want);
-                
-                want = want / size;     /* number of items */
-                break;
-                
-            default: /* unknown or supported type - oh dear */
-                want = 0;
-                errno = EBADF;
-                break;
-                
-        }
-        return want;
-    }
-    
+         file->buffer_pos -= want;
+      }
+      return 0;
+   }
+
+   static URL_FILE *
+   url_fopen(
+      const char *url,
+      const char *operation) {
+      /* this code could check for URLs or types in the 'url' and
+       basically use the real fopen() for standard files */
+
+      URL_FILE *file;
+      (void)operation;
+
+      file = (URL_FILE *) malloc(sizeof(URL_FILE));
+      if(!file)
+         return NULL;
+
+      memset(file, 0, sizeof(URL_FILE));
+
+      if((file->handle.file=fopen(url, operation)))
+         file->type = CFTYPE_FILE; /* marked as URL */
+
+      else {
+         file->type = CFTYPE_CURL; /* marked as URL */
+         file->handle.curl = curl_easy_init();
+
+         curl_easy_setopt(file->handle.curl, CURLOPT_URL, url);
+         curl_easy_setopt(file->handle.curl, CURLOPT_WRITEDATA, file);
+         curl_easy_setopt(file->handle.curl, CURLOPT_VERBOSE, 0L);
+         curl_easy_setopt(file->handle.curl, CURLOPT_WRITEFUNCTION, write_callback);
+
+         if(!multi_handle())
+            *multi_handle_addr() = curl_multi_init();
+
+         curl_multi_add_handle(multi_handle(), file->handle.curl);
+
+         /* lets start the fetch */
+         curl_multi_perform(multi_handle(), &file->still_running);
+
+         if((file->buffer_pos == 0) && (!file->still_running)) {
+            /* if still_running is 0 now, we should return NULL */
+
+            /* make sure the easy handle is not in the multi handle anymore */
+            curl_multi_remove_handle(multi_handle(), file->handle.curl);
+
+            /* cleanup */
+            curl_easy_cleanup(file->handle.curl);
+
+            free(file);
+
+            file = NULL;
+         }
+      }
+      return file;
+   }
+
+   ///
+   static int
+   url_fclose(URL_FILE *file) {
+      int ret=0;/* default is good return */
+
+      switch(file->type) {
+      case CFTYPE_FILE:
+         ret=fclose(file->handle.file); /* passthrough */
+         break;
+
+      case CFTYPE_CURL:
+         /* make sure the easy handle is not in the multi handle anymore */
+         curl_multi_remove_handle(multi_handle(), file->handle.curl);
+
+         /* cleanup */
+         curl_easy_cleanup(file->handle.curl);
+         break;
+
+      default: /* unknown or supported type - oh dear */
+         ret=EOF;
+         errno=EBADF;
+         break;
+      }
+
+      free(file->buffer);/* free any allocated buffer space */
+      free(file);
+
+      return ret;
+   }
+
+   ///
+   static size_t
+   url_fread(
+      void *ptr,
+      size_t size,
+      size_t nmemb,
+      URL_FILE *file) {
+      size_t want;
+
+      switch(file->type) {
+      case CFTYPE_FILE:
+         want = fread(ptr, size, nmemb, file->handle.file);
+         break;
+
+      case CFTYPE_CURL:
+         want = nmemb * size;
+
+         fill_buffer(file, want);
+
+         /* check if theres data in the buffer - if not fill_buffer()
+          * either errored or EOF */
+         if(!file->buffer_pos)
+            return 0;
+
+         /* ensure only available data is considered */
+         if(file->buffer_pos < want)
+            want = file->buffer_pos;
+
+         /* xfer data to caller */
+         memcpy(ptr, file->buffer, want);
+
+         use_buffer(file, want);
+
+         want = want / size;     /* number of items */
+         break;
+
+      default: /* unknown or supported type - oh dear */
+         want = 0;
+         errno = EBADF;
+         break;
+
+      }
+      return want;
+   }
+
 #endif // defined(GLEE_NETWORKING)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3506,4 +3453,3 @@ struct glee_api {
 
 
 #endif // defined(glee_hpp)
-

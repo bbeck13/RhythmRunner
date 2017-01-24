@@ -32,6 +32,9 @@
 #include "MatrixStack.h"
 #include "Shape.h"
 #include "Texture.h"
+#include "Engine.h"
+#include "Window.h"
+#include "World.h"
 
 
 // value_ptr for glm
@@ -70,7 +73,8 @@ int main(int argc, char **argv) {
    cerr << "Looking for resources in " << resource_dir << endl;
 #endif
 
-   engine = new Engine(new World(new Window(WINDOW_HEIGHT, WINDOW_WIDTH, TITLE)));
+   engine = new Engine(new World(new Window(WINDOW_HEIGHT, WINDOW_WIDTH, TITLE)),
+                       resource_dir);
    engine->init();
    engine->run();
 

@@ -18,9 +18,15 @@
 /* to use glee */
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"
+#define FRAMES_PER_SEC 120.0f
+#define SEC_PER_FRAME 1 / FRAMES_PER_SEC
 
 using namespace std;
 using namespace glm;
+
+class Window;
+
+class Renderer;
 
 class World {
 public:
@@ -30,6 +36,7 @@ public:
    void init();
    void update();
 private:
+   Renderer *renderer;
    Window *window;
    vector<GameObject> gameObjects;
    static int GiboLen;

@@ -9,33 +9,27 @@
 #include "glm/vec4.hpp"
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-//#include "vector_angle.hpp"
-//#include "component_wise.hpp"
-
-//#include "matrix_access.hpp"
-//#include "matrix_integer.hpp"
-//#include "matrix_inverse.hpp"
 
 using namespace glm;
 
 class MatrixStack {
 
-	std::shared_ptr< std::stack<mat4> > mstack;
+   std::shared_ptr< std::stack<mat4> > mstack;
 
 public:
 
-   MatrixStack();   
-	virtual ~MatrixStack();
+   MatrixStack();
+   virtual ~MatrixStack();
 
    // Copies the current matrix and adds it to the top of the stack
-   void pushMatrix();   
+   void pushMatrix();
    // Removes the top of the stack and sets the current matrix to be the matrix that is now on top
-	 void popMatrix();
+   void popMatrix();
    //  Sets the top matrix to be the identity
    void loadIdentity();
-   // glMultMatrix(): Right multiplies the top matrix   
-	void multMatrix(const mat4 &matrix);
-  
+   // glMultMatrix(): Right multiplies the top matrix
+   void multMatrix(const mat4 &matrix);
+
    // Right multiplies the top matrix by a translation matrix
    void translate(const vec3 &offset);
    // Right multiplies the top matrix by a scaling matrix
