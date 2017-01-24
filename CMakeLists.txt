@@ -6,7 +6,7 @@
 #
 ################################################################################
 cmake_minimum_required(VERSION 2.8)
-project(RhythmRunner CXX)
+project(lab1 CXX)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "src/*.h")

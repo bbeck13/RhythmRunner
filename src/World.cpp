@@ -59,7 +59,7 @@ void World::update() {
          for (int i = 0; i < 25; i ++)
             tot += elapsed[i];
 
-         cout << "\r" << setw(10) << setprecision(3)
+         cout << "\r" << setw(10) << setprecision(4)
               << "FPS: " << 25.0f / tot;
 #endif
          clock = nextTime;

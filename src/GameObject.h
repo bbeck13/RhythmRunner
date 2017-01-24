@@ -18,6 +18,7 @@
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"
 #include "HitBox.h"
+#include "Renderer.h"
 
 using namespace glm;
 using namespace std;
@@ -27,6 +28,7 @@ public:
    GameObject();
    ~GameObject();
 private:
+   shared_ptr<Renderer> *renderer;
 };
 
 #endif /*__GAME_OBJECT_H__*/
