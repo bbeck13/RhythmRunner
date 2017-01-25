@@ -18,15 +18,15 @@ include_directories(${CMAKE_SOURCE_DIR}/src/helpers)
 file(GLOB_RECURSE GLSL "assets/shaders/*.glsl")
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(${CMAKE_PROJECT_NAME} Threads::Threads)
 
-# Get the GLM environment variable. Since GLM is a header-only library, we
-# just need to add it to the include directory.
-set(GLM_INCLUDE_DIR "$ENV{GLM_INCLUDE_DIR}")
+# Since GLM is a header-only library, we just need to add it to the include directory.
+set(GLM_INCLUDE_DIR "deps/glm")
 if(NOT GLM_INCLUDE_DIR)
-  MESSAGE(FATAL_ERROR "Please point the environment variable GLM_INCLUDE_DIR to the include directory of your GLM installation.")
+  MESSAGE(FATAL_ERROR "deps/glm not found. Did you run git submodule init && git submodule update?")
 endif()
 include_directories(${GLM_INCLUDE_DIR})
 
