@@ -42,9 +42,14 @@
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"
 
+#include "game_state/GameState.h"
+
 using namespace std;
 
 int main(int argc, char **argv) {
    cout << "RhythmRunner" << endl;
+
+   std::unique_ptr<GameState> game_state;
+
    return EXIT_SUCCESS;
 }
