@@ -44,10 +44,8 @@
 
 #include "game_state/GameState.h"
 
-using namespace std;
-
 int main(int argc, char **argv) {
-   cout << "RhythmRunner" << endl;
+   std::cout << "RhythmRunner" << std::endl;
 
    std::shared_ptr<GameState> game_state;
 
