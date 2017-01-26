@@ -6,3 +6,6 @@
 	path = deps/glfw
 	url = http://github.com/glfw/glfw
 	ignore = dirty
+[submodule "deps/glew-cmake"]
+	path = deps/glew-cmake
+	url = http://github.com/perlmint/glew-cmake
