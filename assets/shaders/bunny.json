@@ -1,0 +1,15 @@
+{
+  "attributes": [
+    "vertPos", 
+    "vertNor"
+  ], 
+  "frag": "bunny_frag.glsl", 
+  "name": "bunny_prog", 
+  "uniforms": [
+    "P", 
+    "V", 
+    "MV", 
+    "collected"
+  ], 
+  "vert": "bunny_vert.glsl"
+}

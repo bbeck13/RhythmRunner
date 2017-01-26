@@ -14,6 +14,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/game_state)
 include_directories(${CMAKE_SOURCE_DIR}/src/game_renderer)
 include_directories(${CMAKE_SOURCE_DIR}/src/game_updater)
+include_directories(${CMAKE_SOURCE_DIR}/src/helpers)
 file(GLOB_RECURSE GLSL "assets/shaders/*.glsl")
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
@@ -54,14 +55,6 @@ if(WIN32)
       message(FATAL_ERROR "Define AQUILA_ROOT when calling cmake.")
    endif()
 endif()
-
-# Get the Eigen environment variable. Since Eigen is a header-only library, we
-# just need to add it to the include directory.
-set(EIGEN3_INCLUDE_DIR "$ENV{EIGEN3_INCLUDE_DIR}")
-if(NOT EIGEN3_INCLUDE_DIR)
-   MESSAGE(FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
-endif()
-include_directories(${EIGEN3_INCLUDE_DIR})
 
 # Get the GLFW environment variable. There should be a CMakeLists.txt in the
 # specified directory.
