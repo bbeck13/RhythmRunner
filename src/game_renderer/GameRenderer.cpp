@@ -1,6 +1,13 @@
 // Alex Ottoboni
 
+#include <fstream>
+#include <glm/gtc/type_ptr.hpp>
 #include "GameRenderer.h"
+#include "GLSL.h"
+#include "GL/glew.h"
+#include "json.hpp"
+#include "MatrixStack.h"
+#include "../helpers/FileSystemUtils.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -12,15 +19,15 @@ GLFWwindow* GameRenderer::GetWindow() {
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   // Read in the file
-  std::ifstream i (filepath, std::ifstream::in);
+  std::ifstream json_input_stream (filepath, std::ifstream::in);
   // Read the file into the JSON library
-  nlohmann::json j;
-  i >> j;
+  nlohmann::json json_handler;
+  json_input_stream >> json_handler;
   
   // Get name attributes from JSON
-  std::string vert_name = j["vert"];
-  std::string frag_name = j["frag"];
-  std::string prog_name = j["name"];
+  std::string vert_name = json_handler["vert"];
+  std::string frag_name = json_handler["frag"];
+  std::string prog_name = json_handler["name"];
 
   // Create new shader program
   std::shared_ptr<Program> new_program;
@@ -32,30 +39,18 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   new_program->init();
 
   // Create the uniforms
-  std::vector<std::string> uniforms = j["uniforms"];
+  std::vector<std::string> uniforms = json_handler["uniforms"];
   for (int i = 0; i < uniforms.size(); i++) {
     new_program->addUniform(uniforms[i]);
   }
 
   // Create the attributes
-  std::vector<std::string> attributes = j["attributes"];
+  std::vector<std::string> attributes = json_handler["attributes"];
   for (int i = 0; i < attributes.size(); i++) {
     new_program->addAttribute(uniforms[i]);
   }
 
   return new_program;
-}
-
-// Uses glob to list all files in path with pattern matching
-std::vector<std::string> GameRenderer::ListFiles(const std::string& pattern) {
-  glob_t glob_result;
-  glob(pattern.c_str(), GLOB_TILDE, NULL, &glob_result);
-  std::vector<std::string> files;
-  for (int i = 0; i < glob_result.gl_pathc;++i) {
-    files.push_back(std::string(glob_result.gl_pathv[i]));
-  }
-  globfree(&glob_result);
-  return files;
 }
 
 void GameRenderer::Init(const std::string& resource_dir, 
@@ -99,7 +94,7 @@ void GameRenderer::Init(const std::string& resource_dir,
 
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
-  std::vector<std::string> json_files = ListFiles("../assets/shaders/*.json");
+  std::vector<std::string> json_files = FileSystemUtils::ListFiles("../assets/shaders/*.json");
   for (int i = 0; i < json_files.size(); i++) {
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);  
     programs[temp_program->getName()] = temp_program;

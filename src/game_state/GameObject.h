@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "Shape.h"
+#include "Texture.h"
 
 // GameObjects are 3D entities which can be rendered
 class GameObject {

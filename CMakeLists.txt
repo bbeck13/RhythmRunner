@@ -14,6 +14,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/game_state)
 include_directories(${CMAKE_SOURCE_DIR}/src/game_renderer)
 include_directories(${CMAKE_SOURCE_DIR}/src/game_updater)
+include_directories(${CMAKE_SOURCE_DIR}/src/helpers)
 file(GLOB_RECURSE GLSL "assets/shaders/*.glsl")
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
