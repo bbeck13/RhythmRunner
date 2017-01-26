@@ -1,4 +1,5 @@
 default:
+	git submodule init && git submodule update
 	if [ -a build ] ; then \
 	   cd build && make; \
 	else \

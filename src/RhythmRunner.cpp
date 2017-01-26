@@ -2,7 +2,8 @@
  * RhythmRunner.cpp
  *
  *
- * For now this is just a bunch of import statements to make assert the dependencies
+ * For now this is just a bunch of import statements to make assert the
+ * dependencies
  * Braden Beck (bnbeck)
  *
  */
@@ -20,7 +21,7 @@
 #include "aquila/transform/FftFactory.h"*/
 
 /*SFML*/
-//#include <SFML/Audio.hpp>
+#include <SFML/Audio.hpp>
 
 /*GL stuff glew glfw etc..*/
 #define GLEW_STATIC
@@ -48,8 +49,11 @@
 
 // Callbacks seem like they should be in their own file/class
 // Still trying to figure out function pointer or whatever these are
-static void KeyCallback(GLFWwindow* window, int key, int scancode, 
-                        int action, int mods) {
+static void KeyCallback(GLFWwindow* window,
+                        int key,
+                        int scancode,
+                        int action,
+                        int mods) {
   switch (key) {
     case GLFW_KEY_ESCAPE:
       glfwSetWindowShouldClose(window, GL_TRUE);
@@ -57,8 +61,10 @@ static void KeyCallback(GLFWwindow* window, int key, int scancode,
   }
 }
 
-static void MouseCallback(GLFWwindow* window, int button, 
-                          int action, int mods) {
+static void MouseCallback(GLFWwindow* window,
+                          int button,
+                          int action,
+                          int mods) {
   double posX, posY;
   if (action == GLFW_PRESS) {
     glfwGetCursorPos(window, &posX, &posY);
@@ -70,19 +76,19 @@ static void ErrorCallback(int error, const char* description) {
 }
 
 static void ResizeCallback(GLFWwindow* window, int width, int height) {
-  //glViewport(0, 0, width, height);
+  // glViewport(0, 0, width, height);
 }
 
-int main(int argc, char **argv) {
-   std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
-   std::cout << "RhythmRunner" << std::endl;
-   renderer->Init(RESOURCE_DIR, NULL, ErrorCallback, KeyCallback, 
-                  MouseCallback, ResizeCallback);
-   while (!glfwWindowShouldClose(renderer->GetWindow())) {
-     renderer->Render(NULL);
-   }
-   renderer->Close();
-   std::shared_ptr<GameState> game_state;
+int main(int argc, char** argv) {
+  std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
+  std::cout << "RhythmRunner" << std::endl;
+  renderer->Init(RESOURCE_DIR, NULL, ErrorCallback, KeyCallback, MouseCallback,
+                 ResizeCallback);
+  while (!glfwWindowShouldClose(renderer->GetWindow())) {
+    renderer->Render(NULL);
+  }
+  renderer->Close();
+  std::shared_ptr<GameState> game_state;
 
-   return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

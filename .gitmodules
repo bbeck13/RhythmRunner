@@ -9,3 +9,6 @@
 [submodule "deps/glew-cmake"]
 	path = deps/glew-cmake
 	url = http://github.com/perlmint/glew-cmake
+[submodule "deps/sfml-audio"]
+	path = deps/sfml-audio
+	url = https://github.com/gamerslab/sfml-audio
