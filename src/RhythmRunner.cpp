@@ -1,53 +1,105 @@
 /**
- * RhythmRunner.cpp
- *
- *
- * For now this is just a bunch of import statements to make assert the dependencies
- * Braden Beck (bnbeck)
- *
- */
 
-/*cpp includes*/
-#include <iostream>
+	*	RhythmRunner.cpp
 
-/* Aquila stuff*/
-#include "aquila/global.h"
-#include "aquila/source/WaveFile.h"
-#include "aquila/tools/TextPlot.h"
-#include "aquila/transform/AquilaFft.h"
-#include "aquila/transform/OouraFft.h"
-#include "aquila/source/generator/SineGenerator.h"
-#include "aquila/transform/FftFactory.h"
+	*
+
+	*
+
+	*	For	now	this	is	just	a	bunch	of	import	statements	to	make	assert	the	dependencies
+
+	*	Braden	Beck	(bnbeck)
+
+	*
+
+	*/
+
+
+
+/*cpp	includes*/
+
+#include	<iostream>
+
+
+
+/*	Aquila	stuff*/
+
+#include	"aquila/global.h"
+
+#include	"aquila/source/WaveFile.h"
+
+#include	"aquila/tools/TextPlot.h"
+
+#include	"aquila/transform/AquilaFft.h"
+
+#include	"aquila/transform/OouraFft.h"
+
+#include	"aquila/source/generator/SineGenerator.h"
+
+#include	"aquila/transform/FftFactory.h"
+
+
 
 /*SFML*/
-#include <SFML/Audio.hpp>
 
-/*GL stuff glew glfw etc..*/
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include "GLSL.h"
-#include "Program.h"
-#include "MatrixStack.h"
-#include "Shape.h"
-#include "Texture.h"
+#include	<SFML/Audio.hpp>
 
 
-// value_ptr for glm
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
-/* to use glee */
-#define GLEE_OVERWRITE_GL_FUNCTIONS
-#include "glee.hpp"
+/*GL	stuff	glew	glfw	etc..*/
 
-#include "GameState.h"
+#define	GLEW_STATIC
 
-int main(int argc, char **argv) {
-   std::cout << "RhythmRunner" << std::endl;
+#include	<GL/glew.h>
 
-   std::shared_ptr<GameState> game_state;
+#include	<GLFW/glfw3.h>
 
-   return EXIT_SUCCESS;
+
+
+#include	"GLSL.h"
+
+#include	"Program.h"
+
+#include	"MatrixStack.h"
+
+#include	"Shape.h"
+
+#include	"Texture.h"
+
+
+
+
+
+//	value_ptr	for	glm
+
+#include	<glm/gtc/type_ptr.hpp>
+
+#include	<glm/gtc/matrix_transform.hpp>
+
+
+
+/*	to	use	glee	*/
+
+#define	GLEE_OVERWRITE_GL_FUNCTIONS
+
+#include	"glee.hpp"
+
+
+
+#include	"GameState.h"
+
+
+
+int	main(int	argc,	char	**argv)	{
+
+	std::cout	<<	"RhythmRunner"	<<	std::endl;
+
+
+
+	std::shared_ptr<GameState>	game_state;
+
+
+
+	return	EXIT_SUCCESS;
+
 }
