@@ -10,10 +10,10 @@
 // GameObjects are 3D entities which can be rendered
 class GameObject {
  public:
-  GameObject(std::unique_ptr<Shape> model);
+  GameObject(std::shared_ptr<Shape> model);
   virtual ~GameObject();
 
-  std::unique_ptr<Shape> GetModel();
+  std::shared_ptr<Shape> GetModel();
 
   glm::vec3 GetPosition();
   glm::vec3 GetDirection();
@@ -24,7 +24,7 @@ class GameObject {
   void SetScale(float scale);
 
  private:
-  std::unique_ptr<Shape> model;
+  std::shared_ptr<Shape> model;
 
   glm::vec3 position;
   glm::vec3 direction;
