@@ -10,7 +10,7 @@ class GameUpdater {
   GameUpdater();
   ~GameUpdater();
 
-  void Update(std::unique_ptr<GameState> game_state);
+  void Update(std::shared_ptr<GameState> game_state);
 
  private:
 };

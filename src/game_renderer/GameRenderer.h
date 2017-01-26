@@ -10,7 +10,7 @@ class GameRenderer {
   GameRenderer();
   ~GameRenderer();
 
-  void Render(std::unique_ptr<GameState> game_state);
+  void Render(std::shared_ptr<GameState> game_state);
 
  private:
 };

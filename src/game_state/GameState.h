@@ -13,10 +13,10 @@ class GameState {
   GameState();
   ~GameState();
 
-  std::unique_ptr<std::vector<GameObject>> GetGameObjects();
+  std::shared_ptr<std::vector<GameObject>> GetGameObjects();
 
  private:
-  std::unique_ptr<std::vector<GameObject>> game_objects;
+  std::shared_ptr<std::vector<GameObject>> game_objects;
 };
 
 #endif

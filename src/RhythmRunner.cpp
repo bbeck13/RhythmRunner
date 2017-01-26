@@ -49,7 +49,7 @@ using namespace std;
 int main(int argc, char **argv) {
    cout << "RhythmRunner" << endl;
 
-   std::unique_ptr<GameState> game_state;
+   std::shared_ptr<GameState> game_state;
 
    return EXIT_SUCCESS;
 }
