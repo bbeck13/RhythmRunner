@@ -12,6 +12,7 @@ About
 Rhythm Runner is a graphics project for Zoe Wood's [CPE 476 class](http://users.csc.calpoly.edu/~zwood/teaching/csc476/index.html)
 Authors
 -------
+- Alex Ottoboni (alexottoboni)
 - Braden Beck (bbeck13, bnbeck)
 
 Requirements
