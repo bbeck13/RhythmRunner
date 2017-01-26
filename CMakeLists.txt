@@ -41,7 +41,8 @@ include_directories(${GLFW_DIR}/include)
 target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES})
 
 # GLEW
-set(GLEW_DIR "$ENV{GLEW_DIR}")
+#set(GLEW_DIR "$ENV{GLEW_DIR}")
+set(GLEW_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/glew")
 include_directories(${GLEW_DIR}/include)
 if(WIN32)
    # With prebuilt binaries
