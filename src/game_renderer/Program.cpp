@@ -114,3 +114,11 @@ GLint Program::getUniform(const string &name) const {
    }
    return uniform->second;
 }
+
+std::string Program::getName() const {
+   return progName;
+}
+
+void Program::setName(const string &name) {
+   progName = name;
+}

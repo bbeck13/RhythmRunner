@@ -29,10 +29,13 @@ public:
    void addUniform(const std::string &name);
    GLint getAttribute(const std::string &name) const;
    GLint getUniform(const std::string &name) const;
+   std::string getName() const;
+   void setName(const std::string &name);
 
 protected:
    std::string vShaderName;
    std::string fShaderName;
+   std::string progName;
 
 private:
    GLuint pid;
