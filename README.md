@@ -36,6 +36,19 @@ download some modules in order to find you dependencies. I only had to do this w
 [here's the modules you will need](https://github.com/SFML/SFML/tree/master/cmake/Modules).
 Place them in your ../cmake/Modules dir and you should be able to compile the program.
 
+Submitting A Pull Request
+-------------------------
+Do all your development on a seperate branch and open a pull request when the 
+feature is ready to be merged. If there is an issue that exists for your feature
+include it in your pull request description by writing `#issue_number`.
+
+To mark a pull request as Code Reviewed comment `CR :emoji:`. 
+A pull can be merged once two people CR it.
+
+If the feature is testable it should be QA'd, as in someone else compiles it
+and visually verifies that it works. (Test cases are nice too). 
+To mark a pull as QA'd comment `QA :emoji:`. 
+
 Playing
 -------
 Coming soon!
