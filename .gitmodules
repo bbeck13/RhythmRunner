@@ -1,0 +1,11 @@
+[submodule "deps/glm"]
+	path = deps/glm
+	url = http://github.com/g-truc/glm
+	ignore = dirty
+[submodule "deps/glfw"]
+	path = deps/glfw
+	url = http://github.com/glfw/glfw
+	ignore = dirty
+[submodule "deps/glew-cmake"]
+	path = deps/glew-cmake
+	url = http://github.com/perlmint/glew-cmake
