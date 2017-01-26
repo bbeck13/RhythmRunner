@@ -63,11 +63,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME} Aquila)
 #   endif()
 #endif()
 
-# There should be a CMakeLists.txt in the specified directory.
-set(GLFW_DIR "deps/glfw")
-if(NOT GLFW_DIR)
-   message(FATAL_ERROR "deps/glfw not found. Did you run git submodule init && git submodule update?")
-endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
    if(APPLE)
