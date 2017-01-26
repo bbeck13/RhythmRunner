@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "game_state/GameObject.h"
+#include "GameObject.h"
 
 class GameState {
  public:

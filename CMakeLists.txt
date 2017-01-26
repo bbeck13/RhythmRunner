@@ -10,7 +10,11 @@ project(RhythmRunner CXX)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "src/*.h")
-file(GLOB_RECURSE GLSL "resources/*.glsl")
+include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/src/game_state)
+include_directories(${CMAKE_SOURCE_DIR}/src/game_renderer)
+include_directories(${CMAKE_SOURCE_DIR}/src/game_updater)
+file(GLOB_RECURSE GLSL "assets/shaders/*.glsl")
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
 set(THREADS_PREFER_PTHREAD_FLAG ON)

@@ -42,7 +42,7 @@
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"
 
-#include "game_state/GameState.h"
+#include "GameState.h"
 
 int main(int argc, char **argv) {
    std::cout << "RhythmRunner" << std::endl;
