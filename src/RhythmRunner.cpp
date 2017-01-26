@@ -41,8 +41,8 @@
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"
 
-#include "game_state/GameState.h"
-#include "game_renderer/GameRenderer.h"
+#include "GameState.h"
+#include "GameRenderer.h"
 
 #define RESOURCE_DIR "../Assets"
 
@@ -72,7 +72,6 @@ static void ErrorCallback(int error, const char* description) {
 static void ResizeCallback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
 }
-
 
 int main(int argc, char **argv) {
    std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
