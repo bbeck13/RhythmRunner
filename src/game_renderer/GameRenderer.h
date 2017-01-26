@@ -1,18 +1,18 @@
-// Joseph Arhar
+//	Joseph	Arhar
 
-#ifndef GAME_RENDERER_H_
-#define GAME_RENDERER_H_
+#ifndef	GAME_RENDERER_H_
+#define	GAME_RENDERER_H_
 
-#include "game_state/GameState.h"
+#include	"game_state/GameState.h"
 
-class GameRenderer {
- public:
-  GameRenderer();
-  ~GameRenderer();
+class	GameRenderer	{
+	public:
+	GameRenderer();
+	~GameRenderer();
 
-  void Render(std::shared_ptr<GameState> game_state);
+	void	Render(std::shared_ptr<GameState>	game_state);
 
- private:
+	private:
 };
 
 #endif
