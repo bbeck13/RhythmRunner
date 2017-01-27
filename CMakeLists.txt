@@ -99,14 +99,8 @@ else()
     target_link_libraries(${CMAKE_PROJECT_NAME} "-L/usr/local/lib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -lsfml-audio")
   else()
     # Linux
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
+    find_package(Sndfile)
     target_link_libraries(${CMAKE_PROJECT_NAME} "GL")
-
-    # SFML
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
-    find_package(SFML 2 REQUIRED system window graphics network audio)
-    if(SFML_FOUND)
-      include_directories(${SFML_INCLUDE_DIR})
-      target_link_libraries(${CMAKE_PROJECT_NAME} ${SFML_LIBRARIES})
-    endif()
   endif()
 endif()
