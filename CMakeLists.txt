@@ -66,7 +66,7 @@ option(Aquila_BUILD_EXAMPLES "Aquila_BUILD_EXAMPLES" OFF)
 option(Aquila_BUILD_TESTS "Aquila_BUILD_TESTS" OFF)
 add_subdirectory(${AQUILA_DIR})
 target_link_libraries(${CMAKE_PROJECT_NAME} Aquila)
-include_directories(${AQUILA_DIR}/aquila) # This is somewhat hacky
+include_directories(${AQUILA_DIR}) # TODO(jarhar): this is very hacky
 # On Windows the library location must be explicitly specified
 #if(WIN32)
 #   if(AQUILA_ROOT)

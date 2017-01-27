@@ -15,6 +15,8 @@ Authors
 - Alex Ottoboni (alexottoboni)
 - Braden Beck (bbeck13, bnbeck)
 - Matthew Stewart (Matthew-Stewart)
+- Joseph "Joey" Arhar (josepharhar)
+- Alex Nguyen
 
 Requirements
 ------------
