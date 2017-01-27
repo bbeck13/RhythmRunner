@@ -94,7 +94,7 @@ void GameRenderer::Init(const std::string& resource_dir,
 
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
-  std::vector<std::string> json_files = FileSystemUtils::ListFiles("../assets/shaders/*.json");
+  std::vector<std::string> json_files = FileSystemUtils::ListFiles("../assets/shaders", "*.json");
   for (int i = 0; i < json_files.size(); i++) {
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);  
     programs[temp_program->getName()] = temp_program;

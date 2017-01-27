@@ -2,13 +2,13 @@
 #ifndef __FILE_SYS_UTILS__
 #define __FILE_SYS_UTILS__
 
-#include <iostream>
 #include <vector>
+#include <string>
 
-class FileSystemUtils {
-  public:
-    FileSystemUtils();
-    ~FileSystemUtils();
-    static std::vector<std::string> ListFiles(const std::string& pattern);
-};
+namespace FileSystemUtils {
+
+std::vector<std::string> ListFiles(const std::string& path, const std::string& pattern);
+
+}
+
 #endif
