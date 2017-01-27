@@ -34,10 +34,6 @@
 #include "Shape.h"
 #include "Texture.h"
 
-// value_ptr for glm
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 /* to use glee */
 #define GLEE_OVERWRITE_GL_FUNCTIONS
 #include "glee.hpp"

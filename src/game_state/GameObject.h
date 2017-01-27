@@ -5,37 +5,30 @@
 
 #include <memory>
 
+#include <glm/glm.hpp>
+
 #include "Shape.h"
 #include "Texture.h"
 
 // GameObjects are 3D entities which can be rendered
 class GameObject {
-public:
+  public:
    GameObject(std::shared_ptr<Shape> model);
    virtual ~GameObject();
 
-   std::shared_ptr<Shape> GetModel() {
-      return model;
-   }
-   std::shared_ptr<Texture> GetTexture() {
-      return texture;
-   }
+   std::shared_ptr<Shape> GetModel();
 
-   virtual glm::vec3 GetPosition() {
-      return position;
-   }
-   virtual glm::vec3 GetDirection() {
-      return direction;
-   }
-   float GetScale() {
-      return scale;
-   }
+   glm::vec3 GetPosition();
+   glm::vec3 GetDirection();
+   float GetScale();
+   std::shared_ptr<Texture> GetTexture(); // Texture may be null
 
    void SetPosition(glm::vec3 position);
    void SetDirection(glm::vec3 direction);
    void SetScale(float scale);
+   void SetTexture(std::shared_ptr<Texture> texture);
 
-private:
+  private:
    std::shared_ptr<Shape> model;
    std::shared_ptr<Texture> texture;
 
