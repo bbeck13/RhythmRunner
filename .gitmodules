@@ -12,3 +12,6 @@
 [submodule "deps/sfml-audio"]
 	path = deps/sfml-audio
 	url = https://github.com/gamerslab/sfml-audio
+[submodule "deps/aquila"]
+	path = deps/aquila
+	url = http://github.com/zsiciarz/aquila

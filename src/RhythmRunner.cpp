@@ -12,13 +12,13 @@
 #include <iostream>
 
 /* Aquila stuff*/
-/*#include "aquila/global.h"
-#include "aquila/source/WaveFile.h"
-#include "aquila/tools/TextPlot.h"
-#include "aquila/transform/AquilaFft.h"
-#include "aquila/transform/OouraFft.h"
-#include "aquila/source/generator/SineGenerator.h"
-#include "aquila/transform/FftFactory.h"*/
+#include <aquila/global.h>
+#include <aquila/source/WaveFile.h>
+#include <aquila/tools/TextPlot.h>
+#include <aquila/transform/AquilaFft.h>
+#include <aquila/transform/OouraFft.h>
+#include <aquila/source/generator/SineGenerator.h>
+#include <aquila/transform/FftFactory.h>
 
 /*SFML*/
 #include <SFML/Audio.hpp>

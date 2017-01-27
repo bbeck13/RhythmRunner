@@ -32,6 +32,7 @@ set(GLFW_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/glfw")
 option(GLFW_BUILD_EXAMPLES "GLFW_BUILD_EXAMPLES" OFF)
 option(GLFW_BUILD_TESTS "GLFW_BUILD_TESTS" OFF)
 option(GLFW_BUILD_DOCS "GLFW_BUILD_DOCS" OFF)
+option(GLFW_INSTALL "GLFW_INSTALL" OFF)
 if(CMAKE_BUILD_TYPE MATCHES Release)
   add_subdirectory(${GLFW_DIR} ${GLFW_DIR}/release)
 else()
@@ -60,7 +61,12 @@ include_directories(${SFML_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio)
 
 # Aqila
+set(AQUILA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/aquila")
+option(Aquila_BUILD_EXAMPLES "Aquila_BUILD_EXAMPLES" OFF)
+option(Aquila_BUILD_TESTS "Aquila_BUILD_TESTS" OFF)
+add_subdirectory(${AQUILA_DIR})
 target_link_libraries(${CMAKE_PROJECT_NAME} Aquila)
+include_directories(${AQUILA_DIR}/aquila) # This is somewhat hacky
 # On Windows the library location must be explicitly specified
 #if(WIN32)
 #   if(AQUILA_ROOT)
