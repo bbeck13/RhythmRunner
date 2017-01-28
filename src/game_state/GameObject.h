@@ -4,6 +4,7 @@
 #define GAME_OBJECT_H_
 
 #include <memory>
+#include <glm/ext.hpp>
 
 #include <glm/glm.hpp>
 
@@ -12,29 +13,29 @@
 
 // GameObjects are 3D entities which can be rendered
 class GameObject {
-  public:
-   GameObject(std::shared_ptr<Shape> model);
-   virtual ~GameObject();
+ public:
+  GameObject(std::shared_ptr<Shape> model);
+  virtual ~GameObject();
 
-   std::shared_ptr<Shape> GetModel();
+  std::shared_ptr<Shape> GetModel();
 
-   glm::vec3 GetPosition();
-   glm::vec3 GetDirection();
-   float GetScale();
-   std::shared_ptr<Texture> GetTexture(); // Texture may be null
+  glm::vec3 GetPosition();
+  glm::vec3 GetDirection();
+  glm::vec3 GetScale();
+  std::shared_ptr<Texture> GetTexture();  // Texture may be null
 
-   void SetPosition(glm::vec3 position);
-   void SetDirection(glm::vec3 direction);
-   void SetScale(float scale);
-   void SetTexture(std::shared_ptr<Texture> texture);
+  void SetPosition(glm::vec3 position);
+  void SetDirection(glm::vec3 direction);
+  void SetScale(glm::vec3 scale);
+  void SetTexture(std::shared_ptr<Texture> texture);
 
-  private:
-   std::shared_ptr<Shape> model;
-   std::shared_ptr<Texture> texture;
+ protected:
+  std::shared_ptr<Shape> model;
+  std::shared_ptr<Texture> texture;
 
-   glm::vec3 position;
-   glm::vec3 direction;
-   float scale;
+  glm::vec3 position;
+  glm::vec3 direction;
+  glm::vec3 scale;
 };
 
 #endif

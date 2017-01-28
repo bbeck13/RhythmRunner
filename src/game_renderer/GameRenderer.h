@@ -8,18 +8,25 @@
 #include "GLFW/glfw3.h"
 #include "Program.h"
 
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 480
+#define TITLE "Rhythm Runner"
+#define MUSIC "../assets/music/1.wav"
+
 class GameRenderer {
  public:
   GameRenderer();
   ~GameRenderer();
   GLFWwindow* GetWindow();
-  void Init(const std::string& resource_dir, std::shared_ptr<GameState> state,
-            GLFWerrorfun error_callback, 
+  void Init(const std::string& resource_dir,
+            std::shared_ptr<GameState> state,
+            GLFWerrorfun error_callback,
             GLFWkeyfun key_callback,
-            GLFWmousebuttonfun mouse_callback, 
+            GLFWmousebuttonfun mouse_callback,
             GLFWframebuffersizefun resize_callback);
   void Render(std::shared_ptr<GameState> game_state);
   void Close();
+
  private:
   GLFWwindow* window;
   std::unordered_map<std::string, std::shared_ptr<Program>> programs;

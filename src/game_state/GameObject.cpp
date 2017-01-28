@@ -22,7 +22,7 @@ glm::vec3 GameObject::GetDirection() {
   return direction;
 }
 
-float GameObject::GetScale() {
+glm::vec3 GameObject::GetScale() {
   return scale;
 }
 
@@ -34,7 +34,7 @@ void GameObject::SetDirection(glm::vec3 direction) {
   this->direction = direction;
 }
 
-void GameObject::SetScale(float scale) {
+void GameObject::SetScale(glm::vec3 scale) {
   this->scale = scale;
 }
 

@@ -7,16 +7,21 @@
 #include <vector>
 
 #include "GameObject.h"
+#include "Level.h"
 
 class GameState {
  public:
   GameState();
   ~GameState();
 
+  void insertGameObject(GameObject obj) { game_objects->push_back(obj); }
   std::shared_ptr<std::vector<GameObject>> GetGameObjects();
+  std::shared_ptr<Level> GetLevel();
+  void SetLevel(std::shared_ptr<Level> level);
 
  private:
   std::shared_ptr<std::vector<GameObject>> game_objects;
+  std::shared_ptr<Level> level;
 };
 
 #endif

@@ -33,6 +33,8 @@
 #include "MatrixStack.h"
 #include "Shape.h"
 #include "Texture.h"
+#include "Level.h"
+#include "LevelGenerator.h"
 
 /* to use glee */
 #define GLEE_OVERWRITE_GL_FUNCTIONS
@@ -77,7 +79,12 @@ static void ResizeCallback(GLFWwindow* window, int width, int height) {
 
 int main(int argc, char** argv) {
   std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
-  std::cout << "RhythmRunner" << std::endl;
+  LevelGenerator levelGenerator(MUSIC);
+
+  std::shared_ptr<Level> level = std::make_shared<Level>(
+      levelGenerator.getMusic(), levelGenerator.generateLevel());
+  std::shared_ptr<GameState> gameState = std::make_shared<GameState>();
+
   renderer->Init(RESOURCE_DIR, NULL, ErrorCallback, KeyCallback, MouseCallback,
                  ResizeCallback);
   while (!glfwWindowShouldClose(renderer->GetWindow())) {
