@@ -7,7 +7,8 @@
 #include "GL/glew.h"
 #include "json.hpp"
 #include "MatrixStack.h"
-#include "../helpers/FileSystemUtils.h"
+#include "FileSystemUtils.h"
+#include "LevelGenerator.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -19,11 +20,11 @@ GLFWwindow* GameRenderer::GetWindow() {
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   // Read in the file
-  std::ifstream json_input_stream (filepath, std::ifstream::in);
+  std::ifstream json_input_stream(filepath, std::ifstream::in);
   // Read the file into the JSON library
   nlohmann::json json_handler;
   json_input_stream >> json_handler;
-  
+
   // Get name attributes from JSON
   std::string vert_name = json_handler["vert"];
   std::string frag_name = json_handler["frag"];
@@ -34,7 +35,7 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   new_program = std::make_shared<Program>();
   new_program->setVerbose(true);
   new_program->setName(prog_name);
-  new_program->setShaderNames("../assets/shaders/" + vert_name, 
+  new_program->setShaderNames("../assets/shaders/" + vert_name,
                               "../assets/shaders/" + frag_name);
   new_program->init();
 
@@ -53,13 +54,12 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   return new_program;
 }
 
-void GameRenderer::Init(const std::string& resource_dir, 
+void GameRenderer::Init(const std::string& resource_dir,
                         std::shared_ptr<GameState> state,
-                        GLFWerrorfun error_callback, 
+                        GLFWerrorfun error_callback,
                         GLFWkeyfun key_callback,
-                        GLFWmousebuttonfun mouse_callback, 
+                        GLFWmousebuttonfun mouse_callback,
                         GLFWframebuffersizefun resize_callback) {
-
   // OpenGL Setup Boilerplate
   glfwSetErrorCallback(error_callback);
   if (!glfwInit()) {
@@ -71,34 +71,35 @@ void GameRenderer::Init(const std::string& resource_dir,
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  window = glfwCreateWindow(1600, 900, "Rhythm Runner", NULL, NULL);
+  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, TITLE, NULL, NULL);
   glfwMakeContextCurrent(window);
   glewExperimental = true;
   if (glewInit() != GLEW_OK) {
     std::cerr << "Failed to initialize GLEW" << std::endl;
     exit(1);
   }
-  glGetError(); // weird bootstrap of glGetError
+  glGetError();  // weird bootstrap of glGetError
   std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
   std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
             << std::endl;
-  glfwSwapInterval(0); // vsync
+  glfwSwapInterval(0);  // vsync
   glfwSetKeyCallback(this->window, key_callback);
   glfwSetMouseButtonCallback(this->window, mouse_callback);
   glfwSetFramebufferSizeCallback(this->window, resize_callback);
   GLSL::checkVersion();
-  glClearColor(.12f, .34f, .56f, 1.0f); // set background color
-  glEnable(GL_DEPTH_TEST); // enable z-buffer test
+  glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
+  glEnable(GL_DEPTH_TEST);               // enable z-buffer test
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
-  std::vector<std::string> json_files = FileSystemUtils::ListFiles("../assets/shaders", "*.json");
+  std::vector<std::string> json_files =
+      FileSystemUtils::ListFiles("../assets/shaders", "*.json");
   for (int i = 0; i < json_files.size(); i++) {
-    temp_program = GameRenderer::ProgramFromJSON(json_files[i]);  
+    temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
-  } 
+  }
 }
 
 void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
