@@ -7,8 +7,8 @@
 
 #include "GameObject.h"
 
-#define PLATFORM "../Assets/shaders/platform.json"
-#define PLATFORM_MESH "../Assets/models/platform.obj"
+#define PLATFORM "../assets/shaders/platform.json"
+#define PLATFORM_MESH "../assets/models/platform.obj"
 
 class Platform : public GameObject {
  public:
