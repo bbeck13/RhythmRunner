@@ -7,11 +7,14 @@
 #include "game_state/GameState.h"
 #include "GLFW/glfw3.h"
 #include "Program.h"
+#include "MatrixStack.h"
+#include "GameCamera.h"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 480
 #define TITLE "Rhythm Runner"
 #define MUSIC "../assets/music/1.wav"
+#define PLATFORM_PROG "platform_prog"
 
 class GameRenderer {
  public:
@@ -23,7 +26,9 @@ class GameRenderer {
             GLFWerrorfun error_callback,
             GLFWkeyfun key_callback,
             GLFWmousebuttonfun mouse_callback,
-            GLFWframebuffersizefun resize_callback);
+            GLFWframebuffersizefun resize_callback,
+            GLFWcursorposfun cursor_callback);
+  void cursorCallback(GLFWwindow* window, double x, double y);
   void Render(std::shared_ptr<GameState> game_state);
   void Close();
 
