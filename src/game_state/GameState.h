@@ -11,7 +11,7 @@
 
 class GameState {
  public:
-  GameState();
+  GameState(std::shared_ptr<Level> level);
   ~GameState();
 
   void insertGameObject(GameObject obj) { game_objects->push_back(obj); }

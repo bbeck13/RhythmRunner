@@ -34,6 +34,7 @@
 #include "Shape.h"
 #include "Texture.h"
 #include "Level.h"
+#include "GameUpdater.h"
 #include "LevelGenerator.h"
 
 /* to use glee */
@@ -44,6 +45,8 @@
 #include "GameRenderer.h"
 
 #define RESOURCE_DIR "../Assets"
+#define FRAMES_PER_SEC 120.0f
+#define SEC_PER_FRAME 1 / FRAMES_PER_SEC
 
 // Callbacks seem like they should be in their own file/class
 // Still trying to figure out function pointer or whatever these are
@@ -79,16 +82,27 @@ static void ResizeCallback(GLFWwindow* window, int width, int height) {
 
 int main(int argc, char** argv) {
   std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
-  LevelGenerator levelGenerator(MUSIC);
+  std::shared_ptr<LevelGenerator> levelGenerator =
+      std::make_shared<LevelGenerator>(MUSIC);
 
   std::shared_ptr<Level> level = std::make_shared<Level>(
-      levelGenerator.getMusic(), levelGenerator.generateLevel());
-  std::shared_ptr<GameState> gameState = std::make_shared<GameState>();
+      levelGenerator->getMusic(), levelGenerator->generateLevel());
+  std::shared_ptr<GameState> gameState = std::make_shared<GameState>(level);
+
+  std::shared_ptr<GameUpdater> updater = std::make_shared<GameUpdater>();
 
   renderer->Init(RESOURCE_DIR, NULL, ErrorCallback, KeyCallback, MouseCallback,
                  ResizeCallback);
+  // fix ur time step
+  double clock = glfwGetTime();
   while (!glfwWindowShouldClose(renderer->GetWindow())) {
-    renderer->Render(NULL);
+    double nextTime = glfwGetTime();
+    if (nextTime - clock > SEC_PER_FRAME) {
+      updater->Update(gameState);
+      renderer->Render(gameState);
+
+      clock = nextTime;
+    }
   }
   renderer->Close();
   std::shared_ptr<GameState> game_state;
