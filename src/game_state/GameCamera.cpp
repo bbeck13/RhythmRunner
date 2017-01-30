@@ -3,6 +3,8 @@
 
 #include "GameCamera.h"
 
+#include <algorithm>
+
 GameCamera::GameCamera() {
    ViewMatrix.pushMatrix();
    ViewMatrix.lookAt(eyePos, lookAtPos, up);

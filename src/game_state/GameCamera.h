@@ -4,6 +4,8 @@
 #ifndef GAME_CAMERA_H_
 #define GAME_CAMERA_H_
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <memory>
 
 #include "MatrixStack.h"
