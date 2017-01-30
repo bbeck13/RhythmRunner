@@ -51,15 +51,16 @@ add_subdirectory(${GLEW_DIR})
 target_link_libraries(${CMAKE_PROJECT_NAME} libglew_static)
 include_directories("${GLEW_DIR}/include")
 
-#SFML
+# SFML
 set(SFML-DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/sfml-audio")
 add_subdirectory(${SFML-DIR})
 if(WIN32)
-  SET(RELEASE_DLLS
-    lib/glut/bin/glut32.dll
-    lib/glew/bin/glew32.dll
-    lib/sfml-audio/extlibs/bin/x86/libsndfile-1.dll
-    lib/sfml-audio/extlibs/bin/x86/openal32.dll)
+  # http://stackoverflow.com/a/10672739
+  add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${SFML-DIR}/extlibs/bin/x64/libsndfile-1.dll"
+      "${SFML-DIR}/extlibs/bin/x64/openal32.dll"
+      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>)
 endif()
 include_directories(${SFML_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio)
@@ -71,20 +72,6 @@ option(Aquila_BUILD_TESTS "Aquila_BUILD_TESTS" OFF)
 add_subdirectory(${AQUILA_DIR})
 target_link_libraries(${CMAKE_PROJECT_NAME} Aquila)
 include_directories(${AQUILA_DIR}) # TODO(jarhar): this is very hacky
-# On Windows the library location must be explicitly specified
-#if(WIN32)
-#   if(AQUILA_ROOT)
-#      set(AQUILA_INCLUDE_DIR "${AQUILA_ROOT}\\include")
-#      set(AQUILA_LIB_DIR "${AQUILA_ROOT}\\lib")
-#      message("AQUILA_ROOT: ${AQUILA_ROOT}")
-#      message("AQUILA_INCLUDE_DIR: ${AQUILA_INCLUDE_DIR}")
-#      message("AQUILA_LIB_DIR: ${AQUILA_LIB_DIR}")
-#      include_directories(${AQUILA_INCLUDE_DIR})
-#      link_directories(${AQUILA_LIB_DIR})
-#   else()
-#      message(FATAL_ERROR "Define AQUILA_ROOT when calling cmake.")
-#   endif()
-#endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
