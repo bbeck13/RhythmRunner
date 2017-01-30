@@ -10,6 +10,8 @@
 
 /*cpp includes*/
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 
 /* Aquila stuff*/
 #include <aquila/global.h>
@@ -91,16 +93,30 @@ int main(int argc, char** argv) {
 
   std::shared_ptr<GameUpdater> updater = std::make_shared<GameUpdater>();
 
-  renderer->Init(RESOURCE_DIR, NULL, ErrorCallback, KeyCallback, MouseCallback,
+  renderer->Init(RESOURCE_DIR, gameState, ErrorCallback, KeyCallback, MouseCallback,
                  ResizeCallback);
   // fix ur time step
   double clock = glfwGetTime();
+#ifdef DEBUG
+  float elapsed[25] = {1};
+  int pos = 0;
+#endif
   while (!glfwWindowShouldClose(renderer->GetWindow())) {
     double nextTime = glfwGetTime();
     if (nextTime - clock > SEC_PER_FRAME) {
       updater->Update(gameState);
       renderer->Render(gameState);
 
+#ifdef DEBUG
+      elapsed[pos++] = SEC_PER_FRAME;
+      pos %= 25;
+      float tot = 0;
+      for (int i = 0; i < 25; i++)
+        tot += elapsed[i];
+
+      std::cout << "\r" << std::setw(10) << std::setprecision(4)
+                << "FPS: " << 25.0f / tot;
+#endif
       clock = nextTime;
     }
   }
