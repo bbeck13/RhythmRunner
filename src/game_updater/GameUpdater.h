@@ -15,8 +15,11 @@ class GameUpdater {
 
   void Update(std::shared_ptr<GameState> game_state);
   void Reset(std::shared_ptr<GameState> game_state);
+  void Done();
+
  private:
   std::shared_ptr<LevelUpdater> levelUpdater;
+  bool done;
 };
 
 #endif

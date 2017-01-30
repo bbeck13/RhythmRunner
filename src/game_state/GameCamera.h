@@ -24,7 +24,7 @@ public:
 
 private:
    MatrixStack ViewMatrix = MatrixStack();
-   glm::vec3 eyePos = glm::vec3(0,0,0);
+   glm::vec3 eyePos = glm::vec3(0,1,0);
    glm::vec3 lookAtPos = glm::vec3(0,0,-5);
    glm::vec3 up = glm::vec3(0, 1, 0);
    float obeta = -(M_PI_2);
