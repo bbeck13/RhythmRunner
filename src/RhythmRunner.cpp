@@ -36,6 +36,7 @@
 #include "Level.h"
 #include "GameUpdater.h"
 #include "LevelGenerator.h"
+#include "GameCamera.h"
 
 /* to use glee */
 #define GLEE_OVERWRITE_GL_FUNCTIONS
@@ -87,11 +88,13 @@ int main(int argc, char** argv) {
 
   std::shared_ptr<Level> level = std::make_shared<Level>(
       levelGenerator->getMusic(), levelGenerator->generateLevel());
+  std::shared_ptr<GameCamera> camera = std::make_shared<GameCamera>();
   std::shared_ptr<GameState> gameState = std::make_shared<GameState>(level);
+  gameState->SetCamera(camera);
 
   std::shared_ptr<GameUpdater> updater = std::make_shared<GameUpdater>();
 
-  renderer->Init(RESOURCE_DIR, NULL, ErrorCallback, KeyCallback, MouseCallback,
+  renderer->Init(RESOURCE_DIR, gameState, ErrorCallback, KeyCallback, MouseCallback,
                  ResizeCallback);
   // fix ur time step
   double clock = glfwGetTime();
@@ -105,7 +108,6 @@ int main(int argc, char** argv) {
     }
   }
   renderer->Close();
-  std::shared_ptr<GameState> game_state;
 
   return EXIT_SUCCESS;
 }

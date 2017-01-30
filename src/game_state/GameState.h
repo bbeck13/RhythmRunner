@@ -8,6 +8,7 @@
 
 #include "GameObject.h"
 #include "Level.h"
+#include "GameCamera.h"
 
 class GameState {
  public:
@@ -18,10 +19,13 @@ class GameState {
   std::shared_ptr<std::vector<GameObject>> GetGameObjects();
   std::shared_ptr<Level> GetLevel();
   void SetLevel(std::shared_ptr<Level> level);
+  std::shared_ptr<GameCamera> GetCamera();
+  void SetCamera(std::shared_ptr<GameCamera> camera);
 
  private:
   std::shared_ptr<std::vector<GameObject>> game_objects;
   std::shared_ptr<Level> level;
+  std::shared_ptr<GameCamera> camera;
 };
 
 #endif

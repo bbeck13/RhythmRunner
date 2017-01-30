@@ -103,12 +103,41 @@ void GameRenderer::Init(const std::string& resource_dir,
 }
 
 void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
+
+  std::shared_ptr<Level> level = game_state->GetLevel();
+  std::shared_ptr<GameCamera> camera = game_state->GetCamera();
+
   int width, height;
   glfwGetFramebufferSize(this->window, &width, &height);
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  float aspect = width / (float) height;
 
+  auto P = std::make_shared<MatrixStack>();
+  auto V = camera->getView();
+  auto MV = std::make_shared<MatrixStack>();
+  P->pushMatrix();
+  P->perspective(45.0f, aspect, 0.01f, 100.0f);
+  V.pushMatrix();
+  
+  std::shared_ptr<Program> current_program = programs["platform_prog"];
+  current_program->bind();
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE, glm::value_ptr(V.topMatrix()));
   // Render Loop Goes Here
+  for (int i = 0; i < level->getLevel()->size(); i++) {
+    Platform platform = level->getLevel()->at(i);
+    MV = std::make_shared<MatrixStack>();
+    MV->pushMatrix();
+    MV->loadIdentity();
+    MV->translate(platform.GetPosition()); 
+    glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                       glm::value_ptr(MV->topMatrix()));
+    std::cout << platform.GetPlatformShape() << std::endl;
+    platform.GetPlatformShape()->draw(current_program);
+    MV->popMatrix();
+    std::cout << level->getLevel()->at(i).GetPosition()[0] << std::endl;
+  }
 
   glfwSwapBuffers(this->window);
   glfwPollEvents();

@@ -172,12 +172,12 @@ void Shape::draw(const shared_ptr<Program> prog) const
 	}
 	
 	// Bind texcoords buffer
-	int h_tex = prog->getAttribute("vertTex");
-	if(h_tex != -1 && texBufID != 0) {
-		GLSL::enableVertexAttribArray(h_tex);
-		glBindBuffer(GL_ARRAY_BUFFER, texBufID);
-		glVertexAttribPointer(h_tex, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-	}
+	//int h_tex = prog->getAttribute("vertTex");
+	//if(h_tex != -1 && texBufID != 0) {
+	//	GLSL::enableVertexAttribArray(h_tex);
+	//	glBindBuffer(GL_ARRAY_BUFFER, texBufID);
+	//	glVertexAttribPointer(h_tex, 2, GL_FLOAT, GL_FALSE, 0, (const void *)0);
+	//}
 	
 	// Bind element buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eleBufID);
@@ -186,9 +186,9 @@ void Shape::draw(const shared_ptr<Program> prog) const
 	glDrawElements(GL_TRIANGLES, (int)eleBuf.size(), GL_UNSIGNED_INT, (const void *)0);
 	
 	// Disable and unbind
-	if(h_tex != -1) {
-		GLSL::disableVertexAttribArray(h_tex);
-	}
+	//if(h_tex != -1) {
+	//	GLSL::disableVertexAttribArray(h_tex);
+	//}
 	if(h_nor != -1) {
 		GLSL::disableVertexAttribArray(h_nor);
 	}

@@ -1,0 +1,14 @@
+{
+  "attributes": [
+    "vertPos", 
+    "vertNor"
+  ], 
+  "frag": "platform_frag.glsl", 
+  "name": "platform_prog", 
+  "uniforms": [
+    "P", 
+    "V", 
+    "MV" 
+  ], 
+  "vert": "platform_vert.glsl"
+}
