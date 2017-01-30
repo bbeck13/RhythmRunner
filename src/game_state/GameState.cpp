@@ -2,7 +2,9 @@
 
 #include "GameState.h"
 
-GameState::GameState() {}
+GameState::GameState(std::shared_ptr<Level> level) {
+  this->level = level;
+}
 
 GameState::~GameState() {}
 
