@@ -35,6 +35,7 @@
 #include "Texture.h"
 #include "Level.h"
 #include "LevelGenerator.h"
+#include "GameCamera.h"
 
 /* to use glee */
 #define GLEE_OVERWRITE_GL_FUNCTIONS
@@ -84,11 +85,14 @@ int main(int argc, char** argv) {
   std::shared_ptr<Level> level = std::make_shared<Level>(
       levelGenerator.getMusic(), levelGenerator.generateLevel());
   std::shared_ptr<GameState> gameState = std::make_shared<GameState>();
+  std::shared_ptr<GameCamera> camera = std::make_shared<GameCamera>();
+  gameState->SetLevel(level);
+  gameState->SetCamera(camera);
 
   renderer->Init(RESOURCE_DIR, NULL, ErrorCallback, KeyCallback, MouseCallback,
                  ResizeCallback);
   while (!glfwWindowShouldClose(renderer->GetWindow())) {
-    renderer->Render(NULL);
+    renderer->Render(gameState);
   }
   renderer->Close();
   std::shared_ptr<GameState> game_state;
