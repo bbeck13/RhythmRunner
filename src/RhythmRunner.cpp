@@ -33,7 +33,6 @@
 #include "GLSL.h"
 #include "Program.h"
 #include "MatrixStack.h"
-#include "Shape.h"
 #include "Texture.h"
 #include "Level.h"
 #include "GameUpdater.h"

@@ -15,9 +15,9 @@ class Platform : public GameObject {
    Platform(glm::vec3 position);
    Platform(glm::vec3 position, glm::vec3 scale);
    ~Platform();
-   static std::shared_ptr<Shape> GetPlatformShape();
+   static std::shared_ptr<Model> GetPlatformModel();
  private:
-   static std::shared_ptr<Shape> platform;
+   static std::shared_ptr<Model> model;
    static bool isInitialized;
 };
 #endif

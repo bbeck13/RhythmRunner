@@ -2,11 +2,11 @@
 
 #include "GameObject.h"
 
-GameObject::GameObject(std::shared_ptr<Shape> model) : model(model) {}
+GameObject::GameObject(std::shared_ptr<Model> model) : model(model) {}
 
 GameObject::~GameObject() {}
 
-std::shared_ptr<Shape> GameObject::GetModel() {
+std::shared_ptr<Model> GameObject::GetModel() {
   return model;
 }
 
