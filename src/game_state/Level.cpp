@@ -5,4 +5,13 @@ Level::Level(std::shared_ptr<sf::Music> music,
   this->music = music;
   this->level = level;
 }
+
 Level::~Level() {}
+
+std::shared_ptr<sf::Music> Level::getMusic() {
+  return music;
+}
+
+std::shared_ptr<std::vector<Platform>> Level::getLevel() {
+  return level;
+}

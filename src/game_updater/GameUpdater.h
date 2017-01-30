@@ -6,15 +6,17 @@
 #include <memory>
 
 #include "GameState.h"
+#include "LevelUpdater.h"
 
 class GameUpdater {
  public:
   GameUpdater();
   ~GameUpdater();
 
-  virtual void Update(std::shared_ptr<GameState> game_state) {}
-
+  void Update(std::shared_ptr<GameState> game_state);
+  void Reset(std::shared_ptr<GameState> game_state);
  private:
+  std::shared_ptr<LevelUpdater> levelUpdater;
 };
 
 #endif
