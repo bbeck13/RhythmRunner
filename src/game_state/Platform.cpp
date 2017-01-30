@@ -15,7 +15,6 @@ Platform::Platform(glm::vec3 position) : GameObject(Platform::platform) {
 Platform::Platform(glm::vec3 position, glm::vec3 scale) : GameObject(Platform::platform) {
   this->position = position;
   // todo play around with the size
-  this->scale = glm::vec3(3, .5, .5);
   this->scale = scale;
   this->model = platform;
 }

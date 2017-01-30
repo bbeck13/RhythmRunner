@@ -12,7 +12,7 @@
 
 class GameState {
  public:
-  GameState();
+  GameState(std::shared_ptr<Level> level, std::shared_ptr<GameCamera> camera);
   ~GameState();
 
   void insertGameObject(GameObject obj) { game_objects->push_back(obj); }
@@ -21,11 +21,14 @@ class GameState {
   void SetLevel(std::shared_ptr<Level> level);
   std::shared_ptr<GameCamera> GetCamera();
   void SetCamera(std::shared_ptr<GameCamera> camera);
+  void SetDone(bool done);
+  bool Done();
 
  private:
   std::shared_ptr<std::vector<GameObject>> game_objects;
   std::shared_ptr<Level> level;
   std::shared_ptr<GameCamera> camera;
+  bool done;
 };
 
 #endif

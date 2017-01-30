@@ -9,6 +9,7 @@
 #include "MatrixStack.h"
 #include "FileSystemUtils.h"
 #include "LevelGenerator.h"
+#include "Platform.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -48,7 +49,7 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   // Create the attributes
   std::vector<std::string> attributes = json_handler["attributes"];
   for (int i = 0; i < attributes.size(); i++) {
-    new_program->addAttribute(uniforms[i]);
+    new_program->addAttribute(attributes[i]);
   }
 
   return new_program;
@@ -59,7 +60,8 @@ void GameRenderer::Init(const std::string& resource_dir,
                         GLFWerrorfun error_callback,
                         GLFWkeyfun key_callback,
                         GLFWmousebuttonfun mouse_callback,
-                        GLFWframebuffersizefun resize_callback) {
+                        GLFWframebuffersizefun resize_callback,
+                        GLFWcursorposfun cursor_callback) {
   // OpenGL Setup Boilerplate
   glfwSetErrorCallback(error_callback);
   if (!glfwInit()) {
@@ -73,6 +75,7 @@ void GameRenderer::Init(const std::string& resource_dir,
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, TITLE, NULL, NULL);
   glfwMakeContextCurrent(window);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glewExperimental = true;
   if (glewInit() != GLEW_OK) {
     std::cerr << "Failed to initialize GLEW" << std::endl;
@@ -86,6 +89,7 @@ void GameRenderer::Init(const std::string& resource_dir,
   glfwSetKeyCallback(this->window, key_callback);
   glfwSetMouseButtonCallback(this->window, mouse_callback);
   glfwSetFramebufferSizeCallback(this->window, resize_callback);
+  glfwSetCursorPosCallback(this->window, cursor_callback);
   GLSL::checkVersion();
   glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
   glEnable(GL_DEPTH_TEST);               // enable z-buffer test
@@ -103,7 +107,6 @@ void GameRenderer::Init(const std::string& resource_dir,
 }
 
 void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
-
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
 
@@ -111,36 +114,44 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glfwGetFramebufferSize(this->window, &width, &height);
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  float aspect = width / (float) height;
+  float aspect = width / (float)height;
 
   auto P = std::make_shared<MatrixStack>();
   auto V = camera->getView();
   auto MV = std::make_shared<MatrixStack>();
+
   P->pushMatrix();
   P->perspective(45.0f, aspect, 0.01f, 100.0f);
   V.pushMatrix();
-  
+
   std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE, glm::value_ptr(V.topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
   // Render Loop Goes Here
+  // level
   for (int i = 0; i < level->getLevel()->size(); i++) {
     Platform platform = level->getLevel()->at(i);
-    MV = std::make_shared<MatrixStack>();
     MV->pushMatrix();
     MV->loadIdentity();
-    MV->translate(platform.GetPosition()); 
+    MV->translate(platform.GetPosition());
+    MV->scale(platform.GetScale());
     glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                        glm::value_ptr(MV->topMatrix()));
-    std::cout << platform.GetPlatformShape() << std::endl;
     platform.GetPlatformShape()->draw(current_program);
     MV->popMatrix();
-    std::cout << level->getLevel()->at(i).GetPosition()[0] << std::endl;
   }
+  current_program->unbind();
+  P->popMatrix();
+  V.popMatrix();
 
   glfwSwapBuffers(this->window);
   glfwPollEvents();
+  if (game_state->Done()) {
+    glfwSetWindowShouldClose(window, GL_TRUE);
+  }
 }
 
 void GameRenderer::Close() {

@@ -2,7 +2,11 @@
 
 #include "GameState.h"
 
-GameState::GameState() {}
+GameState::GameState(std::shared_ptr<Level> level, std::shared_ptr<GameCamera> camera) {
+  this->level = level;
+  this->camera = camera;
+  done = false;
+}
 
 GameState::~GameState() {}
 
@@ -24,4 +28,12 @@ std::shared_ptr<GameCamera> GameState::GetCamera() {
 
 void GameState::SetCamera(std::shared_ptr<GameCamera> camera) {
   this->camera = camera;
+}
+
+void GameState::SetDone(bool done) {
+  this->done = done;
+}
+
+bool GameState::Done() {
+  return done;
 }
