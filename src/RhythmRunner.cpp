@@ -88,8 +88,8 @@ static void ResizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 static void CursorCallBack(GLFWwindow* window, double xpos, double ypos) {
-  //camera->pivot(WINDOW_WIDTH, WINDOW_HEIGHT, xpos, ypos);
-  //glfwSetCursorPos(window, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+  // camera->pivot(WINDOW_WIDTH, WINDOW_HEIGHT, xpos, ypos);
+  // glfwSetCursorPos(window, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 }
 
 int main(int argc, char** argv) {
@@ -99,7 +99,6 @@ int main(int argc, char** argv) {
 
   std::shared_ptr<Level> level = std::make_shared<Level>(
       levelGenerator->getMusic(), levelGenerator->generateLevel());
-  std::shared_ptr<GameCamera> camera = std::make_shared<GameCamera>();
 
   std::shared_ptr<GameState> gameState =
       std::make_shared<GameState>(level, camera);

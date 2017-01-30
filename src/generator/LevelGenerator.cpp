@@ -2,12 +2,6 @@
 #include "LevelGenerator.h"
 #include <iostream>
 
-// each platform corresponds to 600 milliseconds .6 second
-#define MS_PER_PLATFORM 600
-#define Y_DELTA 0.4f
-#define X_DELTA 3.8f
-#define EPISILON 0.001f
-
 LevelGenerator::LevelGenerator(std::string musicFile) {
   this->wav = std::make_shared<Aquila::WaveFile>(musicFile);
 
@@ -71,9 +65,11 @@ std::shared_ptr<std::vector<Platform>> LevelGenerator::generateLevel() {
          j++) {
       sample.push_back(wav->sample(j));
     }
+    lastSample += samplesPerPlatform;
     Aquila::SignalSource src(sample, wav->getSampleFrequency());
     power = Aquila::power(src);
     double delta = power - lastPower;
+    lastPower = power;
     if (std::abs(delta) > EPISILON) {
       if (delta > 0) {
         yPos += Y_DELTA;

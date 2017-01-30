@@ -22,6 +22,14 @@ public:
    MatrixStack getView();
    MatrixStack pivot(int width, int height, double xpos, double ypos);
 
+   void setPosition(glm::vec3 new_position);
+   glm::vec3 getPosition();
+
+   void setLookAt(glm::vec3 new_lookat);
+   glm::vec3 getLookAt();
+
+   void Refresh();
+
 private:
    MatrixStack ViewMatrix = MatrixStack();
    glm::vec3 eyePos = glm::vec3(0,1,0);
