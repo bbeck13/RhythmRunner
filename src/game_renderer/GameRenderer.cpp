@@ -9,8 +9,11 @@
 #include "MatrixStack.h"
 #include "FileSystemUtils.h"
 #include "LevelGenerator.h"
+#include "Platform.h"
 
-GameRenderer::GameRenderer() {}
+GameRenderer::GameRenderer() {
+  this->Camera = std::make_shared<GameCamera>();
+}
 
 GameRenderer::~GameRenderer() {}
 
@@ -48,7 +51,7 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   // Create the attributes
   std::vector<std::string> attributes = json_handler["attributes"];
   for (int i = 0; i < attributes.size(); i++) {
-    new_program->addAttribute(uniforms[i]);
+    new_program->addAttribute(attributes[i]);
   }
 
   return new_program;
@@ -107,11 +110,36 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glfwGetFramebufferSize(this->window, &width, &height);
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  Perspective.pushMatrix();
+  Perspective.perspective(45.0f, (float)width / (float)height, 0.01f, 100.0f);
   // Render Loop Goes Here
+
+  // level
+  std::shared_ptr<Program> program = programs[PLATFORM_PROG];
+  program->bind();
+  for (auto& platform : *game_state->GetLevel()->getLevel()) {
+    Model.pushMatrix();
+    Model.loadIdentity();
+    Model.translate(platform.GetPosition());
+    Model.scale(platform.GetScale());
+    glUniformMatrix4fv(program->getUniform("P"), 1, GL_FALSE,
+                       value_ptr(Perspective.topMatrix()));
+    glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
+                       value_ptr(Model.topMatrix()));
+    glUniformMatrix4fv(program->getUniform("V"), 1, GL_FALSE,
+                       value_ptr(Camera->getView().topMatrix()));
+    platform.GetPlatformShape()->draw(program);
+    Model.popMatrix();
+  }
+  program->unbind();
+
+  Perspective.popMatrix();
 
   glfwSwapBuffers(this->window);
   glfwPollEvents();
+  if (game_state->Done()) {
+    glfwSetWindowShouldClose(window, GL_TRUE);
+  }
 }
 
 void GameRenderer::Close() {

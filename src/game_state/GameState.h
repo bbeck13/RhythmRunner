@@ -18,10 +18,13 @@ class GameState {
   std::shared_ptr<std::vector<GameObject>> GetGameObjects();
   std::shared_ptr<Level> GetLevel();
   void SetLevel(std::shared_ptr<Level> level);
+  void SetDone(bool done);
+  bool Done();
 
  private:
   std::shared_ptr<std::vector<GameObject>> game_objects;
   std::shared_ptr<Level> level;
+  bool done;
 };
 
 #endif

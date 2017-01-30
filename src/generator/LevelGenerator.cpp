@@ -61,7 +61,7 @@ std::shared_ptr<std::vector<Platform>> LevelGenerator::generateLevel() {
   int samplesPerPlatform = MS_PER_PLATFORM * (wav->getSamplesCount() /
                                               (double)wav->getAudioLength());
 
-  double xPos = 0, yPos = -1, zPos = -5, power = 0, lastPower = 0;
+  double xPos = 0, yPos = 0, zPos = -5, power = 0, lastPower = 0;
   int lastSample = samplesPerPlatform;
   level->push_back(Platform(glm::vec3(xPos, yPos, zPos)));
   for (int i = 1; i < platforms; i++) {
