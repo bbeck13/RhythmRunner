@@ -1,7 +1,7 @@
 default:
 	git submodule init && git submodule update
 	if [ -a build ] ; then \
-	   cd build && make; \
+	   cd build && cmake .. && make; \
 	else \
 	   mkdir build && cd build && cmake .. && make;\
 	fi;
