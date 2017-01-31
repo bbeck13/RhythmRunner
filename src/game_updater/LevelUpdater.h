@@ -22,6 +22,7 @@ class LevelUpdater {
 
   void Update(std::shared_ptr<Level> levelState);
   void Reset(std::shared_ptr<Level> level);
+  // CurrentPlatform is used for camera manipulation only
   Platform CurrentPlatform(std::shared_ptr<Level> level);
   bool Done();
 
