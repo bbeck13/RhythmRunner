@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
   std::shared_ptr<Level> level = std::make_shared<Level>(
       levelGenerator->getMusic(), levelGenerator->generateLevel());
 
-  std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(-3, 0, -5));
+  std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(-3, -1, -5));
 
   std::shared_ptr<GameState> gameState =
       std::make_shared<GameState>(level, camera, player);

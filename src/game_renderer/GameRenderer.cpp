@@ -156,6 +156,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   MV->pushMatrix();
   MV->loadIdentity();
   MV->translate(player->GetPosition());
+  MV->scale(player->GetScale());
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                        glm::value_ptr(MV->topMatrix()));
   player->GetShape()->draw(current_program);

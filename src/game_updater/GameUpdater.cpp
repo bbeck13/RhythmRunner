@@ -15,6 +15,9 @@ GameUpdater::~GameUpdater() {}
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   levelUpdater->Update(game_state->GetLevel());
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
+
+  std::shared_ptr<Player> player = game_state->GetPlayer();
+
   float dY =
       (levelUpdater->CurrentPlatform(game_state->GetLevel()).GetPosition().y +
        DISTANCE_BELOW_CAMERA) -
@@ -42,6 +45,12 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   camera->setLookAt(glm::vec3(camera->getLookAt()[0] + dX,
                               camera->getLookAt()[1] + dY,
                               camera->getLookAt()[2]));
+
+ 
+  player->SetPosition(glm::vec3(player->GetPosition()[0] + dX,
+                                player->GetPosition()[1] + dY,
+                                player->GetPosition()[2]));
+
 
   if (levelUpdater->Done()) {
     done = true;
