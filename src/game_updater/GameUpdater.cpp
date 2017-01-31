@@ -1,4 +1,5 @@
 #include "GameUpdater.h"
+#include <iostream>
 
 GameUpdater::GameUpdater() {
   this->levelUpdater = std::make_shared<LevelUpdater>();
@@ -8,6 +9,13 @@ GameUpdater::~GameUpdater() {}
 
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   levelUpdater->Update(game_state->GetLevel());
+ 
+  std::shared_ptr<GameCamera> camera = game_state->GetCamera();
+  camera->setPosition(glm::vec3(camera->getPosition()[0] + 0.05, camera->getPosition()[1] + 0.005, camera->getPosition()[2]));
+  camera->setLookAt(glm::vec3(camera->getLookAt()[0] + 0.05, camera->getLookAt()[1] + 0.005, camera->getLookAt()[2]));
+
+  std::cout << " " << camera->getPosition()[0] << std::endl;
+ 
   if (levelUpdater->Done()) {
     done = true;
     game_state->SetDone(done);

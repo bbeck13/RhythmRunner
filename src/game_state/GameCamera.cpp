@@ -15,8 +15,33 @@ GameCamera::GameCamera(glm::vec3 eyePos, glm::vec3 lookAtPos, glm::vec3 up) {
    this->lookAtPos = lookAtPos;
    this->up = up;
 }
+
 MatrixStack GameCamera::getView() {
    return ViewMatrix;
+}
+
+void GameCamera::Refresh() {
+   ViewMatrix = MatrixStack();
+   ViewMatrix.pushMatrix();
+   ViewMatrix.lookAt(eyePos, lookAtPos, up);
+}
+
+void GameCamera::setLookAt(glm::vec3 new_lookat) {
+   lookAtPos = new_lookat;
+   Refresh();
+}
+
+glm::vec3 GameCamera::getLookAt() {
+   return lookAtPos;
+}
+
+void GameCamera::setPosition(glm::vec3 new_position) {
+   eyePos = new_position;
+   Refresh();
+}
+
+glm::vec3 GameCamera::getPosition() {
+   return eyePos;
 }
 
 MatrixStack GameCamera::pivot(int width, int height, double xpos, double ypos) {

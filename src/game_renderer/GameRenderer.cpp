@@ -130,8 +130,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
-  // Render Loop Goes Here
-  // level
+
   for (int i = 0; i < level->getLevel()->size(); i++) {
     Platform platform = level->getLevel()->at(i);
     MV->pushMatrix();
