@@ -2,6 +2,7 @@
 
 #include "game_state/GameObject.h"
 
+// TODO(jarhar): make this constructor require all fields
 GameObject::GameObject(std::shared_ptr<Shape> model) : model(model) {}
 
 GameObject::~GameObject() {}
@@ -32,11 +33,15 @@ glm::vec3 GameObject::GetScale() {
 
 glm::mat4 GameObject::GetTransform() {
   // TODO(jarhar): make this more efficient by caching calculated matrix
-  glm::mat4 transform(1.0);
+  // TODO fix
+  // TODO TODO TODO
+  /*glm::mat4 transform(1.0);
   transform *= glm::scale(glm::mat4(1.0), scale);
   transform *= glm::rotate(glm::mat4(1.0), rotation_angle, rotation_axis);
   transform *= glm::translate(glm::mat4(1.0), position);
-  return transform;
+  return transform;*/
+  //return glm::translate(glm::mat4(1.0), position) * glm::scale(glm::mat4(1.0), scale);
+  return glm::translate(glm::mat4(1.0), position);
 }
 
 AxisAlignedBox GameObject::GetBoundingBox() {

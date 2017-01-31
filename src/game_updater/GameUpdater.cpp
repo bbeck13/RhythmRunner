@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "helpers/Logging.h"
+#include <glm/ext.hpp>
 
 #define DISTANCE_BELOW_CAMERA 3
 #define DISTANCE_BEHIND_CAMERA 3
@@ -19,13 +20,19 @@ namespace {
 std::vector<GameObject> GetCollidingObjects(
     AxisAlignedBox primary_object,
     std::shared_ptr<std::vector<Platform>> secondary_objects) {
+  /*std::string bunnymin = glm::to_string(primary_object.GetMin());
+  std::string bunnymax = glm::to_string(primary_object.GetMax());
+  std::string boxmin = glm::to_string(secondary_objects->at(0).GetBoundingBox().GetMin());
+  std::string boxmax = glm::to_string(secondary_objects->at(0).GetBoundingBox().GetMax());
+  LOG("bunny box - min: " << bunnymin << ", max: " << bunnymax);
+  LOG("first box - min: " << boxmin << ", max: " << boxmax);*/
   std::vector<GameObject> colliding_objects;
-
   // TODO(jarhar): make this more efficient by culling secondary objects
   for (GameObject secondary_object : *secondary_objects) {
     if (AxisAlignedBox::IsColliding(
           primary_object,
           secondary_object.GetBoundingBox())) {
+      //LOG("COLLISION");
       colliding_objects.push_back(secondary_object);
     }
   }
@@ -45,10 +52,9 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
 
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
+  //LOG("player position y: " << player->GetPosition().y);
 
-  
-
-  glm::vec3 current_platform_position =
+  /*glm::vec3 current_platform_position =
     level_updater->CurrentPlatform(game_state->GetLevel()).GetPosition();
 
   float dY =
@@ -71,16 +77,20 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   // always move camera forward
   if (dX < MIN_DELTA_X) {
     dX = MIN_DELTA_X;
-  }
-  float player_y_pos = max(player->GetPosition()[1] + dY
+  }*/
+
+  /*float player_y_pos = max(player->GetPosition()[1] + dY
                               + player->GetVerticalVelocity(),
-                              current_platform_position.y + dY + 0.75f);
-  camera->setPosition(glm::vec3(camera->getPosition()[0] + dX,
+                              current_platform_position.y + dY + 0.75f);*/
+  /*camera->setPosition(glm::vec3(camera->getPosition()[0] + dX,
                                 camera->getPosition()[1] + dY,
                                 camera->getPosition()[2]));
   camera->setLookAt(glm::vec3(camera->getLookAt()[0] + dX,
                               camera->getLookAt()[1] + dY,
-                              camera->getLookAt()[2]));
+                              camera->getLookAt()[2]));*/
+  float dX = 0.01f;
+  camera->setPosition(player->GetPosition() + glm::vec3(0, 0, 10));
+  camera->setLookAt(player->GetPosition());
 
   /*player->SetPosition(glm::vec3(player->GetPosition()[0] + dX,
                                 player_y_pos,
@@ -114,10 +124,19 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   std::vector<GameObject> colliding_objects = GetCollidingObjects(
       future_player_box, game_state->GetLevel()->getLevel());
 
+  /*bool asdf = false;
+  if (player->GetGround()) {
+    asdf = true;
+  }
+  LOG("update - player->GetGround(): " << asdf << " collidingobjectsize: " << colliding_objects.size());*/
+
   // TODO(jarhar): further consider what is happening when we are colliding with two objects
   if (colliding_objects.size() > 1) {
-    LOG("colliding_objects.size() > 1, reseting");
-    Reset(game_state);
+    LOG("colliding_objects.size(): " << colliding_objects.size() << ", should reset");
+    //Reset(game_state);
+    return;
+  } else if (colliding_objects.size() == 0) {
+    LOG("no collisions");
     return;
   }
 

@@ -16,7 +16,7 @@ AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
                                glm::mat4 transform) {
   min.x = min.y = min.z = FLT_MAX;
   max.x = max.y = max.z = FLT_MIN;
-  const std::vector<unsigned>& pos_buf = model->GetElements();
+  const std::vector<float>& pos_buf = model->GetPositions();
   for (int i = 0; i < pos_buf.size(); i += 3) {
     glm::vec4 position(pos_buf[i], pos_buf[i + 1], pos_buf[i + 2], 1.0f);
     // TODO(jarhar): should we consider what happens to the 4th coordinate

@@ -12,8 +12,8 @@ bool Player::isInitialized = false;
 std::shared_ptr<Shape> Player::shape = std::make_shared<Shape>();
 
 Player::Player(glm::vec3 position)
-    : GameObject(Player::shape), vertical_velocity(0) {
-  this->position = position;
+    : GameObject(Player::shape), vertical_velocity(0), spacebar_down(false) {
+  SetPosition(position);
   this->model = shape;
   this->scale = glm::vec3(0.3, 0.3, 0.3);
 }
