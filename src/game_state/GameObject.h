@@ -5,11 +5,11 @@
 
 #include <memory>
 #include <glm/ext.hpp>
-
 #include <glm/glm.hpp>
 
-#include "Shape.h"
-#include "Texture.h"
+#include "game_renderer/Shape.h"
+#include "game_renderer/Texture.h"
+#include "game_state/AxisAlignedBox.h"
 
 // GameObjects are 3D entities which can be rendered
 class GameObject {
@@ -20,12 +20,16 @@ class GameObject {
   std::shared_ptr<Shape> GetModel();
 
   glm::vec3 GetPosition();
-  glm::vec3 GetDirection();
+  glm::vec3 GetRotationAxis();
+  float GetRotationAngle();
   glm::vec3 GetScale();
   std::shared_ptr<Texture> GetTexture();  // Texture may be null
+  glm::mat4 GetTransform();
+  AxisAlignedBox GetBoundingBox();
 
   void SetPosition(glm::vec3 position);
-  void SetDirection(glm::vec3 direction);
+  void SetRotationAxis(glm::vec3 rotation_axis);
+  void SetRotationAngle(float rotaiton_angle);
   void SetScale(glm::vec3 scale);
   void SetTexture(std::shared_ptr<Texture> texture);
 
@@ -34,7 +38,8 @@ class GameObject {
   std::shared_ptr<Texture> texture;
 
   glm::vec3 position;
-  glm::vec3 direction;
+  glm::vec3 rotation_axis;
+  float rotation_angle;
   glm::vec3 scale;
 };
 

@@ -1,6 +1,6 @@
 // Joseph Arhar
 
-#include "GameObject.h"
+#include "game_state/GameObject.h"
 
 GameObject::GameObject(std::shared_ptr<Shape> model) : model(model) {}
 
@@ -18,20 +18,43 @@ glm::vec3 GameObject::GetPosition() {
   return position;
 }
 
-glm::vec3 GameObject::GetDirection() {
-  return direction;
+glm::vec3 GameObject::GetRotationAxis() {
+  return rotation_axis;
+}
+
+float GameObject::GetRotationAngle() {
+  return rotation_angle;
 }
 
 glm::vec3 GameObject::GetScale() {
   return scale;
 }
 
+glm::mat4 GameObject::GetTransform() {
+  // TODO(jarhar): make this more efficient by caching calculated matrix
+  glm::mat4 transform(1.0);
+  transform *= glm::scale(glm::mat4(1.0), scale);
+  transform *= glm::rotate(glm::mat4(1.0), rotation_angle, rotation_axis);
+  transform *= glm::translate(glm::mat4(1.0), position);
+  return transform;
+}
+
+AxisAlignedBox GameObject::GetBoundingBox() {
+  // TODO(jarhar): make this more efficient by caching calculated box
+  AxisAlignedBox box(model, GetTransform());
+  return box;
+}
+
 void GameObject::SetPosition(glm::vec3 position) {
   this->position = position;
 }
 
-void GameObject::SetDirection(glm::vec3 direction) {
-  this->direction = direction;
+void GameObject::SetRotationAxis(glm::vec3 rotation_axis) {
+  this->rotation_axis = rotation_axis;
+}
+
+void GameObject::SetRotationAngle(float rotation_angle) {
+  this->rotation_angle = rotation_angle;
 }
 
 void GameObject::SetScale(glm::vec3 scale) {

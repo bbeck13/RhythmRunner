@@ -24,7 +24,6 @@ Platform::~Platform() {}
 std::shared_ptr<Shape> Platform::GetPlatformShape() {
   if (!isInitialized) {
     platform->loadMesh(PLATFORM_MESH);
-    platform->resize();
     platform->init();
     isInitialized = true;
   }

@@ -1,3 +1,5 @@
+// Joseph Arhar
+
 #include "GameUpdater.h"
 #include <iostream>
 
@@ -6,25 +8,48 @@
 #define DELTA_Y 0.007f
 #define MIN_DELTA_X 0.055f
 
-GameUpdater::GameUpdater() {
-  this->levelUpdater = std::make_shared<LevelUpdater>();
-  done = false;
+namespace {
+
+// TODO(jarhar): consider changing game object storage from
+// shared_ptr<vector<...>> to vector<shared_ptr<...>>
+// so that this function can return better references to game objects
+std::vector<GameObject> GetCollidingObjects(
+    std::shared_ptr<GameObject> primary_object,
+    std::shared_ptr<std::vector<GameObject>> secondary_objects) {
+  std::vector<GameObject> colliding_objects;
+
+  // TODO(jarhar): make this more efficient by culling secondary objects
+  for (GameObject secondary_object : *secondary_objects) {
+    if (AxisAlignedBox::IsColliding(
+          primary_object->GetBoundingBox(),
+          secondary_object.GetBoundingBox())) {
+      colliding_objects.push_back(secondary_object);
+    }
+  }
+
+  return colliding_objects;
 }
+
+}
+
+GameUpdater::GameUpdater()
+    : level_updater(std::make_shared<LevelUpdater>()), done(false) {}
+
 GameUpdater::~GameUpdater() {}
 
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
-  levelUpdater->Update(game_state->GetLevel());
+  level_updater->Update(game_state->GetLevel());
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
 
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
   float dY =
-      (levelUpdater->CurrentPlatform(game_state->GetLevel()).GetPosition().y +
+      (level_updater->CurrentPlatform(game_state->GetLevel()).GetPosition().y +
        DISTANCE_BELOW_CAMERA) -
       camera->getPosition()[1];
 
   float dX =
-      (levelUpdater->CurrentPlatform(game_state->GetLevel()).GetPosition().x -
+      (level_updater->CurrentPlatform(game_state->GetLevel()).GetPosition().x -
        DISTANCE_BEHIND_CAMERA) -
       camera->getPosition()[0];
   // smooth out camera transition
@@ -46,20 +71,18 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
                               camera->getLookAt()[1] + dY,
                               camera->getLookAt()[2]));
 
- 
   player->SetPosition(glm::vec3(player->GetPosition()[0] + dX,
                                 player->GetPosition()[1] + dY,
                                 player->GetPosition()[2]));
 
-
-  if (levelUpdater->Done()) {
+  if (level_updater->Done()) {
     done = true;
     game_state->SetDone(done);
   }
 }
 
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
-  levelUpdater->Reset(game_state->GetLevel());
+  level_updater->Reset(game_state->GetLevel());
   done = false;
   game_state->SetDone(done);
 }

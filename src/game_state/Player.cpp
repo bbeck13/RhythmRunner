@@ -28,7 +28,6 @@ void Player::SetVerticalVelocity(float vertical_velocity) {
 std::shared_ptr<Shape> Player::GetShape() {
   if (!isInitialized) {
     shape->loadMesh(PLAYER_MESH);
-    shape->resize();
     shape->init();
     isInitialized = true;
   }

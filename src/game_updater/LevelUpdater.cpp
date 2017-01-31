@@ -2,9 +2,8 @@
 #include "LevelGenerator.h"
 #include <iostream>
 
-LevelUpdater::LevelUpdater() {
-  this->position = START;
-}
+LevelUpdater::LevelUpdater() : position(START) {}
+
 LevelUpdater::~LevelUpdater() {}
 
 void LevelUpdater::Update(std::shared_ptr<Level> level) {
