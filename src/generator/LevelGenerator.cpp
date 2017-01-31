@@ -74,6 +74,9 @@ std::shared_ptr<std::vector<Platform>> LevelGenerator::generateLevel() {
     Aquila::SignalSource src(sample, wav->getSampleFrequency());
     power = Aquila::power(src);
     double delta = power - lastPower;
+    lastPower = power;
+    std::cout << power << std::endl;
+    std::cout << lastPower << std::endl;
     if (std::abs(delta) > EPISILON) {
       if (delta > 0) {
         yPos += Y_DELTA;

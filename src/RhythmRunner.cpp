@@ -39,6 +39,7 @@
 #include "GameUpdater.h"
 #include "LevelGenerator.h"
 #include "GameCamera.h"
+#include "Player.h"
 
 /* to use glee */
 #define GLEE_OVERWRITE_GL_FUNCTIONS
@@ -101,9 +102,12 @@ int main(int argc, char** argv) {
       levelGenerator->getMusic(), levelGenerator->generateLevel());
   std::shared_ptr<GameCamera> camera = std::make_shared<GameCamera>();
 
+  std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(-3, 0, -5));
+
   std::shared_ptr<GameState> gameState =
-    std::make_shared<GameState>(level, camera);
+    std::make_shared<GameState>(level, camera, player);
   std::shared_ptr<GameUpdater> updater = std::make_shared<GameUpdater>();
+
 
   renderer->Init(RESOURCE_DIR, gameState, ErrorCallback, KeyCallback,
       MouseCallback, ResizeCallback, CursorCallBack);
