@@ -6,7 +6,7 @@ const float Player::GRAVITY = 0.2f;
 
 bool Player::isInitialized = false;
 
-std::shared_ptr<Shape> Player::shape = std::make_shared<Shape>();
+std::shared_ptr<Model> Player::shape = std::make_shared<Model>();
 
 Player::Player(glm::vec3 position)
     : GameObject(Player::shape), vertical_velocity(0) {

@@ -59,14 +59,20 @@ void Model::Normalize() {
 
   // Go through all vertices to determine min and max of each dimension
   for (size_t v = 0; v < positions.size() / 3; v++) {
-    if (positions[3 * v + 0] < minX) minX = positions[3 * v + 0];
-    if (positions[3 * v + 0] > maxX) maxX = positions[3 * v + 0];
+    if (positions[3 * v + 0] < minX)
+      minX = positions[3 * v + 0];
+    if (positions[3 * v + 0] > maxX)
+      maxX = positions[3 * v + 0];
 
-    if (positions[3 * v + 1] < minY) minY = positions[3 * v + 1];
-    if (positions[3 * v + 1] > maxY) maxY = positions[3 * v + 1];
+    if (positions[3 * v + 1] < minY)
+      minY = positions[3 * v + 1];
+    if (positions[3 * v + 1] > maxY)
+      maxY = positions[3 * v + 1];
 
-    if (positions[3 * v + 2] < minZ) minZ = positions[3 * v + 2];
-    if (positions[3 * v + 2] > maxZ) maxZ = positions[3 * v + 2];
+    if (positions[3 * v + 2] < minZ)
+      minZ = positions[3 * v + 2];
+    if (positions[3 * v + 2] > maxZ)
+      maxZ = positions[3 * v + 2];
   }
 
   // From min and max compute necessary scale and shift for each dimension

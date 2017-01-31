@@ -19,11 +19,11 @@ class Player : public GameObject {
 
   void SetVerticalVelocity(float vertical_velocity);
 
-  static std::shared_ptr<Shape> GetShape();
+  static std::shared_ptr<Model> GetShape();
 
  private:
   float vertical_velocity;
-  static std::shared_ptr<Shape> shape;
+  static std::shared_ptr<Model> shape;
   static bool isInitialized;
 };
 
