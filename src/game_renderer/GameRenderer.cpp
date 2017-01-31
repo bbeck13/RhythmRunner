@@ -109,6 +109,7 @@ void GameRenderer::Init(const std::string& resource_dir,
 void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
+  std::shared_ptr<Player> player = game_state->GetPlayer();
 
   int width, height;
   glfwGetFramebufferSize(this->window, &width, &height);
@@ -124,7 +125,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   P->perspective(45.0f, aspect, 0.01f, 100.0f);
   V.pushMatrix();
 
-  std::shared_ptr<Program> current_program = programs["platform_prog"];
+  std::shared_ptr<Program> current_program = programs["player_prog"];
   current_program->bind();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
@@ -143,6 +144,19 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
     MV->popMatrix();
   }
   current_program->unbind();
+
+
+  // Player
+  current_program = programs["player_prog"];
+  current_program->bind();
+  MV->pushMatrix();
+  MV->loadIdentity();
+  MV->translate(player->GetPosition());
+  glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                       glm::value_ptr(MV->topMatrix()));
+  player->GetShape()->draw(current_program);
+  MV->popMatrix();
+
   P->popMatrix();
   V.popMatrix();
 

@@ -2,9 +2,11 @@
 
 #include "GameState.h"
 
-GameState::GameState(std::shared_ptr<Level> level, std::shared_ptr<GameCamera> camera) {
+GameState::GameState(std::shared_ptr<Level> level, std::shared_ptr<GameCamera> camera,
+                     std::shared_ptr<Player> player) {
   this->level = level;
   this->camera = camera;
+  this->player = player;
   done = false;
 }
 
@@ -12,6 +14,10 @@ GameState::~GameState() {}
 
 std::shared_ptr<std::vector<GameObject>> GameState::GetGameObjects() {
   return game_objects;
+}
+
+std::shared_ptr<Player> GameState::GetPlayer() {
+  return this->player;
 }
 
 std::shared_ptr<Level> GameState::GetLevel() {
