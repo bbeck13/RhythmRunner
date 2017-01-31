@@ -5,7 +5,7 @@
 // static
 const float Player::GRAVITY = 0.002f;
 const float Player::JUMP_VELOCITY = Player::GRAVITY * 20.0f;
-const float Player::PLATFORM_SPACING = 0.75f;
+const float Player::PLATFORM_SPACING = 0.01f;
 bool Player::isInitialized = false;
 
 // static
