@@ -4,7 +4,7 @@
 #define DISTANCE_BELOW_CAMERA 3
 #define DISTANCE_BEHIND_CAMERA 3
 #define DELTA_Y 0.007f
-#define MIN_DELTA_X 0.05f
+#define MIN_DELTA_X 0.055f
 
 GameUpdater::GameUpdater() {
   this->levelUpdater = std::make_shared<LevelUpdater>();
