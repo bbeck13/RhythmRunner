@@ -21,11 +21,11 @@ Platform::Platform(glm::vec3 position, glm::vec3 scale) : GameObject(Platform::p
 
 Platform::~Platform() {}
 
-std::shared_ptr<Shape> Platform::GetPlatformShape() {
-  if (!isInitialized) {
-    platform->loadMesh(PLATFORM_MESH);
-    platform->init();
-    isInitialized = true;
+std::shared_ptr<Shape> Platform::GetModel() {
+  if (!Platform::isInitialized) {
+    Platform::platform->loadMesh(PLATFORM_MESH);
+    Platform::platform->init();
+    Platform::isInitialized = true;
   }
-  return platform;
+  return Platform::platform;
 }

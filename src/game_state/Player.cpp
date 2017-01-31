@@ -11,16 +11,6 @@ bool Player::isInitialized = false;
 // static
 std::shared_ptr<Shape> Player::shape = std::make_shared<Shape>();
 
-// static
-std::shared_ptr<Shape> Player::GetShape() {
-  if (!isInitialized) {
-    shape->loadMesh(PLAYER_MESH);
-    shape->init();
-    isInitialized = true;
-  }
-  return shape;
-}
-
 Player::Player(glm::vec3 position)
     : GameObject(Player::shape), vertical_velocity(0) {
   this->position = position;
@@ -42,6 +32,15 @@ bool Player::GetSpacebarDown() {
   return spacebar_down;
 }
 
+std::shared_ptr<Shape> Player::GetModel() {
+  if (!Player::isInitialized) {
+    Player::shape->loadMesh(PLAYER_MESH);
+    Player::shape->init();
+    Player::isInitialized = true;
+  }
+  return Player::shape;
+}
+
 void Player::SetVerticalVelocity(float vertical_velocity) {
   this->vertical_velocity = vertical_velocity;
 }
@@ -51,7 +50,7 @@ void Player::SetSpacebarDown(bool spacebar_down) {
 }
 
 void Player::SetGround(GameObject ground) {
-  this->ground = std::make_shared(ground);
+  this->ground = std::make_shared<GameObject>(ground);
 }
 
 void Player::RemoveGround() {

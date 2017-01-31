@@ -11,7 +11,6 @@ class Player : public GameObject {
  public:
   // Represents change in velocity per tick
   static const float GRAVITY, JUMP_VELOCITY, PLATFORM_SPACING;
-  static std::shared_ptr<Shape> GetShape();
 
   Player(glm::vec3 position);
   ~Player();
@@ -19,6 +18,7 @@ class Player : public GameObject {
   float GetVerticalVelocity();
   bool GetSpacebarDown();
   std::shared_ptr<GameObject> GetGround(); // null if no ground
+  std::shared_ptr<Shape> GetModel() override;
 
   void SetVerticalVelocity(float vertical_velocity);
   void SetSpacebarDown(bool spacebar_down);

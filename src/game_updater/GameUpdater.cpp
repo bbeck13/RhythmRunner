@@ -16,13 +16,12 @@ namespace {
 // TODO(jarhar): consider changing game object storage from
 // shared_ptr<vector<...>> to vector<shared_ptr<...>>
 // so that this function can return better references to game objects
-std::vector<GameObject*> GetCollidingObjects(
+std::vector<GameObject> GetCollidingObjects(
     AxisAlignedBox primary_object,
-    std::shared_ptr<std::vector<GameObject>> secondary_objects) {
+    std::shared_ptr<std::vector<Platform>> secondary_objects) {
   std::vector<GameObject> colliding_objects;
 
   // TODO(jarhar): make this more efficient by culling secondary objects
-  for (int i = 0; i < secondary_objects.size(); i++) {
   for (GameObject secondary_object : *secondary_objects) {
     if (AxisAlignedBox::IsColliding(
           primary_object,
@@ -100,7 +99,7 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   if (player->GetGround() && player->GetSpacebarDown()) {
     // player should jump now
     LOG("player jumped");
-    player->SetVerticalVelocity(Player:JUMP_VELOCITY);
+    player->SetVerticalVelocity(Player::JUMP_VELOCITY);
     player->RemoveGround();
   } else if (player->GetGround()) {
     // player is stuck to ground, neutralize velocity
@@ -113,7 +112,7 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   AxisAlignedBox future_player_box = player->GetBoundingBox();
 
   std::vector<GameObject> colliding_objects = GetCollidingObjects(
-      player, game_state->GetLevel()->getLevel());
+      future_player_box, game_state->GetLevel()->getLevel());
 
   // TODO(jarhar): further consider what is happening when we are colliding with two objects
   if (colliding_objects.size() > 1) {
@@ -139,8 +138,11 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
       // now attach player to the ground
       player->SetGround(colliding_object);
       player->SetVerticalVelocity(0);
-      player->SetPosition(player->GetPosition(
-      LOG("collided and stuck to ground")
+      player->SetPosition(glm::vec3(
+        player->GetPosition().x,
+        colliding_max_y + Player::PLATFORM_SPACING,
+        player->GetPosition().z));
+      LOG("collided and stuck to ground");
     } else {
       LOG("game-ending collided with box! colliding_max_y: " << colliding_max_y);
     }

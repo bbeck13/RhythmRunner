@@ -41,7 +41,7 @@ glm::mat4 GameObject::GetTransform() {
 
 AxisAlignedBox GameObject::GetBoundingBox() {
   // TODO(jarhar): make this more efficient by caching calculated box
-  AxisAlignedBox box(model, GetTransform());
+  AxisAlignedBox box(GetModel(), GetTransform());
   return box;
 }
 

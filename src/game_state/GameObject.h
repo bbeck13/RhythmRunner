@@ -17,7 +17,7 @@ class GameObject {
   GameObject(std::shared_ptr<Shape> model);
   virtual ~GameObject();
 
-  std::shared_ptr<Shape> GetModel();
+  virtual std::shared_ptr<Shape> GetModel();
 
   glm::vec3 GetPosition();
   glm::vec3 GetRotationAxis();
