@@ -9,16 +9,19 @@
 class Program;
 
 class Shape {
-public:
+  public:
    Shape();
    virtual ~Shape();
-   void loadMesh(const std::string &meshName);
+   void loadMesh(const std::string& meshName);
    void init();
    void draw(const std::shared_ptr<Program> prog) const;
-   void ComputeTex();
-   void resize();
 
-private:
+   const std::vector<unsigned>& GetElements() const;
+
+  private:
+   void Normalize();
+   void ComputeTex();
+
    std::vector<unsigned int> eleBuf;
    std::vector<float> posBuf;
    std::vector<float> norBuf;

@@ -18,7 +18,7 @@ class GameUpdater {
   void Done();
 
  private:
-  std::shared_ptr<LevelUpdater> levelUpdater;
+  std::shared_ptr<LevelUpdater> level_updater;
   bool done;
 };
 
