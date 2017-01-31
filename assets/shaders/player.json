@@ -3,12 +3,12 @@
     "vertPos",
     "vertNor"
   ],
-  "frag": "platform_frag.glsl",
+  "frag": "player_frag.glsl",
   "name": "player_prog",
   "uniforms": [
     "P",
     "V",
     "MV"
   ],
-  "vert": "platform_vert.glsl"
+  "vert": "player_vert.glsl"
 }
