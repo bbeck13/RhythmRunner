@@ -91,7 +91,7 @@ void GameRenderer::Init(const std::string& resource_dir,
   glfwSetFramebufferSizeCallback(this->window, resize_callback);
   glfwSetCursorPosCallback(this->window, cursor_callback);
   GLSL::checkVersion();
-  glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
+  glClearColor(.1f, .1f, .1f, 1.0f);  // set background color
   glEnable(GL_DEPTH_TEST);               // enable z-buffer test
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -161,6 +161,27 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                        glm::value_ptr(MV->topMatrix()));
   player->GetShape()->draw(current_program);
   MV->popMatrix();
+  current_program->unbind();
+
+  // Notes
+  current_program = programs["note_prog"];
+  current_program->bind();
+   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+  for (int i = 0l i < level->getNotes()->size(); i++) {
+    Note note = level->getNotes()->at(i);
+    MV->pushMatrix();
+    MV->loadIdentity();
+    MV->translate(note->GetPosition());
+    MV->scale(note->GetScale());
+    glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                       glm::value_ptr(MV->topMatrix()));
+    note->GetShape()->draw(current_program);
+    MV->popMatrix();
+  }
+  current_program->unbind();
 
   P->popMatrix();
   V.popMatrix();

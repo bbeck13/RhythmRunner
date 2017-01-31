@@ -3,9 +3,10 @@
 #include "GameState.h"
 
 GameState::GameState(std::shared_ptr<Level> level,
+                     std::shared_ptr<Note> notes,
                      std::shared_ptr<GameCamera> camera,
                      std::shared_ptr<Player> player)
-    : level(level), camera(camera), player(player), done(false) {}
+    : level(level), notes(notes), camera(camera), player(player), done(false) {}
 
 GameState::~GameState() {}
 

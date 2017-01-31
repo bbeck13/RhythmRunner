@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
       levelGenerator->getMusic(), levelGenerator->generateLevel());
 
   std::shared_ptr<GameState> gameState =
-      std::make_shared<GameState>(level, camera, player);
+      std::make_shared<GameState>(level, NULL, camera, player);
   std::shared_ptr<GameUpdater> updater = std::make_shared<GameUpdater>();
 
   renderer->Init(RESOURCE_DIR, gameState, ErrorCallback, KeyCallback,

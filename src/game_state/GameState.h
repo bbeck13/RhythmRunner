@@ -10,10 +10,12 @@
 #include "Level.h"
 #include "GameCamera.h"
 #include "Player.h"
+#include "Note.h"
 
 class GameState {
  public:
   GameState(std::shared_ptr<Level> level,
+            std::shared_ptr<Note> notes,
             std::shared_ptr<GameCamera> camera,
             std::shared_ptr<Player> player);
   ~GameState();
@@ -29,6 +31,7 @@ class GameState {
 
  private:
   std::shared_ptr<Level> level;
+  std::shared_ptr<Note> notes;
   std::shared_ptr<GameCamera> camera;
   std::shared_ptr<Player> player;
   bool done;

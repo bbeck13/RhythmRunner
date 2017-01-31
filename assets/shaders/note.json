@@ -1,0 +1,14 @@
+{
+  "attributes": [
+    "vertPos",
+    "vertNor"
+  ],
+  "frag": "note_frag.glsl",
+  "name": "note_prog",
+  "uniforms": [
+    "P",
+    "V",
+    "MV"
+  ],
+  "vert": "note_vert.glsl"
+}
