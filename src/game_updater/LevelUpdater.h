@@ -5,6 +5,7 @@
 
 #include <SFML/Audio.hpp>
 #include "Level.h"
+#include "Platform.h"
 
 #define START 0
 #define PLAYING 1
@@ -17,6 +18,7 @@ class LevelUpdater {
 
   void Update(std::shared_ptr<Level> levelState);
   void Reset(std::shared_ptr<Level> level);
+  Platform CurrentPlatform(std::shared_ptr<Level> level);
   bool Done();
 
  private:

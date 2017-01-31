@@ -1,6 +1,11 @@
 #include "GameUpdater.h"
 #include <iostream>
 
+#define DISTANCE_BELOW_CAMERA 3
+#define DISTANCE_BEHIND_CAMERA 3
+#define DELTA_Y 0.007f
+#define MIN_DELTA_X 0.05f
+
 GameUpdater::GameUpdater() {
   this->levelUpdater = std::make_shared<LevelUpdater>();
   done = false;
@@ -11,11 +16,34 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   levelUpdater->Update(game_state->GetLevel());
  
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
-  camera->setPosition(glm::vec3(camera->getPosition()[0] + 0.05, camera->getPosition()[1], camera->getPosition()[2]));
-  camera->setLookAt(glm::vec3(camera->getLookAt()[0] + 0.05, camera->getLookAt()[1], camera->getLookAt()[2]));
+  float dY =
+      (levelUpdater->CurrentPlatform(game_state->GetLevel()).GetPosition().y +
+       DISTANCE_BELOW_CAMERA) -
+      camera->getPosition()[1];
 
-  std::cout << " " << camera->getPosition()[0] << std::endl;
- 
+  float dX =
+      (levelUpdater->CurrentPlatform(game_state->GetLevel()).GetPosition().x -
+       DISTANCE_BEHIND_CAMERA) -
+      camera->getPosition()[0];
+  // smooth out camera transition
+  if (std::abs(dY) > DELTA_Y) {
+    if (dY < 0) {
+      dY = -DELTA_Y;
+    } else {
+      dY = DELTA_Y;
+    }
+  }
+  // always move camera forward
+  if (dX < MIN_DELTA_X) {
+    dX = MIN_DELTA_X;
+  }
+  camera->setPosition(glm::vec3(camera->getPosition()[0] + dX,
+                                camera->getPosition()[1] + dY,
+                                camera->getPosition()[2]));
+  camera->setLookAt(glm::vec3(camera->getLookAt()[0] + dX,
+                              camera->getLookAt()[1] + dY,
+                              camera->getLookAt()[2]));
+
   if (levelUpdater->Done()) {
     done = true;
     game_state->SetDone(done);

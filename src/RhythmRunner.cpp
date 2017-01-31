@@ -108,7 +108,6 @@ int main(int argc, char** argv) {
     std::make_shared<GameState>(level, camera, player);
   std::shared_ptr<GameUpdater> updater = std::make_shared<GameUpdater>();
 
-
   renderer->Init(RESOURCE_DIR, gameState, ErrorCallback, KeyCallback,
       MouseCallback, ResizeCallback, CursorCallBack);
   // fix ur time step

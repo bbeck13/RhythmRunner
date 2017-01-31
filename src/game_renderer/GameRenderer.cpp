@@ -153,9 +153,6 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   MV->popMatrix();
 
   current_program->unbind();
-
-  
-
   P->popMatrix();
   V.popMatrix();
 
