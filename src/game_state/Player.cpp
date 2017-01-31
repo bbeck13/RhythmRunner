@@ -12,6 +12,7 @@ Player::Player(glm::vec3 position)
     : GameObject(Player::shape), vertical_velocity(0) {
   this->position = position;
   this->model = shape;
+  this->scale = glm::vec3(0.3, 0.3, 0.3);
 }
 
 Player::~Player() {}
