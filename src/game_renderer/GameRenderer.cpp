@@ -125,7 +125,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   P->perspective(45.0f, aspect, 0.01f, 100.0f);
   V.pushMatrix();
 
-  std::shared_ptr<Program> current_program = programs["player_prog"];
+  std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
@@ -149,6 +149,10 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   // Player
   current_program = programs["player_prog"];
   current_program->bind();
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
   MV->pushMatrix();
   MV->loadIdentity();
   MV->translate(player->GetPosition());

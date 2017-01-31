@@ -4,7 +4,6 @@ layout(location = 1) in vec3 vertNor;
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 MV;
-uniform int collected;
 out vec3 fragNor;
 out vec3 diff_color;
 out vec3 amb_color;
@@ -15,12 +14,8 @@ out vec3 f_light_color;
 void main() {
   gl_Position = P * V * MV * vertPos;
   fragNor = (MV * vec4(vertNor, 0.0)).xyz;
-  if (collected == 1) {
-    amb_color = vec3(1.0, 0.2, 0.2);
-  } else {
-    amb_color = vec3(0.7, 0.7, 0.7);
-  }
-  diff_color = vec3(0.8, 0.8, 0.8);
+  amb_color = vec3(0.2, 0.2, 0.9);
+  diff_color = vec3(0.2, 0.3, 0.9);
   f_light_pos = 25;
   f_exp = 32;
   f_light_color = vec3(1, 1, 1);
