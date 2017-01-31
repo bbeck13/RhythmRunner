@@ -43,13 +43,16 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
 
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
+  glm::vec3 current_platform_position =
+    level_updater->CurrentPlatform(game_state->GetLevel()).GetPosition();
+
   float dY =
-      (level_updater->CurrentPlatform(game_state->GetLevel()).GetPosition().y +
+      (current_platform_position.y +
        DISTANCE_BELOW_CAMERA) -
       camera->getPosition()[1];
 
   float dX =
-      (level_updater->CurrentPlatform(game_state->GetLevel()).GetPosition().x -
+      (current_platform_position.x -
        DISTANCE_BEHIND_CAMERA) -
       camera->getPosition()[0];
   // smooth out camera transition
@@ -64,6 +67,9 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   if (dX < MIN_DELTA_X) {
     dX = MIN_DELTA_X;
   }
+  float player_y_pos = max(player->GetPosition()[1] + dY
+                              + player->GetVerticalVelocity(),
+                              current_platform_position.y + dY + 0.75f);
   camera->setPosition(glm::vec3(camera->getPosition()[0] + dX,
                                 camera->getPosition()[1] + dY,
                                 camera->getPosition()[2]));
@@ -72,8 +78,13 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
                               camera->getLookAt()[2]));
 
   player->SetPosition(glm::vec3(player->GetPosition()[0] + dX,
-                                player->GetPosition()[1] + dY,
+                                player_y_pos,
                                 player->GetPosition()[2]));
+  if (player_y_pos > current_platform_position.y + dY + 0.75f) {
+    player->SetVerticalVelocity(player->GetVerticalVelocity() - Player::GRAVITY);
+  } else {
+    player->SetVerticalVelocity(0);
+  }
 
   if (level_updater->Done()) {
     done = true;

@@ -55,6 +55,8 @@
 
 static const std::shared_ptr<GameCamera> camera =
     std::make_shared<GameCamera>();
+static const std::shared_ptr<Player> player =
+    std::make_shared<Player>(glm::vec3(-3, -1, -5));
 // Callbacks seem like they should be in their own file/class
 // Still trying to figure out function pointer or whatever these are
 static void KeyCallback(GLFWwindow* window,
@@ -65,6 +67,9 @@ static void KeyCallback(GLFWwindow* window,
   switch (key) {
     case GLFW_KEY_ESCAPE:
       glfwSetWindowShouldClose(window, GL_TRUE);
+      break;
+    case GLFW_KEY_SPACE:
+      player->SetVerticalVelocity(Player::GRAVITY * 20.0f);
       break;
   }
 }
@@ -99,8 +104,6 @@ int main(int argc, char** argv) {
 
   std::shared_ptr<Level> level = std::make_shared<Level>(
       levelGenerator->getMusic(), levelGenerator->generateLevel());
-
-  std::shared_ptr<Player> player = std::make_shared<Player>(glm::vec3(-3, -1, -5));
 
   std::shared_ptr<GameState> gameState =
       std::make_shared<GameState>(level, camera, player);

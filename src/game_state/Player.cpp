@@ -2,7 +2,7 @@
 
 #include "game_state/Player.h"
 
-const float Player::GRAVITY = 0.2f;
+const float Player::GRAVITY = 0.002f;
 
 bool Player::isInitialized = false;
 
