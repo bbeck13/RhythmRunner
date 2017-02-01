@@ -15,12 +15,9 @@
 #include <aquila/transform/FftFactory.h>
 #include <SFML/Audio.hpp>
 
-#include "Platform.h"
+#include "game_state/Platform.h"
+#include "helpers/TimingConstants.h"
 
-// each platform corresponds to 600 milliseconds .6 second
-#define MS_PER_PLATFORM 900
-#define Y_DELTA 0.4f
-#define X_DELTA 6.0f
 #define EPISILON 0.0001f
 
 class LevelGenerator {

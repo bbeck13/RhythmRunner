@@ -72,12 +72,12 @@ std::shared_ptr<std::vector<std::shared_ptr<Platform>>> LevelGenerator::generate
     lastPower = power;
     if (std::abs(delta) > EPISILON) {
       if (delta > 0) {
-        yPos += Y_DELTA;
+        yPos += PLATFORM_Y_DELTA;
       } else {
-        yPos -= Y_DELTA;
+        yPos -= PLATFORM_Y_DELTA;
       }
     }
-    xPos += X_DELTA;
+    xPos += PLATFORM_X_DELTA;
     level->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
   }
 #ifdef DEBUG
