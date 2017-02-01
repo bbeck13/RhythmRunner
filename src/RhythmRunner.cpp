@@ -52,6 +52,7 @@
 #define SEC_PER_FRAME 1 / FRAMES_PER_SEC
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 480
+#define MUSIC "music/1.wav"
 
 static const std::shared_ptr<GameCamera> camera =
     std::make_shared<GameCamera>();
@@ -99,8 +100,13 @@ static void CursorCallBack(GLFWwindow* window, double xpos, double ypos) {
 
 int main(int argc, char** argv) {
   std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
+  std::string music;
+  music = ASSET_DIR;
+  music += "/";
+  music += MUSIC;
+
   std::shared_ptr<LevelGenerator> levelGenerator =
-      std::make_shared<LevelGenerator>(MUSIC);
+      std::make_shared<LevelGenerator>(music);
 
   std::shared_ptr<Level> level = std::make_shared<Level>(
       levelGenerator->getMusic(), levelGenerator->generateLevel());

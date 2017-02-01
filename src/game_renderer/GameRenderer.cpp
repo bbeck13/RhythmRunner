@@ -36,8 +36,8 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   new_program = std::make_shared<Program>();
   new_program->setVerbose(true);
   new_program->setName(prog_name);
-  new_program->setShaderNames("../assets/shaders/" + vert_name,
-                              "../assets/shaders/" + frag_name);
+  new_program->setShaderNames(std::string(ASSET_DIR) + "/shaders/" + vert_name,
+                              std::string(ASSET_DIR) + "/shaders/" + frag_name);
   new_program->init();
 
   // Create the uniforms
@@ -99,7 +99,7 @@ void GameRenderer::Init(const std::string& resource_dir,
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
   std::vector<std::string> json_files =
-      FileSystemUtils::ListFiles("../assets/shaders", "*.json");
+      FileSystemUtils::ListFiles(std::string(ASSET_DIR) + "/shaders", "*.json");
   for (int i = 0; i < json_files.size(); i++) {
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
@@ -145,7 +145,6 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   }
   current_program->unbind();
 
-
   // Player
   current_program = programs["player_prog"];
   current_program->bind();
@@ -158,7 +157,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   MV->translate(player->GetPosition());
   MV->scale(player->GetScale());
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                       glm::value_ptr(MV->topMatrix()));
+                     glm::value_ptr(MV->topMatrix()));
   player->GetShape()->draw(current_program);
   MV->popMatrix();
 

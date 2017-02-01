@@ -18,8 +18,9 @@ include_directories(${CMAKE_SOURCE_DIR}/src/helpers)
 include_directories(${CMAKE_SOURCE_DIR}/src/generator)
 file(GLOB_RECURSE GLSL "assets/shaders/*.glsl")
 if(NOT CMAKE_BUILD_TYPE MATCHES Release)
-   add_definitions(-DDEBUG)
+  add_definitions(-DDEBUG)
 endif()
+add_definitions(-DASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
 
@@ -58,9 +59,9 @@ if(WIN32)
   # http://stackoverflow.com/a/10672739
   add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${SFML-DIR}/extlibs/bin/x64/libsndfile-1.dll"
-      "${SFML-DIR}/extlibs/bin/x64/openal32.dll"
-      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>)
+    "${SFML-DIR}/extlibs/bin/x64/libsndfile-1.dll"
+    "${SFML-DIR}/extlibs/bin/x64/openal32.dll"
+    $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>)
 endif()
 include_directories(${SFML_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio)
