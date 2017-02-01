@@ -55,9 +55,7 @@
 
 static const std::shared_ptr<GameCamera> camera =
     std::make_shared<GameCamera>();
-static const std::shared_ptr<Player> player =
-    //std::make_shared<Player>(glm::vec3(-3, -1, -5));
-    std::make_shared<Player>(glm::vec3(-3, 3, -5));
+static const std::shared_ptr<Player> player = std::make_shared<Player>();
 
 // Callbacks seem like they should be in their own file/class
 // Still trying to figure out function pointer or whatever these are

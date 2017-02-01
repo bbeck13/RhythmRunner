@@ -6,14 +6,15 @@
 const float Player::GRAVITY = 0.002f;
 const float Player::JUMP_VELOCITY = Player::GRAVITY * 40.0f;
 const float Player::PLATFORM_SPACING = 0.01f;
-bool Player::isInitialized = false;
+const glm::vec3 Player::INITIAL_POSITION(-3, 3, -5);
 
 // static
+bool Player::isInitialized = false;
 std::shared_ptr<Shape> Player::shape = std::make_shared<Shape>();
 
-Player::Player(glm::vec3 position)
+Player::Player()
     : GameObject(Player::shape), vertical_velocity(0), spacebar_down(false) {
-  SetPosition(position);
+  SetPosition(Player::INITIAL_POSITION);
   this->model = shape;
   this->scale = glm::vec3(0.3, 0.3, 0.3);
 }
