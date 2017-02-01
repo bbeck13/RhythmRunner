@@ -22,8 +22,7 @@ class Player : public GameObject {
 
   void SetVerticalVelocity(float vertical_velocity);
   void SetSpacebarDown(bool spacebar_down);
-  // TODO(jarhar): consider making this a reference to the real GameObject
-  void SetGround(GameObject ground);
+  void SetGround(std::shared_ptr<GameObject> ground);
   void RemoveGround();
 
  private:

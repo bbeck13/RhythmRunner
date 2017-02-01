@@ -1,6 +1,8 @@
 #include "LevelUpdater.h"
-#include "LevelGenerator.h"
+
 #include <iostream>
+
+#include "LevelGenerator.h"
 
 LevelUpdater::LevelUpdater() : position(START) {}
 
@@ -16,7 +18,7 @@ void LevelUpdater::Update(std::shared_ptr<Level> level) {
   }
 }
 
-Platform LevelUpdater::CurrentPlatform(std::shared_ptr<Level> level) {
+std::shared_ptr<Platform> LevelUpdater::CurrentPlatform(std::shared_ptr<Level> level) {
   return level->getLevel()->at(std::max(
       0l,
       std::min((long)(level->getMusic()->getPlayingOffset().asMilliseconds() /

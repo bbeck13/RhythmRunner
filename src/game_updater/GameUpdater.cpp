@@ -14,24 +14,21 @@
 
 namespace {
 
-// TODO(jarhar): consider changing game object storage from
-// shared_ptr<vector<...>> to vector<shared_ptr<...>>
-// so that this function can return better references to game objects
-std::vector<GameObject> GetCollidingObjects(
+std::vector<std::shared_ptr<GameObject>> GetCollidingObjects(
     AxisAlignedBox primary_object,
-    std::shared_ptr<std::vector<Platform>> secondary_objects) {
+    std::shared_ptr<std::vector<std::shared_ptr<Platform>>> secondary_objects) {
   /*std::string bunnymin = glm::to_string(primary_object.GetMin());
   std::string bunnymax = glm::to_string(primary_object.GetMax());
   std::string boxmin = glm::to_string(secondary_objects->at(1).GetBoundingBox().GetMin());
   std::string boxmax = glm::to_string(secondary_objects->at(1).GetBoundingBox().GetMax());
   LOG("bunny box - min: " << bunnymin << ", max: " << bunnymax);
   LOG("first box - min: " << boxmin << ", max: " << boxmax);*/
-  std::vector<GameObject> colliding_objects;
+  std::vector<std::shared_ptr<GameObject>> colliding_objects;
   // TODO(jarhar): make this more efficient by culling secondary objects
-  for (GameObject secondary_object : *secondary_objects) {
+  for (std::shared_ptr<GameObject> secondary_object : *secondary_objects) {
     if (AxisAlignedBox::IsColliding(
           primary_object,
-          secondary_object.GetBoundingBox())) {
+          secondary_object->GetBoundingBox())) {
       //LOG("COLLISION");
       colliding_objects.push_back(secondary_object);
     }
@@ -123,7 +120,7 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   player->SetPosition(previous_player_position + glm::vec3(dX, player->GetVerticalVelocity(), 0));
   AxisAlignedBox future_player_box = player->GetBoundingBox();
 
-  std::vector<GameObject> colliding_objects = GetCollidingObjects(
+  std::vector<std::shared_ptr<GameObject>> colliding_objects = GetCollidingObjects(
       future_player_box, game_state->GetLevel()->getLevel());
 
   /*bool asdf = false;
@@ -136,38 +133,76 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   if (colliding_objects.size() > 1) {
     LOG("colliding_objects.size(): " << colliding_objects.size() << ", should reset");
     //Reset(game_state);
-    return;
   } else if (colliding_objects.size() == 0) {
     LOG("no collisions");
-    return;
-  }
+  } else {
+    // Handle the collision
+    std::shared_ptr<GameObject> colliding_object = colliding_objects[0];
+    // are we in the air, and is the object we are colliding with below us?
+    // if so, then set it as our current ground
+    if (!player->GetGround()) {
+      AxisAlignedBox colliding_box = colliding_object->GetBoundingBox();
+      AxisAlignedBox player_box = player->GetBoundingBox();
 
-  GameObject colliding_object = colliding_objects[0];
-  // are we in the air, and is the object we are colliding with below us?
-  // if so, then set it as our current ground
-  if (!player->GetGround()) {
-    AxisAlignedBox colliding_box = colliding_object.GetBoundingBox();
-    AxisAlignedBox player_box = player->GetBoundingBox();
+      // TODO(jarhar): make sure this actually makes sense
+      // how do we know when we are "above" the colliding_box?
+      // if our min y was above the colliding_box's max y before collision occured
+      float prev_player_min_y = previous_player_box.GetMin().y;
+      float colliding_max_y = colliding_box.GetMax().y;
+      if (prev_player_min_y > colliding_max_y) {
+        // above colliding box, we are grounded on this platform
+        // now attach player to the ground
+        player->SetGround(colliding_object);
+        player->SetVerticalVelocity(0);
+        player->SetPosition(glm::vec3(
+          player->GetPosition().x,
+          colliding_max_y + Player::PLATFORM_SPACING,
+          player->GetPosition().z));
 
-    // TODO(jarhar): make sure this actually makes sense
-    // how do we know when we are "above" the colliding_box?
-    // if our min y was above the colliding_box's max y before collision occured
-    float prev_player_min_y = previous_player_box.GetMin().y;
-    float colliding_max_y = colliding_box.GetMax().y;
-    if (prev_player_min_y > colliding_max_y) {
-      // above colliding box, we are grounded on this platform
-      // now attach player to the ground
-      player->SetGround(colliding_object);
-      player->SetVerticalVelocity(0);
-      player->SetPosition(glm::vec3(
-        player->GetPosition().x,
-        colliding_max_y + Player::PLATFORM_SPACING,
-        player->GetPosition().z));
-      LOG("collided and stuck to ground at platform: " << std::endl
-          << "platform position: " << glm::to_string(colliding_object.GetPosition()) << std::endl
-          << "platform box: " << colliding_box.ToString());
-    } else {
-      LOG("game-ending collided with box! prev_player_min_y: " << prev_player_min_y << ", colliding_max_y: " << colliding_max_y);
+        MatrixStack asdf;
+        asdf.pushMatrix();
+        asdf.loadIdentity();
+        asdf.scale(colliding_object->GetScale());
+        MatrixStack one;
+        one.pushMatrix();
+        one.loadIdentity();
+        one.scale(colliding_object->GetScale());
+        one.translate(colliding_object->GetPosition());
+        MatrixStack two;
+        two.pushMatrix();
+        two.loadIdentity();
+        two.translate(colliding_object->GetPosition());
+        two.scale(colliding_object->GetScale());
+        LOG("collided and stuck to ground at platform: " << std::endl
+          << "platform position: " << glm::to_string(colliding_object->GetPosition()) << std::endl
+          << "platform box: " << colliding_box.ToString() << std::endl
+          << "    pure box: " << AxisAlignedBox(colliding_object->GetModel(), glm::mat4(1.0f)).ToString() << std::endl
+          << "  scaled box: " << AxisAlignedBox(colliding_object->GetModel(), asdf.topMatrix()).ToString() << std::endl
+          << " both #1 box: " << AxisAlignedBox(colliding_object->GetModel(), one.topMatrix()).ToString() << std::endl
+          << " both #2 box: " << AxisAlignedBox(colliding_object->GetModel(), two.topMatrix()).ToString());
+
+        std::shared_ptr<Shape> model = colliding_object->GetModel();
+        glm::mat4 transform = colliding_object->GetTransform().topMatrix();
+        glm::vec3 min, max;
+        min.x = min.y = min.z = FLT_MAX;
+        max.x = max.y = max.z = FLT_MIN;
+        std::vector<float> pos_buf = model->GetPositions();
+        for (int i = 0; i < pos_buf.size(); i += 3) {
+          glm::vec4 position(pos_buf[i], pos_buf[i + 1], pos_buf[i + 2], 1.0f);
+          // TODO(jarhar): should we consider what happens to the 4th coordinate
+          // after the transform?
+          glm::vec4 new_position = transform * position;
+          std::cout << "transformed " << glm::to_string(position) << " -> " << glm::to_string(new_position) << std::endl;
+          max.x = std::max(max.x, new_position.x);
+          min.x = std::min(min.x, new_position.x);
+          max.y = std::max(max.y, new_position.y);
+          min.y = std::min(min.y, new_position.y);
+          max.z = std::max(max.z, new_position.z);
+          min.z = std::min(min.z, new_position.z);
+        }
+      } else {
+        LOG("game-ending collided with box! prev_player_min_y: " << prev_player_min_y << ", colliding_max_y: " << colliding_max_y);
+      }
     }
   }
 

@@ -198,6 +198,6 @@ void Shape::draw(const std::shared_ptr<Program> prog) const {
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-const std::vector<float>& Shape::GetPositions() const {
+std::vector<float> Shape::GetPositions() {
    return posBuf;
 }

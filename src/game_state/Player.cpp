@@ -4,7 +4,7 @@
 
 // static
 const float Player::GRAVITY = 0.002f;
-const float Player::JUMP_VELOCITY = Player::GRAVITY * 20.0f;
+const float Player::JUMP_VELOCITY = Player::GRAVITY * 40.0f;
 const float Player::PLATFORM_SPACING = 0.01f;
 bool Player::isInitialized = false;
 
@@ -49,8 +49,8 @@ void Player::SetSpacebarDown(bool spacebar_down) {
   this->spacebar_down = spacebar_down;
 }
 
-void Player::SetGround(GameObject ground) {
-  this->ground = std::make_shared<GameObject>(ground);
+void Player::SetGround(std::shared_ptr<GameObject> ground) {
+  this->ground = ground;
 }
 
 void Player::RemoveGround() {

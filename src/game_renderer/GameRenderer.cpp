@@ -132,11 +132,11 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
-  for (Platform& platform : *level->getLevel()) {
-    MV = platform.GetTransform();
+  for (std::shared_ptr<Platform> platform : *level->getLevel()) {
+    MV = platform->GetTransform();
     glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                        glm::value_ptr(MV.topMatrix()));
-    platform.GetModel()->draw(current_program);
+    platform->GetModel()->draw(current_program);
   }
   current_program->unbind();
 

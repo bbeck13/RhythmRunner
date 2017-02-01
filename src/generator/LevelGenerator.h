@@ -29,7 +29,7 @@ class LevelGenerator {
   ~LevelGenerator();
 
   std::shared_ptr<sf::Music> getMusic() { return music; }
-  std::shared_ptr<std::vector<Platform>> generateLevel();
+  std::shared_ptr<std::vector<std::shared_ptr<Platform>>> generateLevel();
 
  private:
   std::shared_ptr<Aquila::WaveFile> wav;
