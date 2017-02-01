@@ -1,7 +1,7 @@
 #include "Level.h"
 
 Level::Level(std::shared_ptr<sf::Music> music,
-             std::shared_ptr<std::vector<Platform>> level) {
+             std::shared_ptr<std::vector<std::shared_ptr<Platform>>> level) {
   this->music = music;
   this->level = level;
 }
@@ -12,6 +12,6 @@ std::shared_ptr<sf::Music> Level::getMusic() {
   return music;
 }
 
-std::shared_ptr<std::vector<Platform>> Level::getLevel() {
+std::shared_ptr<std::vector<std::shared_ptr<Platform>>> Level::getLevel() {
   return level;
 }

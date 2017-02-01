@@ -5,21 +5,24 @@
 
 #include <memory>
 #include <glm/glm.hpp>
+#include <string>
 
 #include "game_renderer/Shape.h"
 
 class AxisAlignedBox {
  public:
-  AxisAlignedBox(std::shared_ptr<Shape> model, glm::mat4 transform);
-  ~AxisAlignedBox();
-
   static bool IsColliding(const AxisAlignedBox& one,
                           const AxisAlignedBox& two);
 
+  AxisAlignedBox(std::shared_ptr<Shape> model, glm::mat4 transform);
+  ~AxisAlignedBox();
+
+  glm::vec3 GetMin();
+  glm::vec3 GetMax();
+  std::string ToString();
+
  private:
-  float min_x, max_x;
-  float min_y, max_y;
-  float min_z, max_z;
+  glm::vec3 min, max;
 };
 
 #endif

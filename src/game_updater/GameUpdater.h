@@ -18,6 +18,9 @@ class GameUpdater {
   void Done();
 
  private:
+  void UpdatePlayer(std::shared_ptr<GameState> game_state);
+  void UpdateCamera(std::shared_ptr<GameState> game_state);
+
   std::shared_ptr<LevelUpdater> level_updater;
   bool done;
 };

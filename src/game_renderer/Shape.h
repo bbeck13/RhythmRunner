@@ -16,7 +16,7 @@ class Shape {
    void init();
    void draw(const std::shared_ptr<Program> prog) const;
 
-   const std::vector<unsigned>& GetElements() const;
+   std::vector<float> GetPositions();
 
   private:
    void Normalize();

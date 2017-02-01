@@ -119,7 +119,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
 
   auto P = std::make_shared<MatrixStack>();
   auto V = camera->getView();
-  auto MV = std::make_shared<MatrixStack>();
+  MatrixStack MV;
 
   P->pushMatrix();
   P->perspective(45.0f, aspect, 0.01f, 100.0f);
@@ -132,34 +132,25 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
-  for (int i = 0; i < level->getLevel()->size(); i++) {
-    Platform platform = level->getLevel()->at(i);
-    MV->pushMatrix();
-    MV->loadIdentity();
-    MV->translate(platform.GetPosition());
-    MV->scale(platform.GetScale());
+  for (std::shared_ptr<Platform> platform : *level->getLevel()) {
+    MV = platform->GetTransform();
     glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                       glm::value_ptr(MV->topMatrix()));
-    platform.GetPlatformShape()->draw(current_program);
-    MV->popMatrix();
+                       glm::value_ptr(MV.topMatrix()));
+    platform->GetModel()->draw(current_program);
   }
   current_program->unbind();
 
   // Player
   current_program = programs["player_prog"];
   current_program->bind();
+  MV = player->GetTransform();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
-  MV->pushMatrix();
-  MV->loadIdentity();
-  MV->translate(player->GetPosition());
-  MV->scale(player->GetScale());
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                     glm::value_ptr(MV->topMatrix()));
-  player->GetShape()->draw(current_program);
-  MV->popMatrix();
+                     glm::value_ptr(MV.topMatrix()));
+  player->GetModel()->draw(current_program);
 
   P->popMatrix();
   V.popMatrix();

@@ -10,21 +10,30 @@
 class Player : public GameObject {
  public:
   // Represents change in velocity per tick
-  static const float GRAVITY;
+  static const float GRAVITY, JUMP_VELOCITY, PLATFORM_SPACING;
+  // TODO(jarhar): consider removing initial position
+  static const glm::vec3 INITIAL_POSITION;
 
-  Player(glm::vec3 position);
+  Player();
   ~Player();
 
   float GetVerticalVelocity();
+  bool GetSpacebarDown();
+  std::shared_ptr<GameObject> GetGround(); // null if no ground
+  std::shared_ptr<Shape> GetModel() override;
 
   void SetVerticalVelocity(float vertical_velocity);
-
-  static std::shared_ptr<Shape> GetShape();
+  void SetSpacebarDown(bool spacebar_down);
+  void SetGround(std::shared_ptr<GameObject> ground);
+  void RemoveGround();
 
  private:
-  float vertical_velocity;
   static std::shared_ptr<Shape> shape;
   static bool isInitialized;
+
+  std::shared_ptr<GameObject> ground;
+  float vertical_velocity;
+  bool spacebar_down;
 };
 
 #endif

@@ -29,9 +29,9 @@ LevelGenerator::LevelGenerator(std::string musicFile) {
 
 LevelGenerator::~LevelGenerator() {}
 
-std::shared_ptr<std::vector<Platform>> LevelGenerator::generateLevel() {
-  std::shared_ptr<std::vector<Platform>> level =
-      std::make_shared<std::vector<Platform>>();
+std::shared_ptr<std::vector<std::shared_ptr<Platform>>> LevelGenerator::generateLevel() {
+  std::shared_ptr<std::vector<std::shared_ptr<Platform>>> level =
+      std::make_shared<std::vector<std::shared_ptr<Platform>>>();
 
 #ifdef DEBUG
   std::cerr << "Generating level ...." << std::endl;
@@ -57,7 +57,7 @@ std::shared_ptr<std::vector<Platform>> LevelGenerator::generateLevel() {
 
   double xPos = -1, yPos = -1, zPos = -5, power = 0, lastPower = 0;
   int lastSample = samplesPerPlatform;
-  level->push_back(Platform(glm::vec3(xPos, yPos, zPos)));
+  level->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
   for (int i = 1; i < platforms; i++) {
     std::vector<Aquila::SampleType> sample;
     for (int j = lastSample;
@@ -72,13 +72,13 @@ std::shared_ptr<std::vector<Platform>> LevelGenerator::generateLevel() {
     lastPower = power;
     if (std::abs(delta) > EPISILON) {
       if (delta > 0) {
-        yPos += Y_DELTA;
+        yPos += PLATFORM_Y_DELTA;
       } else {
-        yPos -= Y_DELTA;
+        yPos -= PLATFORM_Y_DELTA;
       }
     }
-    xPos += X_DELTA;
-    level->push_back(Platform(glm::vec3(xPos, yPos, zPos)));
+    xPos += PLATFORM_X_DELTA;
+    level->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
   }
 #ifdef DEBUG
   std::cerr << "Generated level!" << std::endl;

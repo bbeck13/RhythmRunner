@@ -54,6 +54,8 @@ include_directories("${GLEW_DIR}/include")
 
 # SFML
 set(SFML-DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/sfml-audio")
+option(SFML_BUILD_EXAMPLES "SFML_BUILD_EXAMPLES" OFF)
+option(SFML_BUILD_DOC "SFML_BUILD_DOC" OFF)
 add_subdirectory(${SFML-DIR})
 if(WIN32)
   # http://stackoverflow.com/a/10672739

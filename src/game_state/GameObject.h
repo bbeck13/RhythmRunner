@@ -3,10 +3,11 @@
 #ifndef GAME_OBJECT_H_
 #define GAME_OBJECT_H_
 
-#include <memory>
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
+#include <memory>
 
+#include "game_renderer/MatrixStack.h"
 #include "game_renderer/Shape.h"
 #include "game_renderer/Texture.h"
 #include "game_state/AxisAlignedBox.h"
@@ -17,14 +18,14 @@ class GameObject {
   GameObject(std::shared_ptr<Shape> model);
   virtual ~GameObject();
 
-  std::shared_ptr<Shape> GetModel();
+  virtual std::shared_ptr<Shape> GetModel() = 0;
 
   glm::vec3 GetPosition();
   glm::vec3 GetRotationAxis();
   float GetRotationAngle();
   glm::vec3 GetScale();
   std::shared_ptr<Texture> GetTexture();  // Texture may be null
-  glm::mat4 GetTransform();
+  MatrixStack GetTransform();
   AxisAlignedBox GetBoundingBox();
 
   void SetPosition(glm::vec3 position);
