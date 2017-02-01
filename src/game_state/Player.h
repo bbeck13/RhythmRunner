@@ -5,7 +5,7 @@
 
 #include "game_state/GameObject.h"
 
-#define PLAYER_MESH "../assets/models/bunny.obj"
+#define PLAYER_MESH "models/bunny.obj"
 
 class Player : public GameObject {
  public:

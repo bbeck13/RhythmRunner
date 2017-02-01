@@ -1,6 +1,7 @@
 // Joseph Arhar
 
-#include "game_state/Player.h"
+#include <string>
+#include "Player.h"
 
 const float Player::GRAVITY = 0.002f;
 
@@ -27,7 +28,7 @@ void Player::SetVerticalVelocity(float vertical_velocity) {
 
 std::shared_ptr<Shape> Player::GetShape() {
   if (!isInitialized) {
-    shape->loadMesh(PLAYER_MESH);
+    shape->loadMesh(std::string(ASSET_DIR) + "/" + std::string(PLAYER_MESH));
     shape->init();
     isInitialized = true;
   }

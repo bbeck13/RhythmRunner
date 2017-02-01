@@ -23,7 +23,7 @@ Platform::~Platform() {}
 
 std::shared_ptr<Shape> Platform::GetPlatformShape() {
   if (!isInitialized) {
-    platform->loadMesh(PLATFORM_MESH);
+    platform->loadMesh(std::string(ASSET_DIR) + "/" + std::string(PLATFORM_MESH));
     platform->init();
     isInitialized = true;
   }
