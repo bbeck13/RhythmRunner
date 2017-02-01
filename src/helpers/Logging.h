@@ -3,6 +3,8 @@
 #ifndef LOGGING_H_
 #define LOGGING_H_
 
+#include <iostream>
+
 // TODO(jarhar): figure out why DEBUG flag isnt working
 //#ifdef DEBUG
 //#define LOG(message) std::cout << "[" << __FILE__ << " " << __FUNCTION__ << "] " << message << std::endl;

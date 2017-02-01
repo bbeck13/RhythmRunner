@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <glm/glm.hpp>
+#include <string>
 
 #include "game_renderer/Shape.h"
 
@@ -18,6 +19,7 @@ class AxisAlignedBox {
 
   glm::vec3 GetMin();
   glm::vec3 GetMax();
+  std::string ToString();
 
  private:
   glm::vec3 min, max;

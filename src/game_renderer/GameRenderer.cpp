@@ -119,6 +119,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
 
   auto P = std::make_shared<MatrixStack>();
   auto V = camera->getView();
+  MatrixStack MV;
 
   P->pushMatrix();
   P->perspective(45.0f, aspect, 0.01f, 100.0f);
@@ -132,8 +133,9 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                      glm::value_ptr(V.topMatrix()));
 
   for (Platform& platform : *level->getLevel()) {
+    MV = platform.GetTransform();
     glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-        glm::value_ptr(platform.GetTransform().topMatrix()));
+                       glm::value_ptr(MV.topMatrix()));
     platform.GetModel()->draw(current_program);
   }
   current_program->unbind();
@@ -141,12 +143,13 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   // Player
   current_program = programs["player_prog"];
   current_program->bind();
+  MV = player->GetTransform();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-      glm::value_ptr(player->GetTransform().topMatrix()));
+                     glm::value_ptr(MV.topMatrix()));
   player->GetModel()->draw(current_program);
 
   P->popMatrix();

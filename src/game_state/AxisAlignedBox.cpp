@@ -3,6 +3,7 @@
 #include "game_state/AxisAlignedBox.h"
 
 #include <algorithm>
+#include <glm/ext.hpp>
 
 // static
 bool AxisAlignedBox::IsColliding(const AxisAlignedBox& one,
@@ -39,4 +40,8 @@ glm::vec3 AxisAlignedBox::GetMin() {
 
 glm::vec3 AxisAlignedBox::GetMax() {
   return max;
+}
+
+std::string AxisAlignedBox::ToString() {
+  return "min: " + glm::to_string(GetMin()) + ", max: " + glm::to_string(GetMax());
 }

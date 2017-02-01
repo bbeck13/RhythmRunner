@@ -20,12 +20,12 @@ namespace {
 std::vector<GameObject> GetCollidingObjects(
     AxisAlignedBox primary_object,
     std::shared_ptr<std::vector<Platform>> secondary_objects) {
-  std::string bunnymin = glm::to_string(primary_object.GetMin());
+  /*std::string bunnymin = glm::to_string(primary_object.GetMin());
   std::string bunnymax = glm::to_string(primary_object.GetMax());
   std::string boxmin = glm::to_string(secondary_objects->at(1).GetBoundingBox().GetMin());
   std::string boxmax = glm::to_string(secondary_objects->at(1).GetBoundingBox().GetMax());
   LOG("bunny box - min: " << bunnymin << ", max: " << bunnymax);
-  LOG("first box - min: " << boxmin << ", max: " << boxmax);
+  LOG("first box - min: " << boxmin << ", max: " << boxmax);*/
   std::vector<GameObject> colliding_objects;
   // TODO(jarhar): make this more efficient by culling secondary objects
   for (GameObject secondary_object : *secondary_objects) {
@@ -88,7 +88,7 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   camera->setLookAt(glm::vec3(camera->getLookAt()[0] + dX,
                               camera->getLookAt()[1] + dY,
                               camera->getLookAt()[2]));*/
-  float dX = 0.05f;
+  float dX = 0.05f; // TODO falls through platforms when this is 0.03
   camera->setPosition(player->GetPosition() + glm::vec3(0, 0, 10));
   camera->setLookAt(player->GetPosition());
 
@@ -163,7 +163,9 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
         player->GetPosition().x,
         colliding_max_y + Player::PLATFORM_SPACING,
         player->GetPosition().z));
-      LOG("collided and stuck to ground");
+      LOG("collided and stuck to ground at platform: " << std::endl
+          << "platform position: " << glm::to_string(colliding_object.GetPosition()) << std::endl
+          << "platform box: " << colliding_box.ToString());
     } else {
       LOG("game-ending collided with box! prev_player_min_y: " << prev_player_min_y << ", colliding_max_y: " << colliding_max_y);
     }
