@@ -8,6 +8,10 @@
 #include "helpers/Logging.h"
 #include "helpers/TimingConstants.h"
 
+#define DISTANCE_BELOW_CAMERA 1.8
+#define DISTANCE_BEHIND_CAMERA 3
+#define DELTA_Y 0.007f
+#define MIN_DELTA_X 0.055f
 namespace {
 
 template <typename T>
@@ -167,12 +171,63 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   }
 }
 
+// Returns the platform currently under the player
+// TODO(jarhar): make this more efficient by calculating the current platform
+//               based on music, like LevelUpdater::CurrentPlatform
+std::shared_ptr<Platform> GetCurrentPlatform(std::shared_ptr<GameState> game_state) {
+  // consider the rightmost part of the player to determine the current platform
+  float player_x_location = game_state->GetPlayer()->GetBoundingBox().GetMax().x + 3.0f;
+  std::shared_ptr<Platform> best_platform;
+  for (std::shared_ptr<Platform> platform : *game_state->GetLevel()->getLevel()) {
+    AxisAlignedBox platform_box = platform->GetBoundingBox();
+    if (platform_box.GetMin().x < player_x_location && platform_box.GetMax().x > player_x_location) {
+      // pick the rightmost platform to be the current platform
+      if (!best_platform || best_platform->GetBoundingBox().GetMax().x < platform_box.GetMax().x) {
+        best_platform = platform;
+      }
+    }
+  }
+  return best_platform;
+}
+
 void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
+
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
 
   glm::vec3 player_position = game_state->GetPlayer()->GetPosition();
   glm::vec3 previous_camera_position = camera->getPosition();
   glm::vec3 new_camera_position;
+
+  std::shared_ptr<Platform> current_platform = GetCurrentPlatform(game_state);
+  glm::vec3 current_platform_position;
+  if (current_platform) {
+    current_platform_position = current_platform->GetPosition();
+  } else {
+    // Fall back to player position if there is no platform
+    current_platform_position = game_state->GetPlayer()->GetPosition();
+  }
+  float dY =
+      (current_platform_position.y +
+       DISTANCE_BELOW_CAMERA) -
+      camera->getPosition()[1];
+
+  float dX =
+      (current_platform_position.x -
+       DISTANCE_BEHIND_CAMERA) -
+      camera->getPosition()[0];
+  // smooth out camera transition
+  if (std::abs(dY) > DELTA_Y) {
+    if (dY < 0) {
+      dY = -DELTA_Y;
+    } else {
+      dY = DELTA_Y;
+    }
+  }
+  // always move camera forward
+  if (dX < MIN_DELTA_X) {
+    dX = MIN_DELTA_X;
+  }
+
 
   // Z position is fixed
   new_camera_position.z = player_position.z + CAMERA_Z_SPACING;
@@ -182,13 +237,14 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   new_camera_position.x = player_position.x + FORWARD_CAMERA_SPACING;
 
   // Gradually and smoothly move y towards player
-  float delta_y = player_position.y - previous_camera_position.y;
+  // float delta_y = player_position.y - previous_camera_position.y;
   new_camera_position.y =
-      previous_camera_position.y + delta_y * FRACTION_CAMERA_MOVEMENT_PER_TICK;
+      previous_camera_position.y + dY; // * FRACTION_CAMERA_MOVEMENT_PER_TICK;
 
   camera->setPosition(new_camera_position);
 
   // Always look directly at the player.
   // Add FORWARD_CAMERA_SPACING to align camera
-  camera->setLookAt(player_position + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0));
+  camera->setLookAt(glm::vec3(player_position.x + FORWARD_CAMERA_SPACING,
+           camera->getLookAt().y + dY, 0));
 }
