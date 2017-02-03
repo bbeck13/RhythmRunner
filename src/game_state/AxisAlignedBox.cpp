@@ -19,8 +19,6 @@ AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
   std::vector<float> pos_buf = model->GetPositions();
   for (int i = 0; i < pos_buf.size(); i += 3) {
     glm::vec4 position(pos_buf[i], pos_buf[i + 1], pos_buf[i + 2], 1.0f);
-    // TODO(jarhar): should we consider what happens to the 4th coordinate
-    // after the transform?
     glm::vec4 new_position = transform * position;
     if (first) {
       first = false;

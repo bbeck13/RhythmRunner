@@ -5,17 +5,23 @@
 
 #include <iostream>
 
-// TODO(jarhar): figure out why DEBUG flag isnt working on windows
+#define _LOG(message) std::cout << __FUNCTION__ << " " << message << std::endl;
+#define _LOG_DUMMY(message) do {} while (0)
+
 #ifdef _WIN32
 
-#define LOG(message) std::cout << __FUNCTION__ << " " << message << std::endl;
+#ifdef _DEBUG
+#define LOG(message) _LOG(message)
+#else  // _DEBUG
+#define LOG(message) _LOG_DUMMY(message)
+#endif  // _DEBUG
 
-#else
+#else  // _WIN32
 
 #ifdef DEBUG
-#define LOG(message) std::cout << __FUNCTION__ << " " << message << std::endl;
-#else
-#define LOG(message) do {} while (0)
+#define LOG(message) _LOG(message)
+#else  // DEBUG
+#define LOG(message) _LOG_DUMMY(message)
 #endif  // DEBUG
 
 #endif  // _WIN32
