@@ -8,6 +8,8 @@
 #define _LOG(message) std::cout << __FUNCTION__ << " " << message << std::endl;
 #define _LOG_DUMMY(message) do {} while (0)
 
+#define LOG_ERROR(message) std::cerr << __FUNCTION__ << " " << message << std::endl;
+
 #ifdef _WIN32
 
 #ifdef _DEBUG

@@ -1,8 +1,10 @@
 // Alex Ottoboni
 
+#include "GameRenderer.h"
+
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
-#include "GameRenderer.h"
+
 #include "GLSL.h"
 #include "GL/glew.h"
 #include "json.hpp"
@@ -10,6 +12,7 @@
 #include "FileSystemUtils.h"
 #include "LevelGenerator.h"
 #include "Platform.h"
+#include "InputBindings.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -56,14 +59,8 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
 }
 
 void GameRenderer::Init(const std::string& resource_dir,
-                        std::shared_ptr<GameState> state,
-                        GLFWerrorfun error_callback,
-                        GLFWkeyfun key_callback,
-                        GLFWmousebuttonfun mouse_callback,
-                        GLFWframebuffersizefun resize_callback,
-                        GLFWcursorposfun cursor_callback) {
+                        std::shared_ptr<GameState> state) {
   // OpenGL Setup Boilerplate
-  glfwSetErrorCallback(error_callback);
   if (!glfwInit()) {
     std::cerr << "!glfwInit()" << std::endl;
     exit(1);
@@ -86,10 +83,9 @@ void GameRenderer::Init(const std::string& resource_dir,
   std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
             << std::endl;
   glfwSwapInterval(0);  // vsync
-  glfwSetKeyCallback(this->window, key_callback);
-  glfwSetMouseButtonCallback(this->window, mouse_callback);
-  glfwSetFramebufferSizeCallback(this->window, resize_callback);
-  glfwSetCursorPosCallback(this->window, cursor_callback);
+
+  InputBindings::Init(state, window);
+
   GLSL::checkVersion();
   glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
   glEnable(GL_DEPTH_TEST);               // enable z-buffer test
@@ -163,6 +159,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
 }
 
 void GameRenderer::Close() {
+  InputBindings::Close();
   glfwDestroyWindow(window);
   glfwTerminate();
 }

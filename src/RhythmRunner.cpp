@@ -1,51 +1,16 @@
-/**
- * RhythmRunner.cpp
- *
- *
- * For now this is just a bunch of import statements to make assert the
- * dependencies
- * Braden Beck (bnbeck)
- *
- */
+// Braden Beck (bnbeck)
 
-/*cpp includes*/
-#include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
-/* Aquila stuff*/
-#include <aquila/global.h>
-#include <aquila/source/WaveFile.h>
-#include <aquila/tools/TextPlot.h>
-#include <aquila/transform/AquilaFft.h>
-#include <aquila/transform/OouraFft.h>
-#include <aquila/source/generator/SineGenerator.h>
-#include <aquila/transform/FftFactory.h>
-
-/*SFML*/
-#include <SFML/Audio.hpp>
-
-/*GL stuff glew glfw etc..*/
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include "GLSL.h"
-#include "Program.h"
-#include "MatrixStack.h"
-#include "Shape.h"
-#include "Texture.h"
-#include "Level.h"
-#include "GameUpdater.h"
-#include "LevelGenerator.h"
 #include "GameCamera.h"
-
-/* to use glee */
-#define GLEE_OVERWRITE_GL_FUNCTIONS
-#include "glee.hpp"
-
-#include "GameState.h"
 #include "GameRenderer.h"
+#include "GameState.h"
+#include "GameUpdater.h"
+#include "Level.h"
+#include "LevelGenerator.h"
+#include "TimingConstants.h"
 
 #define RESOURCE_DIR "../Assets"
 #define FRAMES_PER_SEC 120.0f
@@ -57,46 +22,6 @@
 static const std::shared_ptr<GameCamera> camera =
     std::make_shared<GameCamera>();
 static const std::shared_ptr<Player> player = std::make_shared<Player>();
-
-// Callbacks seem like they should be in their own file/class
-// Still trying to figure out function pointer or whatever these are
-static void KeyCallback(GLFWwindow* window,
-                        int key,
-                        int scancode,
-                        int action,
-                        int mods) {
-  switch (key) {
-    case GLFW_KEY_ESCAPE:
-      glfwSetWindowShouldClose(window, GL_TRUE);
-      break;
-    case GLFW_KEY_SPACE:
-      player->SetSpacebarDown(action != GLFW_RELEASE);
-      break;
-  }
-}
-
-static void MouseCallback(GLFWwindow* window,
-                          int button,
-                          int action,
-                          int mods) {
-  double posX, posY;
-  if (action == GLFW_PRESS) {
-    glfwGetCursorPos(window, &posX, &posY);
-  }
-}
-
-static void ErrorCallback(int error, const char* description) {
-  std::cerr << description << std::endl;
-}
-
-static void ResizeCallback(GLFWwindow* window, int width, int height) {
-  // glViewport(0, 0, width, height);
-}
-
-static void CursorCallBack(GLFWwindow* window, double xpos, double ypos) {
-  // camera->pivot(WINDOW_WIDTH, WINDOW_HEIGHT, xpos, ypos);
-  // glfwSetCursorPos(window, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
-}
 
 int main(int argc, char** argv) {
   std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
@@ -115,8 +40,7 @@ int main(int argc, char** argv) {
       std::make_shared<GameState>(level, camera, player);
   std::shared_ptr<GameUpdater> updater = std::make_shared<GameUpdater>();
 
-  renderer->Init(RESOURCE_DIR, gameState, ErrorCallback, KeyCallback,
-                 MouseCallback, ResizeCallback, CursorCallBack);
+  renderer->Init(RESOURCE_DIR, gameState);
   // fix ur time step
   double clock = glfwGetTime();
 #ifdef DEBUG
