@@ -20,14 +20,7 @@ class GameRenderer {
   GameRenderer();
   ~GameRenderer();
   GLFWwindow* GetWindow();
-  void Init(const std::string& resource_dir,
-            std::shared_ptr<GameState> state,
-            GLFWerrorfun error_callback,
-            GLFWkeyfun key_callback,
-            GLFWmousebuttonfun mouse_callback,
-            GLFWframebuffersizefun resize_callback,
-            GLFWcursorposfun cursor_callback);
-  void cursorCallback(GLFWwindow* window, double x, double y);
+  void Init(const std::string& resource_dir, std::shared_ptr<GameState> state);
   void Render(std::shared_ptr<GameState> game_state);
   void Close();
 
