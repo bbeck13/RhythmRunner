@@ -129,4 +129,3 @@ bool IsCulled(AxisAlignedBox box,
 
   return false;
 }
-}
