@@ -18,6 +18,7 @@ Player::Player()
   SetPosition(Player::INITIAL_POSITION);
   this->model = shape;
   this->scale = glm::vec3(-0.3, 0.3, 0.3);
+  this->score = 0;
 }
 
 Player::~Player() {}
@@ -57,4 +58,12 @@ void Player::SetGround(std::shared_ptr<GameObject> ground) {
 
 void Player::RemoveGround() {
   ground.reset();
+}
+
+void Player::SetScore(int score) {
+  this->score = score;
+}
+
+int Player::GetScore() {
+  return this->score;
 }

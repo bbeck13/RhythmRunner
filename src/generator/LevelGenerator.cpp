@@ -1,6 +1,10 @@
 // bnbeck
 #include "LevelGenerator.h"
+#include "../game_state/Note.h"
+#include "../game_state/Level.h"
 #include <iostream>
+#include <cstdlib>
+#include <time.h>
 
 LevelGenerator::LevelGenerator(std::string musicFile) {
   this->wav = std::make_shared<Aquila::WaveFile>(musicFile);
@@ -29,9 +33,14 @@ LevelGenerator::LevelGenerator(std::string musicFile) {
 
 LevelGenerator::~LevelGenerator() {}
 
-std::shared_ptr<std::vector<std::shared_ptr<Platform>>> LevelGenerator::generateLevel() {
-  std::shared_ptr<std::vector<std::shared_ptr<Platform>>> level =
+std::shared_ptr<Level> LevelGenerator::generateLevel() {
+  std::shared_ptr<std::vector<std::shared_ptr<Platform>>> platforms =
       std::make_shared<std::vector<std::shared_ptr<Platform>>>();
+
+  std::shared_ptr<std::vector<std::shared_ptr<Note>>> notes =
+      std::make_shared<std::vector<std::shared_ptr<Note>>>();
+
+  std::srand(time(NULL));
 
 #ifdef DEBUG
   std::cerr << "Generating level ...." << std::endl;
@@ -51,14 +60,14 @@ std::shared_ptr<std::vector<std::shared_ptr<Platform>>> LevelGenerator::generate
   }
   range = std::pair<double, double>(minValue, maxValue);
 
-  int platforms = wav->getAudioLength() / (float)MS_PER_PLATFORM;
+  int num_platforms = wav->getAudioLength() / (float)MS_PER_PLATFORM;
   int samplesPerPlatform = MS_PER_PLATFORM * (wav->getSamplesCount() /
                                               (double)wav->getAudioLength());
 
   double xPos = -1, yPos = -1, zPos = -5, power = 0, lastPower = 0;
   int lastSample = samplesPerPlatform;
-  level->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
-  for (int i = 1; i < platforms; i++) {
+  platforms->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
+  for (int i = 1; i < num_platforms; i++) {
     std::vector<Aquila::SampleType> sample;
     for (int j = lastSample;
          j < (lastSample + samplesPerPlatform) && j < wav->getSamplesCount();
@@ -78,11 +87,18 @@ std::shared_ptr<std::vector<std::shared_ptr<Platform>>> LevelGenerator::generate
       }
     }
     xPos += PLATFORM_X_DELTA;
-    level->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
+    platforms->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
+    if (std::rand()%10 < 4) {
+      notes->push_back(std::make_shared<Note>(glm::vec3(xPos, yPos + 2.5, zPos)));
+    }
   }
 #ifdef DEBUG
   std::cerr << "Generated level!" << std::endl;
 #endif
+
+  std::shared_ptr<Level> level = std::make_shared<Level>(this->getMusic(),
+                                                         platforms,
+                                                         notes);
 
   return level;
 }

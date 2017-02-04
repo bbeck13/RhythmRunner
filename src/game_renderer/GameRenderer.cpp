@@ -125,6 +125,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
       ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
 
+  // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
@@ -132,12 +133,31 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
-  for (std::shared_ptr<Platform> platform : *level->getLevel()) {
+  for (std::shared_ptr<Platform> platform : *level->getPlatforms()) {
     if (!ViewFrustumCulling::IsCulled(platform->GetBoundingBox(), vfplane)) {
       MV = platform->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                          glm::value_ptr(MV.topMatrix()));
       platform->GetModel()->draw(current_program);
+    }
+  }
+  current_program->unbind();
+
+  // Collectible Notes
+  current_program = programs["note_prog"];
+  current_program->bind();
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+
+  for (std::shared_ptr<Note> note : *level->getNotes()) {
+    if (!ViewFrustumCulling::IsCulled(note->GetBoundingBox(), vfplane) &&
+        !note->GetCollected()) {
+      MV = note->GetTransform();
+      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                         glm::value_ptr(MV.topMatrix()));
+      note->GetModel()->draw(current_program);
     }
   }
   current_program->unbind();

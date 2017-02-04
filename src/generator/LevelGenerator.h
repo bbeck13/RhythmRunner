@@ -16,6 +16,7 @@
 #include <SFML/Audio.hpp>
 
 #include "game_state/Platform.h"
+#include "game_state/Level.h"
 #include "helpers/TimingConstants.h"
 
 #define EPISILON 0.0001f
@@ -26,7 +27,7 @@ class LevelGenerator {
   ~LevelGenerator();
 
   std::shared_ptr<sf::Music> getMusic() { return music; }
-  std::shared_ptr<std::vector<std::shared_ptr<Platform>>> generateLevel();
+  std::shared_ptr<Level> generateLevel();
 
  private:
   std::shared_ptr<Aquila::WaveFile> wav;
