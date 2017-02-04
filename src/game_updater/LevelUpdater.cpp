@@ -19,11 +19,11 @@ void LevelUpdater::Update(std::shared_ptr<Level> level) {
 }
 
 std::shared_ptr<Platform> LevelUpdater::CurrentPlatform(std::shared_ptr<Level> level) {
-  return level->getLevel()->at(std::max(
+  return level->getPlatforms()->at(std::max(
       0l,
       std::min((long)(level->getMusic()->getPlayingOffset().asMilliseconds() /
                       (float)MS_PER_PLATFORM),
-               (long)level->getLevel()->size() - 1)));
+               (long)level->getPlatforms()->size() - 1)));
 }
 
 void LevelUpdater::Reset(std::shared_ptr<Level> level) {

@@ -27,6 +27,25 @@ std::vector<std::shared_ptr<GameObject>> GetCollidingObjects(
   return colliding_objects;
 }
 
+// This is so ugly, but the only alternative I can find is refactoring this
+// to check collision for one object at a time, or iterate through the entire
+// vector casting each shared_ptr into the parent class before passing it in
+std::vector<std::shared_ptr<Note>> GetCollidingObjects(
+    AxisAlignedBox primary_object,
+    std::shared_ptr<std::vector<std::shared_ptr<Note>>> secondary_objects) {
+  std::vector<std::shared_ptr<Note>> colliding_objects;
+  for (std::shared_ptr<Note> secondary_object : *secondary_objects) {
+    if (AxisAlignedBox::IsColliding(
+          primary_object,
+          secondary_object->GetBoundingBox())) {
+      colliding_objects.push_back(secondary_object);
+    }
+  }
+
+  return colliding_objects;
+}
+
+
 }
 
 GameUpdater::GameUpdater()
@@ -52,6 +71,11 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   done = false;
   game_state->SetDone(done);
   game_state->GetPlayer()->SetPosition(Player::INITIAL_POSITION);
+  game_state->GetPlayer()->SetScore(0);
+  std::shared_ptr<std::vector<std::shared_ptr<Note>>> notes = game_state->GetLevel()->getNotes();
+  for (int i = 0; i < notes->size(); i++) {
+    notes->at(i)->SetUncollected();
+  }
 }
 
 void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
@@ -91,7 +115,16 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   AxisAlignedBox future_player_box = player->GetBoundingBox();
 
   std::vector<std::shared_ptr<GameObject>> colliding_objects = GetCollidingObjects(
-      future_player_box, game_state->GetLevel()->getLevel());
+      future_player_box, game_state->GetLevel()->getPlatforms());
+
+  std::vector<std::shared_ptr<Note>> colliding_collectibles = GetCollidingObjects(future_player_box, game_state->GetLevel()->getNotes());
+
+  for (int i = 0; i < colliding_collectibles.size(); i++) {
+    if (!colliding_collectibles[i]->GetCollected()) {
+       colliding_collectibles[i]->SetCollected();
+       game_state->GetPlayer()->SetScore(game_state->GetPlayer()->GetScore() + 1);
+    }
+  }
 
   if (colliding_objects.size() > 1) {
     // TODO(jarhar): further consider what is happening when we are colliding with two objects

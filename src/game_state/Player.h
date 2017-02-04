@@ -26,6 +26,8 @@ class Player : public GameObject {
   void SetSpacebarDown(bool spacebar_down);
   void SetGround(std::shared_ptr<GameObject> ground);
   void RemoveGround();
+  void SetScore(int score);
+  int GetScore();
 
  private:
   static std::shared_ptr<Shape> shape;
@@ -34,6 +36,7 @@ class Player : public GameObject {
   std::shared_ptr<GameObject> ground;
   float vertical_velocity;
   bool spacebar_down;
+  int score;
 };
 
 #endif

@@ -1,7 +1,5 @@
 #include "ViewFrustumCulling.h"
 
-#include <iostream>
-
 namespace ViewFrustumCulling {
 
 // Code from CPE-476 lab
@@ -130,5 +128,4 @@ bool IsCulled(AxisAlignedBox box,
   }
 
   return false;
-}
 }

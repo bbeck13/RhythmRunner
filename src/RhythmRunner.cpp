@@ -33,8 +33,7 @@ int main(int argc, char** argv) {
   std::shared_ptr<LevelGenerator> levelGenerator =
       std::make_shared<LevelGenerator>(music);
 
-  std::shared_ptr<Level> level = std::make_shared<Level>(
-      levelGenerator->getMusic(), levelGenerator->generateLevel());
+  std::shared_ptr<Level> level = levelGenerator->generateLevel();
 
   std::shared_ptr<GameState> gameState =
       std::make_shared<GameState>(level, camera, player);
@@ -61,7 +60,8 @@ int main(int argc, char** argv) {
         tot += elapsed[i];
 
       std::cout << "\r" << std::setw(10) << std::setprecision(4)
-                << "FPS: " << 25.0f / tot;
+                << "FPS: " << 25.0f / tot
+                << " Score: " << gameState->GetPlayer()->GetScore();
 #endif
       clock = nextTime;
     }
