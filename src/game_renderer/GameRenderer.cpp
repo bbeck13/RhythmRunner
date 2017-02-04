@@ -158,6 +158,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
 
   glfwSwapBuffers(this->window);
   glfwPollEvents();
+  free(vfplane);
   if (game_state->Done()) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
