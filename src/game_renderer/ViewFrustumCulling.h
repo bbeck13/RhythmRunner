@@ -13,8 +13,8 @@
 #include "game_state/AxisAlignedBox.h"
 
 namespace ViewFrustumCulling {
-    glm::vec4 * GetViewFrustumPlanes(glm::mat4 P, glm::mat4 V);
+    std::shared_ptr<std::vector<glm::vec4>> GetViewFrustumPlanes(glm::mat4 P, glm::mat4 V);
     float DistToPlane(float A, float B, float C, float D, glm::vec3 point);
-    bool IsCulled(AxisAlignedBox box, glm::vec4 * planes); 
+    bool IsCulled(AxisAlignedBox box, std::shared_ptr<std::vector<glm::vec4>> planes); 
 }
 #endif

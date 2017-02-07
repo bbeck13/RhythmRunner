@@ -122,7 +122,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   P->perspective(45.0f, aspect, 0.01f, 100.0f);
   V.pushMatrix();
 
-  vec4 *vfplane = ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
+  std::shared_ptr<std::vector<glm::vec4>> vfplane = ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
 
   std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
@@ -158,7 +158,6 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
 
   glfwSwapBuffers(this->window);
   glfwPollEvents();
-  free(vfplane);
   if (game_state->Done()) {
     glfwSetWindowShouldClose(window, GL_TRUE);
   }
