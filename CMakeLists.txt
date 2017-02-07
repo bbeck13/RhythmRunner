@@ -17,8 +17,8 @@ include_directories(${CMAKE_SOURCE_DIR}/src/game_updater)
 include_directories(${CMAKE_SOURCE_DIR}/src/helpers)
 include_directories(${CMAKE_SOURCE_DIR}/src/generator)
 file(GLOB_RECURSE GLSL "assets/shaders/*.glsl")
-if(NOT CMAKE_BUILD_TYPE MATCHES Release)
-  add_definitions(-DDEBUG)
+if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+   add_definitions(-DDEBUG)
 endif()
 add_definitions(-DASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
 
@@ -39,9 +39,9 @@ option(GLFW_BUILD_TESTS "GLFW_BUILD_TESTS" OFF)
 option(GLFW_BUILD_DOCS "GLFW_BUILD_DOCS" OFF)
 option(GLFW_INSTALL "GLFW_INSTALL" OFF)
 if(CMAKE_BUILD_TYPE MATCHES Release)
-  add_subdirectory(${GLFW_DIR} ${GLFW_DIR}/release)
+   add_subdirectory(${GLFW_DIR} ${GLFW_DIR}/release)
 else()
-  add_subdirectory(${GLFW_DIR} ${GLFW_DIR}/debug)
+   add_subdirectory(${GLFW_DIR} ${GLFW_DIR}/debug)
 endif()
 include_directories(${GLFW_DIR}/include)
 target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES})
@@ -58,12 +58,12 @@ option(SFML_BUILD_EXAMPLES "SFML_BUILD_EXAMPLES" OFF)
 option(SFML_BUILD_DOC "SFML_BUILD_DOC" OFF)
 add_subdirectory(${SFML-DIR})
 if(WIN32)
-  # http://stackoverflow.com/a/10672739
-  add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${SFML-DIR}/extlibs/bin/x64/libsndfile-1.dll"
-    "${SFML-DIR}/extlibs/bin/x64/openal32.dll"
-    $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>)
+   # http://stackoverflow.com/a/10672739
+   add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${SFML-DIR}/extlibs/bin/x64/libsndfile-1.dll"
+      "${SFML-DIR}/extlibs/bin/x64/openal32.dll"
+      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>)
 endif()
 include_directories(${SFML_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio)
@@ -77,30 +77,35 @@ target_link_libraries(${CMAKE_PROJECT_NAME} Aquila)
 include_directories(${AQUILA_DIR}) # TODO(jarhar): this is very hacky
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  if(APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-  endif()
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+   if(APPLE)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+   endif()
 endif()
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+   if(APPLE)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+   endif()
+endif()
 # OS specific options and libraries
 if(WIN32)
-  # c++0x is enabled by default.
-  # -Wall produces way too many warnings.
-  # -pedantic is not supported.
-  # don't know what to do about all the libs I have :(
+   # c++0x is enabled by default.
+   # -Wall produces way too many warnings.
+   # -pedantic is not supported.
+   # don't know what to do about all the libs I have :(
 else()
-  # Enable all pedantic warnings.
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall -pedantic")
-  if(APPLE)
-    #set(ENV{CPLUS_INCLUDE_PATH} "${HOME}/.local/include")
-    #message($ENV{CPLUS_INCLUDE_PATH})
-    # Add required frameworks for GLFW.
-    target_link_libraries(${CMAKE_PROJECT_NAME} "-L/usr/local/lib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -lsfml-audio")
-  else()
-    # Linux
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
-    find_package(Sndfile)
-    target_link_libraries(${CMAKE_PROJECT_NAME} "GL")
-  endif()
+   # Enable all pedantic warnings.
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall -pedantic")
+   if(APPLE)
+      #set(ENV{CPLUS_INCLUDE_PATH} "${HOME}/.local/include")
+      #message($ENV{CPLUS_INCLUDE_PATH})
+      # Add required frameworks for GLFW.
+      target_link_libraries(${CMAKE_PROJECT_NAME} "-L/usr/local/lib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -lsfml-audio")
+   else()
+      # Linux
+      set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
+      find_package(Sndfile)
+      target_link_libraries(${CMAKE_PROJECT_NAME} "GL")
+   endif()
 endif()
