@@ -80,37 +80,37 @@ namespace ViewFrustumCulling {
     float dist;
 
     // If the max point is on the left side of the plane, cull
-    dist = DistToPlane(planes->at(LEFT).x, planes->at(LEFT).y, planes->at(LEFT).z, planes->at(LEFT).w, box.GetMax());
+    dist = DistToPlane(planes->at(VFC_LEFT).x, planes->at(VFC_LEFT).y, planes->at(VFC_LEFT).z, planes->at(VFC_LEFT).w, box.GetMax());
     if (dist <= 0) {
       return true;
     }
 
     // If the min point is on the right side of the plane, cull
-    dist = DistToPlane(planes->at(RIGHT).x, planes->at(RIGHT).y, planes->at(RIGHT).z, planes->at(RIGHT).w, box.GetMin());
+    dist = DistToPlane(planes->at(VFC_RIGHT).x, planes->at(VFC_RIGHT).y, planes->at(VFC_RIGHT).z, planes->at(VFC_RIGHT).w, box.GetMin());
     if (dist <= 0) {
       return true;
     }
 
     // If the min point is above the plane, cull
-    dist = DistToPlane(planes->at(TOP).x, planes->at(TOP).y, planes->at(TOP).z, planes->at(TOP).w, box.GetMin());
+    dist = DistToPlane(planes->at(VFC_TOP).x, planes->at(VFC_TOP).y, planes->at(VFC_TOP).z, planes->at(VFC_TOP).w, box.GetMin());
     if (dist <= 0) {
       return true;
     }
 
     // If the max point is below the plane, cull
-    dist = DistToPlane(planes->at(BOTTOM).x, planes->at(BOTTOM).y, planes->at(BOTTOM).z, planes->at(BOTTOM).w, box.GetMax());
+    dist = DistToPlane(planes->at(VFC_BOTTOM).x, planes->at(VFC_BOTTOM).y, planes->at(VFC_BOTTOM).z, planes->at(VFC_BOTTOM).w, box.GetMax());
     if (dist <= 0) {
       return true;
     }
 
     // If the max point is in front of the plane, cull
-    dist = DistToPlane(planes->at(NEAR).x, planes->at(NEAR).y, planes->at(NEAR).z, planes->at(NEAR).w, box.GetMax());
+    dist = DistToPlane(planes->at(VFC_NEAR).x, planes->at(VFC_NEAR).y, planes->at(VFC_NEAR).z, planes->at(VFC_NEAR).w, box.GetMax());
     if (dist <= 0) {
       return true;
     }
 
     // If the min point is in behind the plane, cull
-    dist = DistToPlane(planes->at(FAR).x, planes->at(FAR).y, planes->at(FAR).z, planes->at(FAR).w, box.GetMax());
+    dist = DistToPlane(planes->at(VFC_FAR).x, planes->at(VFC_FAR).y, planes->at(VFC_FAR).z, planes->at(VFC_FAR).w, box.GetMax());
     if (dist <= 0) {
       return true;
     }

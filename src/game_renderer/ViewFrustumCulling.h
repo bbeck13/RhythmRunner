@@ -2,12 +2,12 @@
 #ifndef __VIEW_FRUST_CULLING__
 #define __VIEW_FRUST_CULLING__
 
-#define LEFT 0
-#define RIGHT 1
-#define BOTTOM 2
-#define TOP 3
-#define NEAR 4
-#define FAR 5
+#define VFC_LEFT 0
+#define VFC_RIGHT 1
+#define VFC_BOTTOM 2
+#define VFC_TOP 3
+#define VFC_NEAR 4
+#define VFC_FAR 5
 
 #include <glm/gtc/type_ptr.hpp>
 #include "game_state/AxisAlignedBox.h"
