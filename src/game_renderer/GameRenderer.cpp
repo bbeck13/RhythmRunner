@@ -13,6 +13,7 @@
 #include "LevelGenerator.h"
 #include "Platform.h"
 #include "InputBindings.h"
+#include "ViewFrustumCulling.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -121,6 +122,9 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   P->perspective(45.0f, aspect, 0.01f, 100.0f);
   V.pushMatrix();
 
+  std::shared_ptr<std::vector<glm::vec4>> vfplane =
+      ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
+
   std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
@@ -129,10 +133,12 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                      glm::value_ptr(V.topMatrix()));
 
   for (std::shared_ptr<Platform> platform : *level->getLevel()) {
-    MV = platform->GetTransform();
-    glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                       glm::value_ptr(MV.topMatrix()));
-    platform->GetModel()->draw(current_program);
+    if (!ViewFrustumCulling::IsCulled(platform->GetBoundingBox(), vfplane)) {
+      MV = platform->GetTransform();
+      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                         glm::value_ptr(MV.topMatrix()));
+      platform->GetModel()->draw(current_program);
+    }
   }
   current_program->unbind();
 
