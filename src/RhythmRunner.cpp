@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
       renderer->Render(gameState);
 
 #ifdef DEBUG
-      elapsed[pos++] = SEC_PER_FRAME;
+      elapsed[pos++] = glfwGetTime() - clock;
       pos %= 25;
       float tot = 0;
       for (int i = 0; i < 25; i++)
