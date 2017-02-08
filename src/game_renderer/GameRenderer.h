@@ -19,10 +19,11 @@ class GameRenderer {
  public:
   GameRenderer();
   ~GameRenderer();
-  GLFWwindow* GetWindow();
+
   void Init(const std::string& resource_dir, std::shared_ptr<GameState> state);
   void Render(std::shared_ptr<GameState> game_state);
   void Close();
+  bool WindowShouldClose();
 
  private:
   GLFWwindow* window;

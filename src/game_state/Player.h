@@ -10,7 +10,7 @@
 class Player : public GameObject {
  public:
   // Represents change in velocity per tick
-  static const float GRAVITY, JUMP_VELOCITY, PLATFORM_SPACING;
+  static const float PLATFORM_SPACING;
   // TODO(jarhar): consider removing initial position
   static const glm::vec3 INITIAL_POSITION;
 

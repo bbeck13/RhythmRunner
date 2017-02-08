@@ -19,10 +19,6 @@ GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
 
-GLFWwindow* GameRenderer::GetWindow() {
-  return window;
-}
-
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   // Read in the file
   std::ifstream json_input_stream(filepath, std::ifstream::in);
@@ -83,7 +79,7 @@ void GameRenderer::Init(const std::string& resource_dir,
   std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
   std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
             << std::endl;
-  glfwSwapInterval(0);  // vsync
+  glfwSwapInterval(1);  // vsync
 
   InputBindings::Init(state, window);
 
@@ -188,4 +184,8 @@ void GameRenderer::Close() {
   InputBindings::Close();
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+bool GameRenderer::WindowShouldClose() {
+  return glfwWindowShouldClose(window);
 }

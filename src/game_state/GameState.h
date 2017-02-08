@@ -21,17 +21,26 @@ class GameState {
   std::shared_ptr<Level> GetLevel();
   std::shared_ptr<GameCamera> GetCamera();
   std::shared_ptr<Player> GetPlayer();
+  bool Done();
+  uint64_t GetElapsedTicks();
+  uint64_t GetTimingStartTick();
+  bool GetMusicTimingMode();
 
   void SetLevel(std::shared_ptr<Level> level);
   void SetCamera(std::shared_ptr<GameCamera> camera);
   void SetDone(bool done);
-  bool Done();
+  void IncrementTicks();
+  void SetTimingStartTick();
+  void SetMusicTimingMode(bool music_timing_mode);
 
  private:
   std::shared_ptr<Level> level;
   std::shared_ptr<GameCamera> camera;
   std::shared_ptr<Player> player;
   bool done;
+  uint64_t elapsed_ticks;
+  uint64_t timing_start_tick;
+  bool music_timing_mode;
 };
 
 #endif
