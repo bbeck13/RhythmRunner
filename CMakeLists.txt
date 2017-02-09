@@ -52,22 +52,6 @@ add_subdirectory(${GLEW_DIR})
 target_link_libraries(${CMAKE_PROJECT_NAME} libglew_static)
 include_directories("${GLEW_DIR}/include")
 
-# SFML
-set(SFML-DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/sfml-audio")
-option(SFML_BUILD_EXAMPLES "SFML_BUILD_EXAMPLES" OFF)
-option(SFML_BUILD_DOC "SFML_BUILD_DOC" OFF)
-add_subdirectory(${SFML-DIR})
-if(WIN32)
-  # http://stackoverflow.com/a/10672739
-  add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${SFML-DIR}/extlibs/bin/x64/libsndfile-1.dll"
-    "${SFML-DIR}/extlibs/bin/x64/openal32.dll"
-    $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>)
-endif()
-include_directories(${SFML_INCLUDE_DIRS})
-target_link_libraries(${CMAKE_PROJECT_NAME} sfml-audio)
-
 # Aqila
 set(AQUILA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/aquila")
 option(Aquila_BUILD_EXAMPLES "Aquila_BUILD_EXAMPLES" OFF)

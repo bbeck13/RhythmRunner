@@ -8,7 +8,8 @@
   "uniforms": [
     "P",
     "V",
-    "MV"
+    "MV",
+    "Texture0"
   ],
   "vert": "platform_vert.glsl"
 }

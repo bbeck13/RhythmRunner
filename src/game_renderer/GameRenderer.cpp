@@ -14,6 +14,7 @@
 #include "Platform.h"
 #include "InputBindings.h"
 #include "ViewFrustumCulling.h"
+#include "Texture.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -59,6 +60,8 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   return new_program;
 }
 
+std::shared_ptr<Texture> texture0;
+
 void GameRenderer::Init(const std::string& resource_dir,
                         std::shared_ptr<GameState> state) {
   // OpenGL Setup Boilerplate
@@ -91,7 +94,14 @@ void GameRenderer::Init(const std::string& resource_dir,
   glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
   glEnable(GL_DEPTH_TEST);               // enable z-buffer test
   glEnable(GL_BLEND);
+  glEnable(GL_TEXTURE_2D);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  texture0 = std::make_shared<Texture>();
+  texture0->setFilename("../assets/textures/test.jpg");
+  texture0->init();
+  texture0->setUnit(0);
+  texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
 
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
@@ -128,6 +138,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
+  texture0->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
