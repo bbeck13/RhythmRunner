@@ -56,11 +56,6 @@ int main(int argc, char** argv) {
 
     // Calculate what tick we should be at right now
     unsigned target_tick_count;
-#ifdef DEBUG
-    double clock = glfwGetTime();
-    float elapsed[25] = {1};
-    int pos = 0;
-#endif
     if (game_state->GetMusicTimingMode()) {
       // get time elapsed in music
       // then, calculate target ticks elapsed based on music time elapsed
@@ -75,10 +70,6 @@ int main(int argc, char** argv) {
       target_tick_count = elapsed_seconds * TICKS_PER_SECOND;
     }
 
-#ifdef DEBUG
-    double nextTime = glfwGetTime();
-#endif
-
     // Run enough ticks to catch up
     // TODO(jarhar): consider basic infinite loop detection here
     // TODO(jarhar): consider re-assessing timing after each call to Update().
@@ -88,17 +79,27 @@ int main(int argc, char** argv) {
     }
 
 #ifdef DEBUG  // Print FPS and stuff
-    elapsed[pos++] = glfwGetTime() - clock;
-    pos %= 25;
-    float tot = 0;
-    for (int i = 0; i < 25; i++)
-      tot += elapsed[i];
+    static double last_debug_time = glfwGetTime();
+    static int frames_since_last_debug = 0;
 
-    std::cout << "\r" << std::setw(10) << std::setprecision(4)
-              << "FPS: " << 25.0f / tot
-              << " Score: " << gameState->GetPlayer()->GetScore() << std::flush;
+    double current_debug_time = glfwGetTime();
+    double elapsed_debug_time = current_debug_time - last_debug_time;
+    if (elapsed_debug_time > 1.0) {
+      // more than a second has elapsed, so print an update
+#ifdef _WIN32 // printing \r doesn't work on windows
+      std::cout << std::setw(10) << std::setprecision(4)
+                << "FPS: " << (frames_since_last_debug / elapsed_debug_time)
+                << " Score: " << game_state->GetPlayer()->GetScore() << std::endl;
+#else
+      std::cout << "\r" << std::setw(10) << std::setprecision(4)
+                << "FPS: " << (frames_since_last_debug / elapsed_debug_time)
+                << " Score: " << game_state->GetPlayer()->GetScore() << std::flush;
+#endif
+      last_debug_time = current_debug_time;
+      frames_since_last_debug = 0;
+    }
 
-    clock = nextTime;
+    frames_since_last_debug++;
 #endif
   }
 
