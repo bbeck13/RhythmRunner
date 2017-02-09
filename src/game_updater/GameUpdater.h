@@ -6,7 +6,6 @@
 #include <memory>
 
 #include "GameState.h"
-#include "LevelUpdater.h"
 
 class GameUpdater {
  public:
@@ -15,14 +14,11 @@ class GameUpdater {
 
   void Update(std::shared_ptr<GameState> game_state);
   void Reset(std::shared_ptr<GameState> game_state);
-  void Done();
+  void Init(std::shared_ptr<GameState> game_state);
 
  private:
   void UpdatePlayer(std::shared_ptr<GameState> game_state);
   void UpdateCamera(std::shared_ptr<GameState> game_state);
-
-  std::shared_ptr<LevelUpdater> level_updater;
-  bool done;
 };
 
 #endif
