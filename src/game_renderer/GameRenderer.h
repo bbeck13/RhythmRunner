@@ -23,6 +23,7 @@ class GameRenderer {
   void Init(const std::string& resource_dir, std::shared_ptr<GameState> state);
   void Render(std::shared_ptr<GameState> game_state);
   void Close();
+  GLuint loadCubemap(std::vector<const GLchar*> faces_ext);
 
  private:
   GLFWwindow* window;

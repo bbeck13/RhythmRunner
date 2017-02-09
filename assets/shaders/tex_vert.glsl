@@ -12,7 +12,7 @@ out vec3 fragNor;
 
 void main() {
 
-	vec3 lightDir = vec3(1, 1, 1);
+  vec3 lightDir = vec3(1, 1, 1);
   vec4 vPosition;
 
   /* First model transforms */

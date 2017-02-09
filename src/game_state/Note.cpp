@@ -8,7 +8,7 @@ bool Note::isInitialized = false;
 Note::Note(glm::vec3 position) : GameObject(Note::shape) {
   this->position = position;
   // todo play around with the size
-  this->scale = glm::vec3(0.5, 0.5, 0.5);
+  this->scale = glm::vec3(10, 10, 10);
   this->model = shape;
   this->isCollected = false;
 }

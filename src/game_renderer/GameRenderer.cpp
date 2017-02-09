@@ -14,6 +14,9 @@
 #include "Platform.h"
 #include "InputBindings.h"
 #include "ViewFrustumCulling.h"
+#include "Texture.h"
+
+std::shared_ptr<Texture> texture0;
 
 GameRenderer::GameRenderer() {}
 
@@ -101,6 +104,13 @@ void GameRenderer::Init(const std::string& resource_dir,
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
   }
+
+  texture0 = std::make_shared<Texture>();
+  texture0->setFilename("../src/game_renderer/right.jpg");
+  texture0->init();
+  texture0->setUnit(0);
+  texture0->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+  
 }
 
 void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
@@ -128,10 +138,8 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE, glm::value_ptr(V.topMatrix()));
 
   for (std::shared_ptr<Platform> platform : *level->getPlatforms()) {
     if (!ViewFrustumCulling::IsCulled(platform->GetBoundingBox(), vfplane)) {
@@ -140,6 +148,22 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                          glm::value_ptr(MV.topMatrix()));
       platform->GetModel()->draw(current_program);
     }
+  }
+  current_program->unbind();
+
+  // Skybox
+  current_program = programs["skybox_prog"];
+  current_program->bind();
+  texture0->bind(current_program->getUniform("Texture0"));
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+  for (std::shared_ptr<Note> note : *level->getNotes()) {
+    MV = note->GetTransform();
+    glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                         glm::value_ptr(MV.topMatrix()));
+    note->GetModel()->draw(current_program);
   }
   current_program->unbind();
 
