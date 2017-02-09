@@ -95,6 +95,7 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
    endif()
 endif()
+
 # OS specific options and libraries
 if(WIN32)
    # c++0x is enabled by default.

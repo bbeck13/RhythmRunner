@@ -6,15 +6,16 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include <string>
+#include <glm/glm.hpp>
 
 #include "game_renderer/Shape.h"
 
 class AxisAlignedBox {
  public:
-  static bool IsColliding(const AxisAlignedBox& one,
-                          const AxisAlignedBox& two);
+  static bool IsColliding(const AxisAlignedBox& one, const AxisAlignedBox& two);
 
   AxisAlignedBox(std::shared_ptr<Shape> model, glm::mat4 transform);
+  AxisAlignedBox(glm::vec3 min, glm::vec3 max);
   ~AxisAlignedBox();
 
   glm::vec3 GetMin();

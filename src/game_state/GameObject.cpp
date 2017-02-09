@@ -1,10 +1,10 @@
 // Joseph Arhar
 
-#include "game_state/GameObject.h"
+#include "GameObject.h"
 
 #include <assert.h>
 
-#include "helpers/Logging.h"
+#include "Logging.h"
 
 // TODO(jarhar): make this constructor require all fields
 GameObject::GameObject(std::shared_ptr<Shape> model) : model(model) {}

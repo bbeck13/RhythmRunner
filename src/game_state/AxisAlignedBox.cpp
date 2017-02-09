@@ -13,6 +13,9 @@ bool AxisAlignedBox::IsColliding(const AxisAlignedBox& one,
          one.min.z <= two.max.z && one.max.z >= two.min.z;
 }
 
+AxisAlignedBox::AxisAlignedBox(glm::vec3 min, glm::vec3 max)
+    : min(min), max(max) {}
+
 AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
                                glm::mat4 transform) {
   bool first = true;

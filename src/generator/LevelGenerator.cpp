@@ -1,7 +1,8 @@
 // bnbeck
 #include "LevelGenerator.h"
-#include "../game_state/Note.h"
-#include "../game_state/Level.h"
+#include "Note.h"
+#include "Level.h"
+#include "Octree.h"
 #include <iostream>
 #include <cstdlib>
 #include <time.h>
@@ -34,11 +35,8 @@ LevelGenerator::LevelGenerator(std::string musicFile) {
 LevelGenerator::~LevelGenerator() {}
 
 std::shared_ptr<Level> LevelGenerator::generateLevel() {
-  std::shared_ptr<std::vector<std::shared_ptr<Platform>>> platforms =
-      std::make_shared<std::vector<std::shared_ptr<Platform>>>();
-
-  std::shared_ptr<std::vector<std::shared_ptr<Note>>> notes =
-      std::make_shared<std::vector<std::shared_ptr<Note>>>();
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objs =
+      std::make_shared<std::vector<std::shared_ptr<GameObject>>>();
 
   std::srand(time(NULL));
 
@@ -64,9 +62,10 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
   int samplesPerPlatform = MS_PER_PLATFORM * (wav->getSamplesCount() /
                                               (double)wav->getAudioLength());
 
-  double xPos = -1, yPos = -1, zPos = -5, power = 0, lastPower = 0;
+  double xPos = -1, yPos = 2, zPos = -5, power = 0, lastPower = 0;
   int lastSample = samplesPerPlatform;
-  platforms->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
+  objs->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
+
   for (int i = 1; i < num_platforms; i++) {
     std::vector<Aquila::SampleType> sample;
     for (int j = lastSample;
@@ -74,6 +73,7 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
          j++) {
       sample.push_back(wav->sample(j));
     }
+
     lastSample += samplesPerPlatform;
     Aquila::SignalSource src(sample, wav->getSampleFrequency());
     power = Aquila::power(src);
@@ -87,18 +87,23 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
       }
     }
     xPos += PLATFORM_X_DELTA;
-    platforms->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
-    if (std::rand()%10 < 4) {
-      notes->push_back(std::make_shared<Note>(glm::vec3(xPos, yPos + 2.5, zPos)));
+    objs->push_back(
+        std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
+    if (std::rand() % 10 < 4) {
+      objs->push_back(
+          std::make_shared<Note>(glm::vec3(xPos, yPos + 2.5, zPos)));
     }
   }
+
+#ifdef DEBUG
+  std::cerr << "Generating octree..." << std::endl;
+#endif
+  std::shared_ptr<Octree> tree = std::make_shared<Octree>(objs);
+  std::shared_ptr<Level> level =
+      std::make_shared<Level>(this->getMusic(), tree);
+
 #ifdef DEBUG
   std::cerr << "Generated level!" << std::endl;
 #endif
-
-  std::shared_ptr<Level> level = std::make_shared<Level>(this->getMusic(),
-                                                         platforms,
-                                                         notes);
-
   return level;
 }

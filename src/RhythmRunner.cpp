@@ -23,13 +23,15 @@ int main(int argc, char** argv) {
   std::shared_ptr<LevelGenerator> levelGenerator =
       std::make_shared<LevelGenerator>(music);
 
-  std::shared_ptr<Level> level = levelGenerator->generateLevel();
+  std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
+  renderer->Init(ASSET_DIR);
 
+  std::shared_ptr<Level> level = levelGenerator->generateLevel();
   std::shared_ptr<GameState> game_state = std::make_shared<GameState>(
       level, std::make_shared<GameCamera>(), std::make_shared<Player>());
-
-  std::shared_ptr<GameRenderer> renderer = std::make_shared<GameRenderer>();
-  renderer->Init(ASSET_DIR, game_state);
+  // had to separate this since gl initialization needs to be done before
+  // generating the level
+  renderer->InitState(game_state);
 
   std::shared_ptr<GameUpdater> updater = std::make_shared<GameUpdater>();
   updater->Init(game_state);
@@ -83,15 +85,17 @@ int main(int argc, char** argv) {
     double current_debug_time = glfwGetTime();
     double elapsed_debug_time = current_debug_time - last_debug_time;
     if (elapsed_debug_time > 1.0) {
-      // more than a second has elapsed, so print an update
-#ifdef _WIN32 // printing \r doesn't work on windows
+// more than a second has elapsed, so print an update
+#ifdef _WIN32  // printing \r doesn't work on windows
       std::cout << std::setw(10) << std::setprecision(4)
                 << "FPS: " << (frames_since_last_debug / elapsed_debug_time)
-                << " Score: " << game_state->GetPlayer()->GetScore() << std::endl;
+                << " Score: " << game_state->GetPlayer()->GetScore()
+                << std::endl;
 #else
       std::cout << "\r" << std::setw(10) << std::setprecision(4)
                 << "FPS: " << (frames_since_last_debug / elapsed_debug_time)
-                << " Score: " << game_state->GetPlayer()->GetScore() << std::flush;
+                << " Score: " << game_state->GetPlayer()->GetScore()
+                << std::flush;
 #endif
       last_debug_time = current_debug_time;
       frames_since_last_debug = 0;

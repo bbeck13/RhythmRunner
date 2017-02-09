@@ -1,11 +1,8 @@
 #include "Level.h"
 
-Level::Level(std::shared_ptr<sf::Music> music,
-             std::shared_ptr<std::vector<std::shared_ptr<Platform>>> platforms,
-             std::shared_ptr<std::vector<std::shared_ptr<Note>>> notes) {
+Level::Level(std::shared_ptr<sf::Music> music, std::shared_ptr<Octree> tree) {
   this->music = music;
-  this->platforms = platforms;
-  this->notes = notes;
+  this->tree = tree;
 }
 
 Level::~Level() {}
@@ -14,10 +11,10 @@ std::shared_ptr<sf::Music> Level::getMusic() {
   return music;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<Platform>>> Level::getPlatforms() {
-  return platforms;
+std::shared_ptr<Octree> Level::getTree() {
+  return tree;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<Note>>> Level::getNotes() {
-  return notes;
+std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> Level::getObjects() {
+  return tree->getObjects();
 }

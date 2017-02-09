@@ -15,9 +15,9 @@
 #include <aquila/transform/FftFactory.h>
 #include <SFML/Audio.hpp>
 
-#include "game_state/Platform.h"
-#include "game_state/Level.h"
-#include "helpers/TimingConstants.h"
+#include "Platform.h"
+#include "Level.h"
+#include "TimingConstants.h"
 
 #define EPISILON 0.0001f
 
