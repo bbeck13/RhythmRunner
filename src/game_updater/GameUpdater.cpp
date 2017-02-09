@@ -1,30 +1,43 @@
 // Joseph Arhar
 
-#include "game_updater/GameUpdater.h"
+#include "GameUpdater.h"
 
 #include <glm/ext.hpp>
 #include <iostream>
+#include <queue>
 
-#include "helpers/Logging.h"
-#include "helpers/TimingConstants.h"
+#include "Logging.h"
+#include "TimingConstants.h"
+#include "Octree.h"
 
-namespace {
+// TODO(bnbeck) thread that shit my dude
+std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+GameUpdater::GetCollidingObjects(AxisAlignedBox primary_object,
+                                 std::shared_ptr<Octree> tree) {
+  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> collisions =
+      std::make_shared<std::unordered_set<std::shared_ptr<GameObject>>>();
+  std::queue<Node*> toVisit;
+  toVisit.push(tree->GetRoot());
 
-template <typename T>
-std::vector<std::shared_ptr<T>> GetCollidingObjects(
-    AxisAlignedBox primary_object,
-    std::shared_ptr<std::vector<std::shared_ptr<T>>> secondary_objects) {
-  std::vector<std::shared_ptr<T>> colliding_objects;
-  // TODO(jarhar): make this more efficient by culling secondary objects
-  for (std::shared_ptr<T> secondary_object : *secondary_objects) {
-    if (AxisAlignedBox::IsColliding(primary_object,
-                                    secondary_object->GetBoundingBox())) {
-      colliding_objects.push_back(secondary_object);
+  while (!toVisit.empty()) {
+    Node* node = toVisit.front();
+    toVisit.pop();
+    if (node->objects->empty()) {
+      for (Node* child : *(node->children)) {
+        if (AxisAlignedBox::IsColliding(child->boundingBox, primary_object)) {
+          toVisit.push(child);
+        }
+      }
+    } else {
+      for (std::shared_ptr<GameObject> objectInBox : *(node->objects)) {
+        if (AxisAlignedBox::IsColliding(objectInBox->GetBoundingBox(),
+                                        primary_object)) {
+          collisions->insert(objectInBox);
+        }
+      }
     }
   }
-
-  return colliding_objects;
-}
+  return collisions;
 }
 
 GameUpdater::GameUpdater() {}
@@ -49,6 +62,26 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
 }
 
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
+  // reset the player
+  game_state->SetDone(false);
+  game_state->GetPlayer()->SetPosition(Player::INITIAL_POSITION);
+  game_state->GetPlayer()->SetScore(0);
+
+  // reset collectibles
+  for (std::shared_ptr<GameObject> obj :
+       *game_state->GetLevel()->getObjects()) {
+    if (obj->GetType() == ObjectType::COLLECTIBLE) {
+      if (std::shared_ptr<Collectible> c =
+              std::static_pointer_cast<Collectible>(obj)) {
+        c->SetUncollected();
+      }
+    }
+  }
+
+  // reset timing
+  game_state->SetMusicTimingMode(true);
+  game_state->SetTimingStartTick();
+
   // set the music back to the beginning of the song
   std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
   if (music->getStatus() == sf::SoundSource::Status::Playing) {
@@ -60,20 +93,6 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
     music->play();
     music->setLoop(false);
   }
-
-  // reset the player
-  game_state->SetDone(false);
-  game_state->GetPlayer()->SetPosition(Player::INITIAL_POSITION);
-  game_state->GetPlayer()->SetScore(0);
-
-  // reset collectible notes
-  for (std::shared_ptr<Note> note : *game_state->GetLevel()->getNotes()) {
-    note->SetUncollected();
-  }
-
-  // reset timing
-  game_state->SetMusicTimingMode(true);
-  game_state->SetTimingStartTick();
 }
 
 void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
@@ -111,21 +130,24 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   player->SetPosition(
       previous_player_position +
       glm::vec3(DELTA_X_PER_TICK, player->GetVerticalVelocity(), 0));
-  AxisAlignedBox future_player_box = player->GetBoundingBox();
 
-  std::vector<std::shared_ptr<Platform>> colliding_platforms =
-      GetCollidingObjects(future_player_box,
-                          game_state->GetLevel()->getPlatforms());
-
-  std::vector<std::shared_ptr<Note>> colliding_collectibles =
-      GetCollidingObjects(future_player_box,
-                          game_state->GetLevel()->getNotes());
-
-  for (int i = 0; i < colliding_collectibles.size(); i++) {
-    if (!colliding_collectibles[i]->GetCollected()) {
-      colliding_collectibles[i]->SetCollected();
-      game_state->GetPlayer()->SetScore(game_state->GetPlayer()->GetScore() +
-                                        1);
+  // collide!
+  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+      collidingObjects = GetCollidingObjects(player->GetBoundingBox(),
+                                             game_state->GetLevel()->getTree());
+  std::vector<std::shared_ptr<GameObject>> colliding_platforms;
+  for (std::shared_ptr<GameObject> g : *collidingObjects) {
+    if (g->GetType() == ObjectType::COLLECTIBLE) {
+      if (std::shared_ptr<Collectible> c =
+              std::static_pointer_cast<Collectible>(g)) {
+        if (!c->GetCollected()) {
+          c->SetCollected();
+          game_state->GetPlayer()->SetScore(
+              game_state->GetPlayer()->GetScore() + 1);
+        }
+      }
+    } else if (g->GetType() == ObjectType::OBSTACLE) {
+      colliding_platforms.push_back(g);
     }
   }
 
@@ -137,7 +159,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     // No collision
   } else {
     // Handle the collision
-    std::shared_ptr<GameObject> colliding_object = colliding_platforms[0];
+    std::shared_ptr<GameObject> colliding_object = *colliding_platforms.begin();
     // Are we in the air, and is the object we are colliding with below us?
     // If so, then set it as our current ground
     if (!player->GetGround()) {

@@ -7,10 +7,12 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "game_renderer/MatrixStack.h"
-#include "game_renderer/Shape.h"
-#include "game_renderer/Texture.h"
-#include "game_state/AxisAlignedBox.h"
+#include "MatrixStack.h"
+#include "Shape.h"
+#include "Texture.h"
+#include "AxisAlignedBox.h"
+
+enum ObjectType { OBSTACLE, COLLECTIBLE, PLAYER };
 
 // GameObjects are 3D entities which can be rendered
 class GameObject {
@@ -19,6 +21,7 @@ class GameObject {
   virtual ~GameObject();
 
   virtual std::shared_ptr<Shape> GetModel() = 0;
+  virtual ObjectType GetType() = 0;
 
   glm::vec3 GetPosition();
   glm::vec3 GetRotationAxis();

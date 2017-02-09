@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
+#include <queue>
 
 #include "GLSL.h"
 #include "GL/glew.h"
@@ -16,6 +17,7 @@
 #include "Platform.h"
 #include "InputBindings.h"
 #include "ViewFrustumCulling.h"
+#include "Octree.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -57,8 +59,7 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   return new_program;
 }
 
-void GameRenderer::Init(const std::string& resource_dir,
-                        std::shared_ptr<GameState> state) {
+void GameRenderer::Init(const std::string& resource_dir) {
   // OpenGL Setup Boilerplate
   if (!glfwInit()) {
     std::cerr << "!glfwInit()" << std::endl;
@@ -87,8 +88,6 @@ void GameRenderer::Init(const std::string& resource_dir,
             << std::endl;
   glfwSwapInterval(1);  // vsync
 
-  InputBindings::Init(state, window);
-
   GLSL::checkVersion();
   glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
   glEnable(GL_DEPTH_TEST);               // enable z-buffer test
@@ -105,6 +104,38 @@ void GameRenderer::Init(const std::string& resource_dir,
   }
 
   ImGuiInit();
+}
+
+void GameRenderer::InitState(std::shared_ptr<GameState> state) {
+  InputBindings::Init(state, this->window);
+}
+
+std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+GameRenderer::GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
+                               std::shared_ptr<Octree> tree) {
+  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> inView =
+      std::make_shared<std::unordered_set<std::shared_ptr<GameObject>>>();
+  std::queue<Node*> toVisit;
+  toVisit.push(tree->GetRoot());
+  while (!toVisit.empty()) {
+    Node* node = toVisit.front();
+    toVisit.pop();
+    if (node->objects->empty()) {
+      for (Node* child : *(node->children)) {
+        if (!ViewFrustumCulling::IsCulled(child->boundingBox, vfplane)) {
+          toVisit.push(child);
+        }
+      }
+    } else {
+      for (std::shared_ptr<GameObject> objectInBox : *(node->objects)) {
+        if (!ViewFrustumCulling::IsCulled(objectInBox->GetBoundingBox(),
+                                          vfplane)) {
+          inView->insert(objectInBox);
+        }
+      }
+    }
+  }
+  return inView;
 }
 
 void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
@@ -129,6 +160,9 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
       ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
 
+  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> gameObjects =
+      GetObjectsInView(vfplane, level->getTree());
+
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
@@ -137,8 +171,9 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
-  for (std::shared_ptr<Platform> platform : *level->getPlatforms()) {
-    if (!ViewFrustumCulling::IsCulled(platform->GetBoundingBox(), vfplane)) {
+  for (std::shared_ptr<GameObject> obj : *gameObjects) {
+    if (std::shared_ptr<Platform> platform =
+            std::dynamic_pointer_cast<Platform>(obj)) {
       MV = platform->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                          glm::value_ptr(MV.topMatrix()));
@@ -155,13 +190,14 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
-  for (std::shared_ptr<Note> note : *level->getNotes()) {
-    if (!ViewFrustumCulling::IsCulled(note->GetBoundingBox(), vfplane) &&
-        !note->GetCollected()) {
-      MV = note->GetTransform();
-      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(MV.topMatrix()));
-      note->GetModel()->draw(current_program);
+  for (std::shared_ptr<GameObject> obj : *gameObjects) {
+    if (std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(obj)) {
+      if (!note->GetCollected()) {
+        MV = note->GetTransform();
+        glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                           glm::value_ptr(MV.topMatrix()));
+        note->GetModel()->draw(current_program);
+      }
     }
   }
   current_program->unbind();
@@ -201,20 +237,22 @@ bool GameRenderer::WindowShouldClose() {
 }
 
 void GameRenderer::ImGuiInit() {
-  ImGui_ImplGlfwGL3_Init(window, false); // false -> don't use glfw keybindings
+  ImGui_ImplGlfwGL3_Init(window, false);  // false -> don't use glfw keybindings
 }
 
 void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state) {
-  static const ImGuiWindowFlags static_window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs;
+  static const ImGuiWindowFlags static_window_flags =
+      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs;
 
   ImGui_ImplGlfwGL3_NewFrame();
 
   ImGui::Begin("Stats", NULL, static_window_flags);
 
-  std::string score_string = "Score: " + std::to_string(game_state->GetPlayer()->GetScore());
+  std::string score_string =
+      "Score: " + std::to_string(game_state->GetPlayer()->GetScore());
   ImGui::Text(score_string.c_str());
 
-#ifdef DEBUG // Print fps and stuff
+#ifdef DEBUG  // Print fps and stuff
   static double last_debug_time = glfwGetTime();
   static int frames_since_last_debug = 0;
   static std::string fps_string = "FPS: no data";

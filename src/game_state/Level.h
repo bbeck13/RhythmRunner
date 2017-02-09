@@ -8,22 +8,22 @@
 #include "GameObject.h"
 #include "Platform.h"
 #include "Note.h"
+#include "Collectible.h"
+#include "Obstacle.h"
+#include "Octree.h"
 
 class Level {
  public:
-  Level(std::shared_ptr<sf::Music> music,
-        std::shared_ptr<std::vector<std::shared_ptr<Platform>>> platforms,
-        std::shared_ptr<std::vector<std::shared_ptr<Note>>> notes);
+  Level(std::shared_ptr<sf::Music> music, std::shared_ptr<Octree> tree);
   ~Level();
 
   std::shared_ptr<sf::Music> getMusic();
-  std::shared_ptr<std::vector<std::shared_ptr<Platform>>> getPlatforms();
-  std::shared_ptr<std::vector<std::shared_ptr<Note>>> getNotes();
+  std::shared_ptr<Octree> getTree();
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> getObjects();
 
  private:
   std::shared_ptr<sf::Music> music;
-  std::shared_ptr<std::vector<std::shared_ptr<Platform>>> platforms;
-  std::shared_ptr<std::vector<std::shared_ptr<Note>>> notes;
+  std::shared_ptr<Octree> tree;
 };
 
 #endif

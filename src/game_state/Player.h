@@ -21,6 +21,7 @@ class Player : public GameObject {
   bool GetSpacebarDown();
   std::shared_ptr<GameObject> GetGround(); // null if no ground
   std::shared_ptr<Shape> GetModel() override;
+  ObjectType GetType() override;
 
   void SetVerticalVelocity(float vertical_velocity);
   void SetSpacebarDown(bool spacebar_down);

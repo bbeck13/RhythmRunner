@@ -35,7 +35,8 @@ bool Player::GetSpacebarDown() {
 
 std::shared_ptr<Shape> Player::GetModel() {
   if (!Player::isInitialized) {
-    Player::shape->loadMesh(std::string(ASSET_DIR) + "/" + std::string(PLAYER_MESH));
+    Player::shape->loadMesh(std::string(ASSET_DIR) + "/" +
+                            std::string(PLAYER_MESH));
     Player::shape->init();
     Player::isInitialized = true;
   }
@@ -64,4 +65,8 @@ void Player::SetScore(int score) {
 
 int Player::GetScore() {
   return this->score;
+}
+
+ObjectType Player::GetType() {
+  return ObjectType::PLAYER;
 }
