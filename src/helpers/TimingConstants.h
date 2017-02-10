@@ -19,7 +19,7 @@
 #define DELTA_X_PER_TICK (DELTA_X_PER_SECOND * SECONDS_PER_TICK)
 
 // Platforms
-#define MS_PER_PLATFORM 1350
+#define MS_PER_PLATFORM 900
 // Spacing between platform positions - no regard for platform size/scale
 #define PLATFORM_X_DELTA (DELTA_X_PER_MS * MS_PER_PLATFORM)
 #define PLATFORM_Y_DELTA 0.4
