@@ -26,6 +26,9 @@ class GameRenderer {
   bool WindowShouldClose();
 
  private:
+  void ImGuiInit();
+  void ImGuiRender(std::shared_ptr<GameState> game_state);
+
   GLFWwindow* window;
   std::unordered_map<std::string, std::shared_ptr<Program>> programs;
   std::shared_ptr<Program> ProgramFromJSON(std::string filepath);

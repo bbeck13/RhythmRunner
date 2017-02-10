@@ -4,6 +4,8 @@
 
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw_gl3.h>
 
 #include "GLSL.h"
 #include "GL/glew.h"
@@ -97,6 +99,8 @@ void GameRenderer::Init(const std::string& resource_dir,
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
   }
+
+  ImGuiInit();
 }
 
 void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
@@ -173,6 +177,8 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   P->popMatrix();
   V.popMatrix();
 
+  ImGuiRender(game_state);
+
   glfwSwapBuffers(this->window);
   glfwPollEvents();
   if (game_state->Done()) {
@@ -188,4 +194,44 @@ void GameRenderer::Close() {
 
 bool GameRenderer::WindowShouldClose() {
   return glfwWindowShouldClose(window);
+}
+
+void GameRenderer::ImGuiInit() {
+  ImGui_ImplGlfwGL3_Init(window, false); // false -> don't use glfw keybindings
+}
+
+void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state) {
+  static const ImGuiWindowFlags static_window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs;
+
+  ImGui_ImplGlfwGL3_NewFrame();
+
+  ImGui::Begin("Stats", NULL, static_window_flags);
+
+  std::string score_string = "Score: " + std::to_string(game_state->GetPlayer()->GetScore());
+  ImGui::Text(score_string.c_str());
+
+#ifdef DEBUG // Print fps and stuff
+  static double last_debug_time = glfwGetTime();
+  static int frames_since_last_debug = 0;
+  static std::string fps_string = "FPS: no data";
+
+  double current_debug_time = glfwGetTime();
+  double elapsed_debug_time = current_debug_time - last_debug_time;
+  if (elapsed_debug_time > 1.0) {
+    // more than a second has elapsed, so print an update
+    double fps = frames_since_last_debug / elapsed_debug_time;
+    std::ostringstream fps_stream;
+    fps_stream << std::setprecision(4) << "FPS: " << fps;
+    fps_string = fps_stream.str();
+    last_debug_time = current_debug_time;
+    frames_since_last_debug = 0;
+  }
+  frames_since_last_debug++;
+
+  ImGui::Text(fps_string.c_str());
+#endif
+
+  ImGui::End();
+
+  ImGui::Render();
 }

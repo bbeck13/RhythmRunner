@@ -76,6 +76,13 @@ add_subdirectory(${AQUILA_DIR})
 target_link_libraries(${CMAKE_PROJECT_NAME} Aquila)
 include_directories(${AQUILA_DIR}) # TODO(jarhar): this is very hacky
 
+# imgui
+set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui-glew")
+file(GLOB IMGUI_SOURCES "${IMGUI_DIR}/*.cpp")
+add_library(IMGUI_LIB STATIC ${IMGUI_SOURCES})
+target_link_libraries(${CMAKE_PROJECT_NAME} IMGUI_LIB)
+include_directories(${IMGUI_DIR})
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
    if(APPLE)
