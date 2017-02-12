@@ -1,29 +1,26 @@
-default:
+ifeq ($(OS),Windows_NT)
+	CMAKE_ARGS = -G "Visual Studio 14 2015 Win64"
+	MAKE_CMD = echo windoze
+else
+	CMAKE_ARGS = 
+	MAKE_CMD = make
+endif
+
+.PHONY: default release_debug release debug clean
+
+default: release_debug
+
+release_debug:
 	git submodule init && git submodule update
-	if [ -a build ] ; then \
-	   cd build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && make; \
-	else \
-	   mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && make;\
-	fi;
+	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && ${MAKE_CMD}
 
 release:
 	git submodule init && git submodule update
-	if [ -a build ] ; then \
-	   cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make; \
-	else \
-	   mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make;\
-	fi;
+	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Release .. && ${MAKE_CMD}
 
 debug:
 	git submodule init && git submodule update
-	if [ -a build ] ; then \
-	   cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make; \
-	else \
-	   mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make;\
-	fi;
+	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Debug .. && ${MAKE_CMD}
 
 clean:
-	if [ -a build ] ; then \
-	   rm -rf build; \
-	fi;
-
+	rm -rf build
