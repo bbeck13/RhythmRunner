@@ -10,8 +10,6 @@
 #include "MatrixStack.h"
 #include "GameCamera.h"
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 480
 #define TITLE "Rhythm Runner"
 #define PLATFORM_PROG "platform_prog"
 

@@ -12,8 +12,6 @@
 #include "LevelGenerator.h"
 #include "TimingConstants.h"
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 480
 #define MUSIC "music/1.wav"
 
 int main(int argc, char** argv) {
