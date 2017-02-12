@@ -16,11 +16,11 @@ release_debug:
 
 release:
 	git submodule init && git submodule update
-	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && ${MAKE_CMD}
+	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Release .. && ${MAKE_CMD}
 
 debug:
 	git submodule init && git submodule update
-	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && ${MAKE_CMD}
+	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Debug .. && ${MAKE_CMD}
 
 clean:
 	rm -rf build
