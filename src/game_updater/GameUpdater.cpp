@@ -8,6 +8,7 @@
 #include "helpers/Logging.h"
 #include "helpers/TimingConstants.h"
 
+#define MAX_DELTA_Y 0.007f
 namespace {
 
 template <typename T>
@@ -167,28 +168,58 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   }
 }
 
+std::shared_ptr<Platform> GetCurrentPlatform(std::shared_ptr<Level> level) {
+  return level->getPlatforms()->at(std::max(
+      0l,
+      std::min((long)(level->getMusic()->getPlayingOffset().asMilliseconds() /
+                      (float)MS_PER_PLATFORM),
+               (long)level->getPlatforms()->size() - 1)));
+}
+
 void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
+
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
 
   glm::vec3 player_position = game_state->GetPlayer()->GetPosition();
   glm::vec3 previous_camera_position = camera->getPosition();
   glm::vec3 new_camera_position;
 
+  std::shared_ptr<Platform> current_platform =
+     GetCurrentPlatform(game_state->GetLevel());
+  glm::vec3 current_platform_position;
+  if (current_platform) {
+    current_platform_position = current_platform->GetPosition();
+  } else {
+    // Fall back to player position if there is no platform
+    current_platform_position = game_state->GetPlayer()->GetPosition();
+  }
+  float dY =
+      (current_platform_position.y +
+       CAMERA_Y_SPACING) -
+      previous_camera_position.y;
+  // smooth out camera transition
+  if (std::abs(dY) > MAX_DELTA_Y) {
+    if (dY < 0) {
+      dY = -MAX_DELTA_Y;
+    } else {
+      dY = MAX_DELTA_Y;
+    }
+  }
+
   // Z position is fixed
   new_camera_position.z = player_position.z + CAMERA_Z_SPACING;
 
   // Always keep camera aligned with player on x axis.
   // Make camera look ahead of the player
-  new_camera_position.x = player_position.x + FORWARD_CAMERA_SPACING;
+  new_camera_position.x = player_position.x + CAMERA_X_SPACING;
 
-  // Gradually and smoothly move y towards player
-  float delta_y = player_position.y - previous_camera_position.y;
+  // align camera with y of current platform
   new_camera_position.y =
-      previous_camera_position.y + delta_y * FRACTION_CAMERA_MOVEMENT_PER_TICK;
+      previous_camera_position.y + dY;
 
   camera->setPosition(new_camera_position);
 
   // Always look directly at the player.
   // Add FORWARD_CAMERA_SPACING to align camera
-  camera->setLookAt(player_position + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0));
+  camera->setLookAt(new_camera_position - glm::vec3(0,0,CAMERA_Z_SPACING));
 }

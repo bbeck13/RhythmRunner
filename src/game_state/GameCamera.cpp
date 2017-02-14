@@ -27,6 +27,7 @@ void GameCamera::Refresh() {
 }
 
 void GameCamera::setLookAt(glm::vec3 new_lookat) {
+   //printf("look at set to: %f %f %f\n", new_lookat.x, new_lookat.y, new_lookat.z);
    lookAtPos = new_lookat;
    Refresh();
 }
@@ -36,6 +37,7 @@ glm::vec3 GameCamera::getLookAt() {
 }
 
 void GameCamera::setPosition(glm::vec3 new_position) {
+   //printf("position set to: %f %f %f\n", new_position.x, new_position.y, new_position.z);
    eyePos = new_position;
    Refresh();
 }

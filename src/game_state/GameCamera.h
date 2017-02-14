@@ -17,8 +17,11 @@
 #define FORWARD_CAMERA_SPACING 2.0f
 // Move the camera X% closer to the target every tick
 #define FRACTION_CAMERA_MOVEMENT_PER_TICK 0.2f
-// How far the camera is from the player
-#define CAMERA_Z_SPACING 9.0f
+// How far the camera is from the player on each axis
+#define CAMERA_X_SPACING 3.0f
+#define CAMERA_Y_SPACING 1.8f
+#define CAMERA_Z_SPACING 6.0f
+
 
 class GameCamera {
 public:
@@ -39,7 +42,7 @@ public:
 private:
    MatrixStack ViewMatrix = MatrixStack();
    glm::vec3 eyePos = glm::vec3(0,1,0);
-   glm::vec3 lookAtPos = glm::vec3(0,0,-5);
+   glm::vec3 lookAtPos = glm::vec3(0,0.9,5);
    glm::vec3 up = glm::vec3(0, 1, 0);
    float obeta = -(M_PI_2);
    float oalpha = 0;
