@@ -15,6 +15,7 @@
 #include "FileSystemUtils.h"
 #include "LevelGenerator.h"
 #include "Platform.h"
+#include "MovingPlatform.h"
 #include "InputBindings.h"
 #include "ViewFrustumCulling.h"
 #include "Octree.h"
@@ -160,8 +161,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
       ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
 
-  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> gameObjects =
-      GetObjectsInView(vfplane, level->getTree());
+  game_state->SetItemsInView(GetObjectsInView(vfplane, level->getTree()));
 
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
@@ -171,9 +171,15 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
-  for (std::shared_ptr<GameObject> obj : *gameObjects) {
+  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
     if (std::shared_ptr<Platform> platform =
             std::dynamic_pointer_cast<Platform>(obj)) {
+      MV = platform->GetTransform();
+      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                         glm::value_ptr(MV.topMatrix()));
+      platform->GetModel()->draw(current_program);
+    } else if (std::shared_ptr<MovingPlatform> platform =
+            std::dynamic_pointer_cast<MovingPlatform>(obj)) {
       MV = platform->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                          glm::value_ptr(MV.topMatrix()));
@@ -190,7 +196,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
-  for (std::shared_ptr<GameObject> obj : *gameObjects) {
+  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
     if (std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(obj)) {
       if (!note->GetCollected()) {
         MV = note->GetTransform();

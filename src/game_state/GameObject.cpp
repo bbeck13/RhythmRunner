@@ -32,20 +32,12 @@ glm::vec3 GameObject::GetScale() {
 }
 
 MatrixStack GameObject::GetTransform() {
-  // TODO(jarhar): make this more efficient by caching calculated matrix
-  MatrixStack transform;
-  transform.pushMatrix();
-  transform.loadIdentity();
-  transform.translate(GetPosition());
-  // TODO(jarhar): rotate
-  transform.scale(GetScale());
-  return transform;
+  return AxisAlignedBox::GetTransform(GetPosition(), GetScale());
 }
 
 AxisAlignedBox GameObject::GetBoundingBox() {
   // TODO(jarhar): make this more efficient by caching calculated box
-  AxisAlignedBox box(GetModel(), GetTransform().topMatrix());
-  return box;
+  return AxisAlignedBox(GetModel(), GetTransform().topMatrix());
 }
 
 void GameObject::SetPosition(glm::vec3 position) {

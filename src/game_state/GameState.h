@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_set>
 
 #include "GameObject.h"
 #include "Level.h"
@@ -21,6 +22,9 @@ class GameState {
   std::shared_ptr<Level> GetLevel();
   std::shared_ptr<GameCamera> GetCamera();
   std::shared_ptr<Player> GetPlayer();
+  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+  GetObjectsInView();
+
   bool Done();
   uint64_t GetElapsedTicks();
   uint64_t GetTimingStartTick();
@@ -32,11 +36,15 @@ class GameState {
   void IncrementTicks();
   void SetTimingStartTick();
   void SetMusicTimingMode(bool music_timing_mode);
+  void SetItemsInView(
+      std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> objects);
 
  private:
   std::shared_ptr<Level> level;
   std::shared_ptr<GameCamera> camera;
   std::shared_ptr<Player> player;
+  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+      objectsInView;
   bool done;
   uint64_t elapsed_ticks;
   uint64_t timing_start_tick;

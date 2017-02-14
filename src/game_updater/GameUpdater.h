@@ -20,6 +20,7 @@ class GameUpdater {
   void Init(std::shared_ptr<GameState> game_state);
 
  private:
+  void UpdateLevel(std::shared_ptr<GameState> game_state);
   void UpdatePlayer(std::shared_ptr<GameState> game_state);
   void UpdateCamera(std::shared_ptr<GameState> game_state);
   static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>

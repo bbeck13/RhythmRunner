@@ -16,6 +16,9 @@ class MovingPlatform : public MovingObject, public Obstacle {
  public:
   MovingPlatform(glm::vec3 position,
                  std::shared_ptr<std::vector<glm::vec3>> path);
+  MovingPlatform(glm::vec3 position,
+                 std::shared_ptr<std::vector<glm::vec3>> path,
+                 float velocity);
   ~MovingPlatform();
 
   std::shared_ptr<Shape> GetModel() override;
