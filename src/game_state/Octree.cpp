@@ -1,8 +1,10 @@
 #include "Octree.h"
+
 #include <iostream>
 #include <limits>
 #include <sstream>
 #include <cstdlib>
+#include "MovingObject.h"
 
 Octree::Octree(
     std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects)
@@ -40,7 +42,8 @@ Node* Octree::constructOctree(std::vector<std::shared_ptr<GameObject>>* objs) {
 
   std::vector<Node*>* children = new std::vector<Node*>();
 
-  for (AxisAlignedBox a : splitOct(bb)) {
+  // TODO(bnbeck) profile quad tree vs octree
+  for (AxisAlignedBox a : splitQuad(bb)) {
     std::vector<std::shared_ptr<GameObject>>* objects =
         getObjectsInBox(objs, a);
     if (!objects->empty()) {
@@ -52,10 +55,33 @@ Node* Octree::constructOctree(std::vector<std::shared_ptr<GameObject>>* objs) {
 }
 
 // TODO(bnbeck) is it worth it to implement this?
+// TODONE(bnbeck) yes, yes it is
 std::vector<AxisAlignedBox> Octree::splitQuad(AxisAlignedBox toSplit) {
   std::vector<AxisAlignedBox> quadrants;
 
-  quadrants.push_back(AxisAlignedBox(toSplit.GetMin(), toSplit.GetMax()));
+  // mid
+  glm::vec3 mid_top_mid(0.5f * (toSplit.GetMin().x + toSplit.GetMax().x),
+                        toSplit.GetMax().y,
+                        0.5f * (toSplit.GetMin().z + toSplit.GetMax().z));
+  glm::vec3 right_top_mid(toSplit.GetMax().x, toSplit.GetMax().y,
+                          0.5f * (toSplit.GetMin().z + toSplit.GetMax().z));
+  glm::vec3 left_bottom_mid(toSplit.GetMin().x, toSplit.GetMin().y,
+                            0.5f * (toSplit.GetMin().z + toSplit.GetMax().z));
+  glm::vec3 mid_bottom_mid(0.5f * (toSplit.GetMin().x + toSplit.GetMax().x),
+                           toSplit.GetMin().y,
+                           0.5f * (toSplit.GetMin().z + toSplit.GetMax().z));
+  // front
+  glm::vec3 mid_bottom_front(0.5f * (toSplit.GetMin().x + toSplit.GetMax().x),
+                             toSplit.GetMin().y, toSplit.GetMin().z);
+  // back
+  glm::vec3 mid_top_back(0.5f * (toSplit.GetMin().x + toSplit.GetMax().x),
+                         toSplit.GetMax().y, toSplit.GetMax().z);
+
+  quadrants.push_back(AxisAlignedBox(toSplit.GetMin(), mid_top_mid));
+  quadrants.push_back(AxisAlignedBox(mid_bottom_front, right_top_mid));
+
+  quadrants.push_back(AxisAlignedBox(left_bottom_mid, mid_top_back));
+  quadrants.push_back(AxisAlignedBox(mid_bottom_mid, toSplit.GetMax()));
 
   return quadrants;
 }
@@ -133,7 +159,13 @@ std::vector<std::shared_ptr<GameObject>>* Octree::getObjectsInBox(
 glm::vec3 Octree::getMin(std::vector<std::shared_ptr<GameObject>>* objs) {
   glm::vec3 min(INFINITY, INFINITY, INFINITY);
   for (std::shared_ptr<GameObject> g : *objs) {
-    glm::vec3 cur = g->GetBoundingBox().GetMin();
+    glm::vec3 cur;
+    if (std::shared_ptr<MovingObject> movingObj =
+            std::dynamic_pointer_cast<MovingObject>(g)) {
+      cur = movingObj->GetFullBox(g->GetModel(), g->GetScale()).GetMin();
+    } else {
+      cur = g->GetBoundingBox().GetMin();
+    }
     if (min.x > cur.x) {
       min.x = cur.x;
     }
@@ -150,7 +182,13 @@ glm::vec3 Octree::getMin(std::vector<std::shared_ptr<GameObject>>* objs) {
 glm::vec3 Octree::getMax(std::vector<std::shared_ptr<GameObject>>* objs) {
   glm::vec3 max(-INFINITY, -INFINITY, -INFINITY);
   for (std::shared_ptr<GameObject> g : *objs) {
-    glm::vec3 cur = g->GetBoundingBox().GetMax();
+    glm::vec3 cur;
+    if (std::shared_ptr<MovingObject> movingObj =
+            std::dynamic_pointer_cast<MovingObject>(g)) {
+      cur = movingObj->GetFullBox(g->GetModel(), g->GetScale()).GetMax();
+    } else {
+      cur = g->GetBoundingBox().GetMax();
+    }
     if (max.x < cur.x) {
       max.x = cur.x;
     }

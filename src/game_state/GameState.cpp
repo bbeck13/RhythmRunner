@@ -11,7 +11,10 @@ GameState::GameState(std::shared_ptr<Level> level,
       done(false),
       elapsed_ticks(0),
       timing_start_tick(0),
-      music_timing_mode(false) {}
+      music_timing_mode(false) {
+  objectsInView =
+      std::make_shared<std::unordered_set<std::shared_ptr<GameObject>>>();
+}
 
 GameState::~GameState() {}
 
@@ -65,4 +68,14 @@ void GameState::SetTimingStartTick() {
 
 void GameState::SetMusicTimingMode(bool music_timing_mode) {
   this->music_timing_mode = music_timing_mode;
+}
+
+void GameState::SetItemsInView(
+    std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> objects) {
+  this->objectsInView = objects;
+}
+
+std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+GameState::GetObjectsInView() {
+  return objectsInView;
 }

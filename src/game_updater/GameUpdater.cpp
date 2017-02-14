@@ -9,6 +9,9 @@
 #include "Logging.h"
 #include "TimingConstants.h"
 #include "Octree.h"
+#include "MovingObject.h"
+
+#define COLLISION_WIDTH 0.05f
 
 // TODO(bnbeck) thread that shit my dude
 std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
@@ -55,19 +58,27 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
     game_state->SetDone(true);
   }
 
+  UpdateLevel(game_state);
   UpdatePlayer(game_state);
   UpdateCamera(game_state);
 
   game_state->IncrementTicks();
 }
 
+void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
+  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
+    if (std::shared_ptr<MovingObject> movingObj =
+            std::dynamic_pointer_cast<MovingObject>(obj)) {
+      obj->SetPosition(movingObj->updatePosition(obj->GetPosition()));
+    }
+  }
+}
+
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset the player
   game_state->SetDone(false);
-  game_state->GetPlayer()->SetPosition(Player::INITIAL_POSITION);
-  game_state->GetPlayer()->SetScore(0);
 
-  // reset collectibles
+  // reset collectibles and moving objects
   for (std::shared_ptr<GameObject> obj :
        *game_state->GetLevel()->getObjects()) {
     if (obj->GetType() == ObjectType::COLLECTIBLE) {
@@ -76,11 +87,17 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
         c->SetUncollected();
       }
     }
+    if (std::shared_ptr<MovingObject> movingObj =
+            std::dynamic_pointer_cast<MovingObject>(obj)) {
+      movingObj->Reset();
+      obj->SetPosition(movingObj->GetOriginalPosition());
+    }
   }
 
   // reset timing
   game_state->SetMusicTimingMode(true);
   game_state->SetTimingStartTick();
+  game_state->GetPlayer()->Reset();
 
   // set the music back to the beginning of the song
   std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
@@ -100,8 +117,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
 
   // Store player state before moving
   AxisAlignedBox previous_player_box = player->GetBoundingBox();
-  glm::vec3 previous_player_position = player->GetPosition();
-  float previous_player_velocity = player->GetVerticalVelocity();
+  float previous_player_velocity = player->GetYVelocity();
+  float collision_width = COLLISION_WIDTH;
 
   // Check to see if the ground is no longer beneath the player,
   // in which case they should fall down
@@ -118,18 +135,29 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   // determine new velocity, then position, then collision box
   if (player->GetGround() && player->GetSpacebarDown()) {
     // player should jump now
-    player->SetVerticalVelocity(PLAYER_JUMP_VELOCITY);
+    player->SetYVelocity(PLAYER_JUMP_VELOCITY);
+    player->SetZVelocity(0);
     player->RemoveGround();
   } else if (player->GetGround()) {
-    // player is stuck to ground, make sure velocity is neutralized
-    player->SetVerticalVelocity(0.0f);
+    if (std::shared_ptr<MovingObject> moving =
+            std::dynamic_pointer_cast<MovingObject>(player->GetGround())) {
+      // Move player with moving object
+      glm::vec3 movementVector = moving->GetMovementVector();
+      player->SetYVelocity(movementVector.y * moving->GetVelocity().y);
+      player->SetZVelocity(movementVector.z * moving->GetVelocity().z);
+      collision_width += movementVector.y * moving->GetVelocity().y;
+    } else {
+      // player is stuck to ground, make sure velocity is neutralized
+      player->SetYVelocity(0.0f);
+      player->SetZVelocity(0.0f);
+    }
   } else {
     // player is in the air, apply gravity
-    player->SetVerticalVelocity(previous_player_velocity - PLAYER_GRAVITY);
+    player->SetYVelocity(previous_player_velocity - PLAYER_GRAVITY);
   }
-  player->SetPosition(
-      previous_player_position +
-      glm::vec3(DELTA_X_PER_TICK, player->GetVerticalVelocity(), 0));
+  player->SetPosition(player->GetPosition() +
+                      glm::vec3(DELTA_X_PER_TICK, player->GetYVelocity(),
+                                player->GetZVelocity()));
 
   // collide!
   std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
@@ -151,39 +179,37 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     }
   }
 
-  if (colliding_platforms.size() > 1) {
-    // TODO(jarhar): further consider what is happening when we are colliding
-    // with two objects
-    Reset(game_state);
-  } else if (colliding_platforms.size() == 0) {
-    // No collision
-  } else {
-    // Handle the collision
-    std::shared_ptr<GameObject> colliding_object = *colliding_platforms.begin();
-    // Are we in the air, and is the object we are colliding with below us?
-    // If so, then set it as our current ground
-    if (!player->GetGround()) {
+  if (!colliding_platforms.empty()) {
+    AxisAlignedBox player_box = player->GetBoundingBox();
+    float player_min_y = previous_player_box.GetMin().y;
+    // Handle the collisions
+    for (std::shared_ptr<GameObject> colliding_object : colliding_platforms) {
+      // Are we in the air, and is the object we are colliding with below us?
+      // If so, then set it as our current ground
       AxisAlignedBox colliding_box = colliding_object->GetBoundingBox();
-      AxisAlignedBox player_box = player->GetBoundingBox();
+      float colliding_max_y = colliding_object->GetBoundingBox().GetMax().y;
 
-      // If the player's bounding box was "above" the platform's box before
+      // If the player's bounding box was "above" (within 1 velocity unit +
+      // allowed COLLISION_WIDTH error) the platform's box before
       // collision,
       // then we consider the collision "landing" on the platform
-      float prev_player_min_y = previous_player_box.GetMin().y;
-      float colliding_max_y = colliding_box.GetMax().y;
-      if (prev_player_min_y > colliding_max_y) {
+      if (std::abs(player_min_y - colliding_max_y) <
+          (std::abs(player->GetYVelocity()) + collision_width)) {
         // above colliding box, we are grounded on this platform
         // now attach player to the ground
         player->SetGround(colliding_object);
-        player->SetVerticalVelocity(0);
+        player->SetYVelocity(0);
+        player->SetZVelocity(0);
         player->SetPosition(
             glm::vec3(player->GetPosition().x,
                       colliding_max_y + Player::PLATFORM_SPACING +
                           (player_box.GetMax().y - player_box.GetMin().y) / 2,
                       player->GetPosition().z));
+        player_min_y = player->GetBoundingBox().GetMin().y;
       } else {
         // The collision was not from above, so reset the game
         Reset(game_state);
+        return;
       }
     }
   }

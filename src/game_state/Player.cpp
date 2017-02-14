@@ -5,28 +5,38 @@
 
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
-const glm::vec3 Player::INITIAL_POSITION(-5.5, 3, -5);
+const glm::vec3 Player::INITIAL_POSITION(-3, 4, -5);
 
 // static
 bool Player::isInitialized = false;
 std::shared_ptr<Shape> Player::shape = std::make_shared<Shape>();
 
 Player::Player()
-    : GameObject(Player::shape), vertical_velocity(0), spacebar_down(false) {
+    : GameObject(Player::shape), y_velocity(0), spacebar_down(false) {
   SetPosition(Player::INITIAL_POSITION);
   this->model = shape;
   this->scale = glm::vec3(0.8, 0.8, 0.8);
   this->score = 0;
+  this->y_velocity = 0;
+  this->z_velocity = 0;
 }
 
 Player::~Player() {}
 
-float Player::GetVerticalVelocity() {
-  return vertical_velocity;
+float Player::GetYVelocity() {
+  return y_velocity;
 }
 
 std::shared_ptr<GameObject> Player::GetGround() {
   return ground;
+}
+
+void Player::Reset() {
+  SetPosition(Player::INITIAL_POSITION);
+  score = 0;
+  y_velocity = 0;
+  z_velocity = 0;
+  RemoveGround();
 }
 
 bool Player::GetSpacebarDown() {
@@ -43,8 +53,8 @@ std::shared_ptr<Shape> Player::GetModel() {
   return Player::shape;
 }
 
-void Player::SetVerticalVelocity(float vertical_velocity) {
-  this->vertical_velocity = vertical_velocity;
+void Player::SetYVelocity(float y_velocity) {
+  this->y_velocity = y_velocity;
 }
 
 void Player::SetSpacebarDown(bool spacebar_down) {
@@ -69,4 +79,12 @@ int Player::GetScore() {
 
 ObjectType Player::GetType() {
   return ObjectType::PLAYER;
+}
+
+float Player::GetZVelocity() {
+  return z_velocity;
+}
+
+void Player::SetZVelocity(float z_velocity) {
+  this->z_velocity = z_velocity;
 }

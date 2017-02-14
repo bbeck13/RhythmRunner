@@ -1,11 +1,13 @@
 // bnbeck
+#include <iostream>
+#include <cstdlib>
+#include <time.h>
+
 #include "LevelGenerator.h"
 #include "Note.h"
 #include "Level.h"
 #include "Octree.h"
-#include <iostream>
-#include <cstdlib>
-#include <time.h>
+#include "MovingPlatform.h"
 
 LevelGenerator::LevelGenerator(std::string musicFile) {
   this->wav = std::make_shared<Aquila::WaveFile>(musicFile);
@@ -64,7 +66,23 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
 
   double xPos = -1, yPos = 2, zPos = -5, power = 0, lastPower = 0;
   int lastSample = samplesPerPlatform;
-  objs->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
+  std::shared_ptr<std::vector<glm::vec3>> path =
+      std::make_shared<std::vector<glm::vec3>>();
+
+  path->push_back(glm::vec3(xPos - 5, yPos, zPos));
+  path->push_back(glm::vec3(xPos + 1, yPos, zPos));
+
+  objs->push_back(
+      std::make_shared<MovingPlatform>(glm::vec3(xPos, yPos, zPos), path));
+
+  std::shared_ptr<std::vector<glm::vec3>> path2 =
+      std::make_shared<std::vector<glm::vec3>>();
+
+  path2->push_back(glm::vec3(xPos, yPos + 1, zPos));
+  path2->push_back(glm::vec3(xPos, yPos - 1, zPos));
+
+  objs->push_back(std::make_shared<MovingPlatform>(
+      glm::vec3(xPos - 1, yPos - 1, zPos), path2, 0.03f));
 
   for (int i = 1; i < num_platforms; i++) {
     std::vector<Aquila::SampleType> sample;
@@ -87,8 +105,7 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
       }
     }
     xPos += PLATFORM_X_DELTA;
-    objs->push_back(
-        std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
+    objs->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
     if (std::rand() % 10 < 4) {
       objs->push_back(
           std::make_shared<Note>(glm::vec3(xPos, yPos + 2.5, zPos)));
