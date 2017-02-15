@@ -1,7 +1,8 @@
 {
   "attributes": [
     "vertPos",
-    "vertNor"
+    "vertNor",
+    "vertTex"
   ],
   "frag": "player_frag.glsl",
   "name": "player_prog",

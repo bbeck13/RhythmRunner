@@ -7,7 +7,7 @@
 
 #include "GameObject.h"
 
-#define NOTE_MESH "models/sphere.obj"
+#define NOTE_MESH "models/note.obj"
 
 class Note : public GameObject {
   public:
