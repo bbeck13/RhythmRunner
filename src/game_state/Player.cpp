@@ -15,7 +15,7 @@ Player::Player()
     : GameObject(Player::shape), vertical_velocity(0), spacebar_down(false) {
   SetPosition(Player::INITIAL_POSITION);
   this->model = shape;
-  this->scale = glm::vec3(-0.3, 0.3, 0.3);
+  this->scale = glm::vec3(0.8, 0.8, 0.8);
   this->score = 0;
 }
 
