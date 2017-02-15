@@ -8,7 +8,7 @@ bool Platform::isInitialized = false;
 Platform::Platform(glm::vec3 position) : Obstacle(Platform::platform) {
   this->position = position;
   // todo play around with the size
-  this->scale = glm::vec3(3, .5, .5);
+  this->scale = glm::vec3(4, .5, .5);
   this->model = platform;
 }
 
@@ -29,4 +29,8 @@ std::shared_ptr<Shape> Platform::GetModel() {
     Platform::isInitialized = true;
   }
   return Platform::platform;
+}
+
+SecondaryType Platform::GetSecondaryType() {
+  return SecondaryType::PLATFORM;
 }

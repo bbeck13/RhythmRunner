@@ -88,3 +88,7 @@ float Player::GetZVelocity() {
 void Player::SetZVelocity(float z_velocity) {
   this->z_velocity = z_velocity;
 }
+
+SecondaryType Player::GetSecondaryType() {
+  return SecondaryType::BIKE;
+}

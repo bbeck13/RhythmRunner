@@ -29,7 +29,7 @@ MovingPlatform::~MovingPlatform() {
 std::shared_ptr<Shape> MovingPlatform::GetModel() {
   if (!MovingPlatform::isInitialized) {
     MovingPlatform::platform->loadMesh(std::string(ASSET_DIR) + "/" +
-                                       std::string(PLATFORM_MESH));
+                                       std::string(MOVING_PLATFORM_MESH));
     MovingPlatform::platform->init();
     MovingPlatform::isInitialized = true;
   }
@@ -38,4 +38,8 @@ std::shared_ptr<Shape> MovingPlatform::GetModel() {
 
 ObjectType MovingPlatform::GetType() {
   return ObjectType::OBSTACLE;
+}
+
+SecondaryType MovingPlatform::GetSecondaryType() {
+  return SecondaryType::MOVING_PLATFORM;
 }

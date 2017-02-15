@@ -12,13 +12,10 @@
 #include "LevelGenerator.h"
 #include "TimingConstants.h"
 
-#define MUSIC "music/1.wav"
+#define MUSIC "music/2.wav"
 
 int main(int argc, char** argv) {
-  std::string music;
-  music = ASSET_DIR;
-  music += "/";
-  music += MUSIC;
+  std::string music(ASSET_DIR "/" MUSIC);
 
   std::shared_ptr<LevelGenerator> levelGenerator =
       std::make_shared<LevelGenerator>(music);

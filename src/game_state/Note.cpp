@@ -24,9 +24,14 @@ Note::~Note() {}
 
 std::shared_ptr<Shape> Note::GetModel() {
   if (!Note::isInitialized) {
-    Note::shape->loadMesh(std::string(ASSET_DIR) + "/" + std::string(NOTE_MESH));
+    Note::shape->loadMesh(std::string(ASSET_DIR) + "/" +
+                          std::string(NOTE_MESH));
     Note::shape->init();
     Note::isInitialized = true;
   }
   return Note::shape;
+}
+
+SecondaryType Note::GetSecondaryType() {
+  return SecondaryType::NOTE;
 }

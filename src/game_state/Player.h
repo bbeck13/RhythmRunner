@@ -24,6 +24,7 @@ class Player : public GameObject {
   std::shared_ptr<GameObject> GetGround(); // null if no ground
   std::shared_ptr<Shape> GetModel() override;
   ObjectType GetType() override;
+  SecondaryType GetSecondaryType() override;
 
   void SetYVelocity(float y_velocity);
   void SetSpacebarDown(bool spacebar_down);

@@ -8,6 +8,27 @@
 #include "Level.h"
 #include "Octree.h"
 #include "MovingPlatform.h"
+#include "DroppingPlatform.h"
+
+#define COLLECT 3.2f
+#define EPISILON 0.05f
+
+std::pair<double, double> LevelGenerator::sizeRange(2.6f, 8.0f);
+
+namespace {
+template <typename tVal>
+tVal mapRange(std::pair<tVal, tVal> a, std::pair<tVal, tVal> b, tVal inVal) {
+  tVal inValNorm = inVal - a.first;
+  tVal aUpperNorm = a.second - a.first;
+  tVal normPosition = inValNorm / aUpperNorm;
+
+  tVal bUpperNorm = b.second - b.first;
+  tVal bValNorm = normPosition * bUpperNorm;
+  tVal outVal = b.first + bValNorm;
+
+  return outVal;
+}
+}
 
 LevelGenerator::LevelGenerator(std::string musicFile) {
   this->wav = std::make_shared<Aquila::WaveFile>(musicFile);
@@ -65,24 +86,9 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
                                               (double)wav->getAudioLength());
 
   double xPos = -1, yPos = 2, zPos = -5, power = 0, lastPower = 0;
-  int lastSample = samplesPerPlatform;
-  std::shared_ptr<std::vector<glm::vec3>> path =
-      std::make_shared<std::vector<glm::vec3>>();
-
-  path->push_back(glm::vec3(xPos - 5, yPos, zPos));
-  path->push_back(glm::vec3(xPos + 1, yPos, zPos));
-
-  objs->push_back(
-      std::make_shared<MovingPlatform>(glm::vec3(xPos, yPos, zPos), path));
-
-  std::shared_ptr<std::vector<glm::vec3>> path2 =
-      std::make_shared<std::vector<glm::vec3>>();
-
-  path2->push_back(glm::vec3(xPos, yPos + 1, zPos));
-  path2->push_back(glm::vec3(xPos, yPos - 1, zPos));
-
-  objs->push_back(std::make_shared<MovingPlatform>(
-      glm::vec3(xPos - 1, yPos - 1, zPos), path2, 0.03f));
+  int lastSample = samplesPerPlatform, ups = 0, downs = 0, wobble = 0,
+      dropping = 0, moving = 0;
+  objs->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
 
   for (int i = 1; i < num_platforms; i++) {
     std::vector<Aquila::SampleType> sample;
@@ -94,23 +100,87 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
 
     lastSample += samplesPerPlatform;
     Aquila::SignalSource src(sample, wav->getSampleFrequency());
-    power = Aquila::power(src);
+    power = mapRange(range, sizeRange, Aquila::power(src));
     double delta = power - lastPower;
     lastPower = power;
     if (std::abs(delta) > EPISILON) {
       if (delta > 0) {
         yPos += PLATFORM_Y_DELTA;
+        if (downs == 1) {
+          wobble++;
+        } else {
+          wobble = 0;
+        }
+        downs = 0;
+        ups++;
       } else {
         yPos -= PLATFORM_Y_DELTA;
+        if (ups == 1) {
+          wobble++;
+        } else {
+          wobble = 0;
+        }
+        ups = 0;
+        downs++;
       }
     }
+
     xPos += PLATFORM_X_DELTA;
-    objs->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos)));
-    if (std::rand() % 10 < 4) {
+    if (wobble == 2) {
+      wobble = 0;
+      objs->pop_back();
+      objs->pop_back();
+      if (objs->back()->GetSecondaryType() ==
+          SecondaryType::DROPPING_PLATFORM) {
+        objs->pop_back();
+        objs->push_back(std::make_shared<Platform>(
+            glm::vec3(xPos - 2 * PLATFORM_X_DELTA, yPos, zPos),
+            glm::vec3(power, .5f, .5f)));
+      }
+    }
+    if (downs > 2 || ups > 2) {
+      glm::vec3 xDelta =
+          glm::vec3(PLATFORM_X_DELTA, -PLATFORM_Y_DELTA, 0.0f);
+      std::shared_ptr<std::vector<glm::vec3>> path =
+          std::make_shared<std::vector<glm::vec3>>();
+      path->push_back(objs->at(objs->size() - 2)->GetPosition() + xDelta);
+      path->push_back(objs->at(objs->size() - 1)->GetPosition() + 2 * xDelta);
+      path->push_back(objs->at(objs->size() - 3)->GetPosition());
+      objs->pop_back();
+      objs->pop_back();
+      objs->pop_back();
+
+      objs->push_back(std::make_shared<MovingPlatform>(
+          path->at(2), path,
+          mapRange(sizeRange, std::pair<double, double>(0.01, 0.1), power)));
+      ups = downs = 0;
+      moving = 1;
+    } else if (moving == 1) {
+      moving = 0;
+    } else {
+      if (std::abs(delta) > EPISILON) {
+        if (objs->back()->GetSecondaryType() ==
+            SecondaryType::DROPPING_PLATFORM) {
+          yPos = objs->back()->GetPosition().y;
+        }
+        objs->push_back(std::make_shared<Platform>(glm::vec3(xPos, yPos, zPos),
+                                                   glm::vec3(power, .5f, .5f)));
+        dropping = 0;
+      } else {
+        objs->push_back(std::make_shared<DroppingPlatform>(
+            glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, .5f)));
+        dropping++;
+      }
+    }
+    if (power > COLLECT) {
       objs->push_back(
-          std::make_shared<Note>(glm::vec3(xPos, yPos + 2.5, zPos)));
+          std::make_shared<Note>(glm::vec3(xPos, yPos + power - .5, zPos)));
     }
   }
+
+#ifdef DEBUG
+  std::cerr << "Generated level!" << std::endl;
+#endif
 
 #ifdef DEBUG
   std::cerr << "Generating octree..." << std::endl;
@@ -118,9 +188,9 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
   std::shared_ptr<Octree> tree = std::make_shared<Octree>(objs);
   std::shared_ptr<Level> level =
       std::make_shared<Level>(this->getMusic(), tree);
-
 #ifdef DEBUG
-  std::cerr << "Generated level!" << std::endl;
+  std::cerr << "Generated octree!!" << std::endl;
 #endif
+
   return level;
 }

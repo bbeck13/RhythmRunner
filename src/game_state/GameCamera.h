@@ -14,7 +14,7 @@
 #define DEGREES_IN_CIRCLE 360.0f
 #define VIEWING_ANGLE 160.0f
 // Keep the camera this many units in front of the player
-#define FORWARD_CAMERA_SPACING 2.0f
+#define FORWARD_CAMERA_SPACING 6.0f
 // Move the camera X% closer to the target every tick
 #define FRACTION_CAMERA_MOVEMENT_PER_TICK 0.2f
 // How far the camera is from the player

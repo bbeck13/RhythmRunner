@@ -6,7 +6,7 @@
 #include "AxisAlignedBox.h"
 
 // TODO(bnbeck) play around with this value it can change the performace a lot
-#define OBJS_IN_LEAF 10
+#define OBJS_IN_LEAF 20
 
 class Node {
  public:
@@ -35,11 +35,13 @@ class Octree {
 
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> getObjects();
   std::string ToString();
+  float GetKillZone();
 
   Node* GetRoot();
 
  private:
   Node* root;
+  float killZone;
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects;
 
   static std::string ToString(Node* n);
