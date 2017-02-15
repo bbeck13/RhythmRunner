@@ -10,6 +10,7 @@ Octree::Octree(
     std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects)
     : root(constructOctree(objects.get())) {
   this->objects = objects;
+  this->killZone = root->boundingBox.GetMin().y;
 }
 
 Octree::~Octree() {
@@ -18,6 +19,10 @@ Octree::~Octree() {
 
 Node* Octree::GetRoot() {
   return root;
+}
+
+float Octree::GetKillZone() {
+  return killZone;
 }
 
 std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> Octree::getObjects() {

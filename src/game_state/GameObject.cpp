@@ -40,6 +40,10 @@ AxisAlignedBox GameObject::GetBoundingBox() {
   return AxisAlignedBox(GetModel(), GetTransform().topMatrix());
 }
 
+bool GameObject::Moves(SecondaryType type) {
+  return type == SecondaryType::MOVING_PLATFORM;
+}
+
 void GameObject::SetPosition(glm::vec3 position) {
   this->position = position;
 }

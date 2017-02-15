@@ -4,7 +4,7 @@
 #define TIMING_CONSTANTS_H_
 
 // Supreme constants
-#define DELTA_X_PER_SECOND 6.6  // "horizontal" player speed
+#define DELTA_X_PER_SECOND 10  // "horizontal" player speed
 #define TICKS_PER_SECOND 120.0
 
 // Conversions
@@ -19,10 +19,10 @@
 #define DELTA_X_PER_TICK (DELTA_X_PER_SECOND * SECONDS_PER_TICK)
 
 // Platforms
-#define MS_PER_PLATFORM 900
+#define MS_PER_PLATFORM 400
 // Spacing between platform positions - no regard for platform size/scale
 #define PLATFORM_X_DELTA (DELTA_X_PER_MS * MS_PER_PLATFORM)
-#define PLATFORM_Y_DELTA 0.4
+#define PLATFORM_Y_DELTA 0.5
 
 // Player Movement
 #define PLAYER_JUMP_DELTA_Y_PER_SECOND 10.0  // Jump velocity

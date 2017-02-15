@@ -172,18 +172,29 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                      glm::value_ptr(V.topMatrix()));
 
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (std::shared_ptr<Platform> platform =
-            std::dynamic_pointer_cast<Platform>(obj)) {
-      MV = platform->GetTransform();
+    if (obj->GetSecondaryType() == SecondaryType::PLATFORM) {
+      MV = obj->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                          glm::value_ptr(MV.topMatrix()));
-      platform->GetModel()->draw(current_program);
-    } else if (std::shared_ptr<MovingPlatform> platform =
-            std::dynamic_pointer_cast<MovingPlatform>(obj)) {
-      MV = platform->GetTransform();
+      obj->GetModel()->draw(current_program);
+    }
+  }
+  current_program->unbind();
+
+  // moving platforms
+  current_program = programs["moving_platform_prog"];
+  current_program->bind();
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
+    if (obj->GetSecondaryType() == SecondaryType::MOVING_PLATFORM ||
+        obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
+      MV = obj->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                          glm::value_ptr(MV.topMatrix()));
-      platform->GetModel()->draw(current_program);
+      obj->GetModel()->draw(current_program);
     }
   }
   current_program->unbind();
@@ -197,12 +208,14 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                      glm::value_ptr(V.topMatrix()));
 
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (std::shared_ptr<Note> note = std::dynamic_pointer_cast<Note>(obj)) {
-      if (!note->GetCollected()) {
-        MV = note->GetTransform();
-        glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                           glm::value_ptr(MV.topMatrix()));
-        note->GetModel()->draw(current_program);
+    if (obj->GetSecondaryType() == SecondaryType::NOTE) {
+      if (std::shared_ptr<Note> note = std::static_pointer_cast<Note>(obj)) {
+        if (!note->GetCollected()) {
+          MV = note->GetTransform();
+          glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                             glm::value_ptr(MV.topMatrix()));
+          note->GetModel()->draw(current_program);
+        }
       }
     }
   }

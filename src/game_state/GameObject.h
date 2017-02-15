@@ -13,6 +13,7 @@
 #include "AxisAlignedBox.h"
 
 enum ObjectType { OBSTACLE, COLLECTIBLE, PLAYER };
+enum SecondaryType { NOTE, PLATFORM, BIKE, MOVING_PLATFORM, DROPPING_PLATFORM };
 
 // GameObjects are 3D entities which can be rendered
 class GameObject {
@@ -22,6 +23,7 @@ class GameObject {
 
   virtual std::shared_ptr<Shape> GetModel() = 0;
   virtual ObjectType GetType() = 0;
+  virtual SecondaryType GetSecondaryType() = 0;
 
   glm::vec3 GetPosition();
   glm::vec3 GetRotationAxis();
@@ -30,6 +32,7 @@ class GameObject {
   std::shared_ptr<Texture> GetTexture();  // Texture may be null
   MatrixStack GetTransform();
   AxisAlignedBox GetBoundingBox();
+  static bool Moves(SecondaryType type);
 
   void SetPosition(glm::vec3 position);
   void SetRotationAxis(glm::vec3 rotation_axis);

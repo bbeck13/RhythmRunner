@@ -10,7 +10,7 @@
 #include "Shape.h"
 #include "MovingObject.h"
 
-#define PLATFORM_MESH "models/platform.obj"
+#define MOVING_PLATFORM_MESH "models/platform.obj"
 
 class MovingPlatform : public MovingObject, public Obstacle {
  public:
@@ -23,6 +23,7 @@ class MovingPlatform : public MovingObject, public Obstacle {
 
   std::shared_ptr<Shape> GetModel() override;
   ObjectType GetType() override;
+  SecondaryType GetSecondaryType() override;
 
  private:
   static std::shared_ptr<Shape> platform;

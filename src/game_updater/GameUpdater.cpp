@@ -10,8 +10,9 @@
 #include "TimingConstants.h"
 #include "Octree.h"
 #include "MovingObject.h"
+#include "DroppingPlatform.h"
 
-#define COLLISION_WIDTH 0.05f
+#define COLLISION_WIDTH 0.15f
 
 // TODO(bnbeck) thread that shit my dude
 std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
@@ -67,9 +68,20 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (std::shared_ptr<MovingObject> movingObj =
-            std::dynamic_pointer_cast<MovingObject>(obj)) {
+    // Moving the moving objects
+    if (GameObject::Moves(obj->GetSecondaryType())) {
+      std::shared_ptr<MovingObject> movingObj =
+          std::dynamic_pointer_cast<MovingObject>(obj);
       obj->SetPosition(movingObj->updatePosition(obj->GetPosition()));
+
+      // Drop the dropping Platforms
+    } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
+      std::shared_ptr<DroppingPlatform> dropper =
+          std::dynamic_pointer_cast<DroppingPlatform>(obj);
+      if (dropper->IsDropping()) {
+        obj->SetPosition(obj->GetPosition() +
+                         glm::vec3(0.0f, dropper->GetYVelocity(), 0.0f));
+      }
     }
   }
 }
@@ -82,15 +94,21 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   for (std::shared_ptr<GameObject> obj :
        *game_state->GetLevel()->getObjects()) {
     if (obj->GetType() == ObjectType::COLLECTIBLE) {
-      if (std::shared_ptr<Collectible> c =
-              std::static_pointer_cast<Collectible>(obj)) {
-        c->SetUncollected();
-      }
+      std::shared_ptr<Collectible> c =
+          std::static_pointer_cast<Collectible>(obj);
+      c->SetUncollected();
     }
-    if (std::shared_ptr<MovingObject> movingObj =
-            std::dynamic_pointer_cast<MovingObject>(obj)) {
+    // reset the moving objects
+    if (obj->GetSecondaryType() == SecondaryType::MOVING_PLATFORM) {
+      std::shared_ptr<MovingObject> movingObj =
+          std::dynamic_pointer_cast<MovingObject>(obj);
       movingObj->Reset();
       obj->SetPosition(movingObj->GetOriginalPosition());
+      // reset the dropping platforms
+    } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
+      std::shared_ptr<DroppingPlatform> dropping =
+          std::dynamic_pointer_cast<DroppingPlatform>(obj);
+      dropping->Reset();
     }
   }
 
@@ -118,6 +136,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   // Store player state before moving
   AxisAlignedBox previous_player_box = player->GetBoundingBox();
   float previous_player_velocity = player->GetYVelocity();
+  // the max width to allow the player to be colliding with an object
   float collision_width = COLLISION_WIDTH;
 
   // Check to see if the ground is no longer beneath the player,
@@ -139,13 +158,21 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     player->SetZVelocity(0);
     player->RemoveGround();
   } else if (player->GetGround()) {
-    if (std::shared_ptr<MovingObject> moving =
-            std::dynamic_pointer_cast<MovingObject>(player->GetGround())) {
+    if (GameObject::Moves(player->GetGround()->GetSecondaryType())) {
+      std::shared_ptr<MovingObject> moving =
+          std::dynamic_pointer_cast<MovingObject>(player->GetGround());
       // Move player with moving object
       glm::vec3 movementVector = moving->GetMovementVector();
       player->SetYVelocity(movementVector.y * moving->GetVelocity().y);
       player->SetZVelocity(movementVector.z * moving->GetVelocity().z);
+      // add to the allowed collision width
       collision_width += movementVector.y * moving->GetVelocity().y;
+    } else if (player->GetGround()->GetSecondaryType() ==
+               SecondaryType::DROPPING_PLATFORM) {
+      std::shared_ptr<DroppingPlatform> dropping =
+          std::static_pointer_cast<DroppingPlatform>(player->GetGround());
+      // move the player with the dropping platform
+      player->SetYVelocity(dropping->GetYVelocity());
     } else {
       // player is stuck to ground, make sure velocity is neutralized
       player->SetYVelocity(0.0f);
@@ -155,6 +182,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     // player is in the air, apply gravity
     player->SetYVelocity(previous_player_velocity - PLAYER_GRAVITY);
   }
+  // finally update the players position
   player->SetPosition(player->GetPosition() +
                       glm::vec3(DELTA_X_PER_TICK, player->GetYVelocity(),
                                 player->GetZVelocity()));
@@ -165,6 +193,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
                                              game_state->GetLevel()->getTree());
   std::vector<std::shared_ptr<GameObject>> colliding_platforms;
   for (std::shared_ptr<GameObject> g : *collidingObjects) {
+    // collect the collectibles we are colliding with
     if (g->GetType() == ObjectType::COLLECTIBLE) {
       if (std::shared_ptr<Collectible> c =
               std::static_pointer_cast<Collectible>(g)) {
@@ -174,6 +203,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
               game_state->GetPlayer()->GetScore() + 1);
         }
       }
+      // add the platform to the list of colliding platforms
     } else if (g->GetType() == ObjectType::OBSTACLE) {
       colliding_platforms.push_back(g);
     }
@@ -206,12 +236,23 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
                           (player_box.GetMax().y - player_box.GetMin().y) / 2,
                       player->GetPosition().z));
         player_min_y = player->GetBoundingBox().GetMin().y;
+        // If the ground is now a dropping platform drop it
+        if (player->GetGround()->GetSecondaryType() ==
+            SecondaryType::DROPPING_PLATFORM) {
+          std::shared_ptr<DroppingPlatform> dropping =
+              std::dynamic_pointer_cast<DroppingPlatform>(player->GetGround());
+          dropping->SetDropping();
+        }
       } else {
         // The collision was not from above, so reset the game
         Reset(game_state);
         return;
       }
     }
+  }
+  if (previous_player_box.GetMin().y <
+      game_state->GetLevel()->getTree()->GetKillZone()) {
+    Reset(game_state);
   }
 }
 

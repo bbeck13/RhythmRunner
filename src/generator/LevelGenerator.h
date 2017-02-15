@@ -19,8 +19,6 @@
 #include "Level.h"
 #include "TimingConstants.h"
 
-#define EPISILON 0.0001f
-
 class LevelGenerator {
  public:
   LevelGenerator(std::string musicFile);
@@ -32,6 +30,7 @@ class LevelGenerator {
  private:
   std::shared_ptr<Aquila::WaveFile> wav;
   std::shared_ptr<sf::Music> music;
+  static std::pair<double, double> sizeRange;
 };
 
 #endif

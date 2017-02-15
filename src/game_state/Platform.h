@@ -17,6 +17,7 @@ class Platform : public Obstacle {
    ~Platform();
 
    std::shared_ptr<Shape> GetModel() override;
+   SecondaryType GetSecondaryType() override;
 
  private:
    static std::shared_ptr<Shape> platform;
