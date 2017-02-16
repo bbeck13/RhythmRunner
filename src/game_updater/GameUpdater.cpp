@@ -63,7 +63,6 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
       sf::Music::Status::Stopped) {
     StopGame(game_state);
   }
-
   UpdateLevel(game_state);
   UpdatePlayer(game_state);
   UpdateCamera(game_state);
@@ -186,7 +185,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   } else {
     // player is in the air, apply gravity
     player->SetYVelocity(previous_player_velocity - PLAYER_GRAVITY);
-    if (player->GetDoubleJump() && InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE)) {
+    if (player->GetDoubleJump() &&
+        InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE)) {
       // Double jump
       player->SetYVelocity(PLAYER_JUMP_VELOCITY);
       player->SetZVelocity(0);

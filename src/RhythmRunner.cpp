@@ -39,7 +39,7 @@ void PrintStatus() {
   double current_debug_time = glfwGetTime();
   double elapsed_debug_time = current_debug_time - last_debug_time;
   if (elapsed_debug_time > 1.0) {
-  // more than a second has elapsed, so print an update
+// more than a second has elapsed, so print an update
 #ifndef _WIN32  // printing \r doesn't work on windows
     std::cout << "\r" << std::setw(10) << std::setprecision(4)
               << "FPS: " << (frames_since_last_debug / elapsed_debug_time)
@@ -89,6 +89,8 @@ int main(int argc, char** argv) {
                                           .asMicroseconds();
         unsigned target_tick_count = music_offset_micros * TICKS_PER_MICRO +
                                      game_state->GetTimingStartTick();
+        bool song_done = game_state->GetLevel()->getMusic()->getStatus() ==
+                         sf::Music::Status::Stopped;
 
         // Run enough ticks to catch up
         // TODO(jarhar): consider basic infinite loop detection here
@@ -100,7 +102,7 @@ int main(int argc, char** argv) {
           game_updater.Update(game_state);
         }
 
-        if (game_state->Done()) {
+        if (game_state->Done() || song_done) {
           program_mode = ProgramMode::END_SCREEN;
         }
         break;
@@ -117,10 +119,8 @@ int main(int argc, char** argv) {
 
       case ProgramMode::END_SCREEN:
         program_mode = end_renderer.Render(window, game_state);
-
         if (program_mode == ProgramMode::GAME_SCREEN) {
-          // If we are switching to game mode, then create a new game
-          CreateGame();
+          game_updater.Reset(game_state);
         }
         break;
 
