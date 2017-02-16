@@ -2,8 +2,6 @@
 
 #include "RendererSetup.h"
 
-#include <imgui.h>
-#include <imgui_impl_glfw_gl3.h>
 #include <iostream>
 
 #include "GLSL.h"
@@ -47,6 +45,15 @@ GLFWwindow* RendererSetup::InitOpenGL() {
   ImGui_ImplGlfwGL3_Init(window, false); // false -> don't install callbacks
 
   return window;
+}
+
+void RendererSetup::PreRender(GLFWwindow* window) {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void RendererSetup::PostRender(GLFWwindow* window) {
+  glfwSwapBuffers(window);
+  glfwPollEvents();
 }
 
 void RendererSetup::Close(GLFWwindow* window) {

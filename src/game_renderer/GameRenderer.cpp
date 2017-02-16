@@ -4,8 +4,6 @@
 
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
-#include <imgui.h>
-#include <imgui_impl_glfw_gl3.h>
 #include <queue>
 
 #include "FileSystemUtils.h"
@@ -17,6 +15,7 @@
 #include "Platform.h"
 #include "ViewFrustumCulling.h"
 #include "json.hpp"
+#include "RendererSetup.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -112,10 +111,11 @@ void GameRenderer::Render(GLFWwindow* window,
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
+  RendererSetup::PreRender(window);
+
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   float aspect = width / (float)height;
 
   auto P = std::make_shared<MatrixStack>();
@@ -213,8 +213,7 @@ void GameRenderer::Render(GLFWwindow* window,
 
   ImGuiRender(game_state);
 
-  glfwSwapBuffers(window);
-  glfwPollEvents();
+  RendererSetup::PostRender(window);
 }
 
 void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state) {
