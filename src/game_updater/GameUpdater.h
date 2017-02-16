@@ -26,6 +26,7 @@ class GameUpdater {
   static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
   GetCollidingObjects(AxisAlignedBox primary_object,
                       std::shared_ptr<Octree> tree);
+  void StopGame(std::shared_ptr<GameState> game_state);
 };
 
 #endif

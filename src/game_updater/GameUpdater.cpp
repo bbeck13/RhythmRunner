@@ -11,6 +11,7 @@
 #include <queue>
 
 #include "DroppingPlatform.h"
+#include "InputBindings.h"
 #include "Logging.h"
 #include "MovingObject.h"
 #include "Octree.h"
@@ -60,7 +61,7 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   // check to see if the music ended, in which case the level is complete
   if (game_state->GetLevel()->getMusic()->getStatus() ==
       sf::Music::Status::Stopped) {
-    game_state->SetDone(true);
+    StopGame(game_state);
   }
 
   UpdateLevel(game_state);
@@ -185,10 +186,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   } else {
     // player is in the air, apply gravity
     player->SetYVelocity(previous_player_velocity - PLAYER_GRAVITY);
-    // if player is close to falling, allow double jump
-    if (player->GetYVelocity() < PLAYER_JUMP_VELOCITY / 3.0 &&
-          player->GetDoubleJump() &&
-          ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) {
+    if (player->GetDoubleJump() && InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE)) {
+      // Double jump
       player->SetYVelocity(PLAYER_JUMP_VELOCITY);
       player->SetZVelocity(0);
       player->SetDoubleJump(false);
@@ -257,14 +256,14 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
         }
       } else {
         // The collision was not from above, so reset the game
-        game_state->SetDone(true);
+        StopGame(game_state);
         return;
       }
     }
   }
   if (previous_player_box.GetMin().y <
       game_state->GetLevel()->getTree()->GetKillZone()) {
-    game_state->SetDone(true);
+    StopGame(game_state);
   }
 }
 
@@ -292,4 +291,14 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   // Always look directly at the player.
   // Add FORWARD_CAMERA_SPACING to align camera
   camera->setLookAt(player_position + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0));
+}
+
+void GameUpdater::StopGame(std::shared_ptr<GameState> game_state) {
+  std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
+  if (music->getStatus() == sf::SoundSource::Status::Playing) {
+    // stop the music
+    music->stop();
+    music->setPlayingOffset(sf::Time::Zero);
+  }
+  game_state->SetDone(true);
 }
