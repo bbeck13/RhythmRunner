@@ -179,8 +179,15 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
       player->SetZVelocity(0.0f);
     }
   } else {
-    // player is in the air, apply gravity
-    player->SetYVelocity(previous_player_velocity - PLAYER_GRAVITY);
+    // determine if double jumping
+    if (player->GetDoubleJump()) {
+      player->SetYVelocity(PLAYER_JUMP_VELOCITY);
+      player->SetZVelocity(0);
+      player->SetDoubleJump(false);
+    } else {
+      // player is in the air, apply gravity
+      player->SetYVelocity(previous_player_velocity - PLAYER_GRAVITY);
+    }
   }
   // finally update the players position
   player->SetPosition(player->GetPosition() +

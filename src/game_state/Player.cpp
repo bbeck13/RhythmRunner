@@ -37,10 +37,16 @@ void Player::Reset() {
   y_velocity = 0;
   z_velocity = 0;
   RemoveGround();
+  is_double_jumping = false;
+  can_double_jump = true;
 }
 
 bool Player::GetSpacebarDown() {
   return spacebar_down;
+}
+
+bool Player::GetDoubleJump() {
+  return is_double_jumping;
 }
 
 std::shared_ptr<Shape> Player::GetModel() {
@@ -59,10 +65,19 @@ void Player::SetYVelocity(float y_velocity) {
 
 void Player::SetSpacebarDown(bool spacebar_down) {
   this->spacebar_down = spacebar_down;
+  if (!this->ground && spacebar_down && this->can_double_jump) {
+    this->is_double_jumping = true;
+    this->can_double_jump = false;
+  }
+}
+
+void Player::SetDoubleJump(bool is_double_jumping) {
+  this->is_double_jumping = is_double_jumping;
 }
 
 void Player::SetGround(std::shared_ptr<GameObject> ground) {
   this->ground = ground;
+  this->can_double_jump = true;
 }
 
 void Player::RemoveGround() {
