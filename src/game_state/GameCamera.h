@@ -28,6 +28,8 @@ public:
    MatrixStack getView();
    MatrixStack pivot(int width, int height, double xpos, double ypos);
 
+   void revolveAroundLookAt(float radiansVertical, float radiansHorizontal);
+
    void setPosition(glm::vec3 new_position);
    glm::vec3 getPosition();
 
