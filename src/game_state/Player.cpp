@@ -5,14 +5,13 @@
 
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
-const glm::vec3 Player::INITIAL_POSITION(-3, 4, -5);
+const glm::vec3 Player::INITIAL_POSITION(-5, 4, -5);
 
 // static
 bool Player::isInitialized = false;
 std::shared_ptr<Shape> Player::shape = std::make_shared<Shape>();
 
-Player::Player()
-    : GameObject(Player::shape), y_velocity(0) {
+Player::Player() : GameObject(Player::shape), y_velocity(0) {
   SetPosition(Player::INITIAL_POSITION);
   this->model = shape;
   this->scale = glm::vec3(0.8, 0.8, 0.8);
@@ -47,8 +46,7 @@ void Player::Reset() {
 
 std::shared_ptr<Shape> Player::GetModel() {
   if (!Player::isInitialized) {
-    Player::shape->loadMesh(std::string(ASSET_DIR) + "/" +
-                            std::string(PLAYER_MESH));
+    Player::shape->loadMesh(ASSET_DIR "/" PLAYER_MESH);
     Player::shape->init();
     Player::isInitialized = true;
   }
