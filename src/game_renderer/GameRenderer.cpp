@@ -192,7 +192,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                      glm::value_ptr(V.topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                      glm::value_ptr(MV.topMatrix()));
-  player->GetShape()->draw(current_program);
+  player->GetModel()->draw(current_program);
 
   P->popMatrix();
   V.popMatrix();
