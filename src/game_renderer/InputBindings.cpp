@@ -2,27 +2,24 @@
 
 #include "InputBindings.h"
 
-#include "Logging.h"
+#include <imgui.h>
+#include <imgui_impl_glfw_gl3.h>
 
-static std::shared_ptr<GameState> static_game_state;
+#include "Logging.h"
 
 InputBindings::InputBindings() {}
 
 InputBindings::~InputBindings() {}
 
-void InputBindings::Init(std::shared_ptr<GameState> game_state,
-                         GLFWwindow* window) {
-  static_game_state = game_state;
-
+void InputBindings::Bind(GLFWwindow* window) {
   glfwSetErrorCallback(InputBindings::ErrorCallback);
   glfwSetKeyCallback(window, InputBindings::KeyCallback);
   glfwSetMouseButtonCallback(window, InputBindings::MouseCallback);
   glfwSetFramebufferSizeCallback(window, InputBindings::ResizeCallback);
   glfwSetCursorPosCallback(window, InputBindings::CursorCallback);
-}
 
-void InputBindings::Close() {
-  static_game_state.reset();
+  glfwSetScrollCallback(window, ImGui_ImplGlfwGL3_ScrollCallback);
+  glfwSetCharCallback(window, ImGui_ImplGlfwGL3_CharCallback);
 }
 
 void InputBindings::KeyCallback(GLFWwindow* window,
@@ -32,12 +29,13 @@ void InputBindings::KeyCallback(GLFWwindow* window,
                                 int mods) {
   switch (key) {
     case GLFW_KEY_ESCAPE:
+      // TODO(jarhar): consider using ImGuiIO to do this instead, and remove
+      // most callbacks in this file in favor of ImGui bindings
       glfwSetWindowShouldClose(window, GL_TRUE);
       break;
-    case GLFW_KEY_SPACE:
-      static_game_state->GetPlayer()->SetSpacebarDown(action != GLFW_RELEASE);
-      break;
   }
+
+  ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
 }
 
 void InputBindings::MouseCallback(GLFWwindow* window,
@@ -48,6 +46,8 @@ void InputBindings::MouseCallback(GLFWwindow* window,
   if (action == GLFW_PRESS) {
     glfwGetCursorPos(window, &posX, &posY);
   }
+
+  ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
 }
 
 void InputBindings::ErrorCallback(int error, const char* description) {

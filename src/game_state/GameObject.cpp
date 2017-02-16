@@ -1,10 +1,10 @@
 // Joseph Arhar
 
-#include "game_state/GameObject.h"
+#include "GameObject.h"
 
 #include <assert.h>
 
-#include "helpers/Logging.h"
+#include "Logging.h"
 
 // TODO(jarhar): make this constructor require all fields
 GameObject::GameObject(std::shared_ptr<Shape> model) : model(model) {}
@@ -32,20 +32,16 @@ glm::vec3 GameObject::GetScale() {
 }
 
 MatrixStack GameObject::GetTransform() {
-  // TODO(jarhar): make this more efficient by caching calculated matrix
-  MatrixStack transform;
-  transform.pushMatrix();
-  transform.loadIdentity();
-  transform.translate(GetPosition());
-  // TODO(jarhar): rotate
-  transform.scale(GetScale());
-  return transform;
+  return AxisAlignedBox::GetTransform(GetPosition(), GetScale());
 }
 
 AxisAlignedBox GameObject::GetBoundingBox() {
   // TODO(jarhar): make this more efficient by caching calculated box
-  AxisAlignedBox box(GetModel(), GetTransform().topMatrix());
-  return box;
+  return AxisAlignedBox(GetModel(), GetTransform().topMatrix());
+}
+
+bool GameObject::Moves(SecondaryType type) {
+  return type == SecondaryType::MOVING_PLATFORM;
 }
 
 void GameObject::SetPosition(glm::vec3 position) {

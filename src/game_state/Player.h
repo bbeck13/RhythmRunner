@@ -3,7 +3,7 @@
 #ifndef PLAYER_H_
 #define PLAYER_H_
 
-#include "game_state/GameObject.h"
+#include "GameObject.h"
 
 #define PLAYER_MESH "models/body_of_bike.obj"
 
@@ -17,16 +17,19 @@ class Player : public GameObject {
   Player();
   ~Player();
 
-  float GetVerticalVelocity();
-  bool GetSpacebarDown();
+  void Reset();
+  float GetYVelocity();
+  float GetZVelocity();
   std::shared_ptr<GameObject> GetGround(); // null if no ground
   std::shared_ptr<Shape> GetModel() override;
+  ObjectType GetType() override;
+  SecondaryType GetSecondaryType() override;
 
-  void SetVerticalVelocity(float vertical_velocity);
-  void SetSpacebarDown(bool spacebar_down);
+  void SetYVelocity(float y_velocity);
   void SetGround(std::shared_ptr<GameObject> ground);
   void RemoveGround();
   void SetScore(int score);
+  void SetZVelocity(float z_velocity);
   int GetScore();
 
  private:
@@ -34,8 +37,8 @@ class Player : public GameObject {
   static bool isInitialized;
 
   std::shared_ptr<GameObject> ground;
-  float vertical_velocity;
-  bool spacebar_down;
+  float y_velocity;
+  float z_velocity;
   int score;
 };
 

@@ -15,11 +15,9 @@
 #include <aquila/transform/FftFactory.h>
 #include <SFML/Audio.hpp>
 
-#include "game_state/Platform.h"
-#include "game_state/Level.h"
-#include "helpers/TimingConstants.h"
-
-#define EPISILON 0.0001f
+#include "Platform.h"
+#include "Level.h"
+#include "TimingConstants.h"
 
 class LevelGenerator {
  public:
@@ -32,6 +30,7 @@ class LevelGenerator {
  private:
   std::shared_ptr<Aquila::WaveFile> wav;
   std::shared_ptr<sf::Music> music;
+  static std::pair<double, double> sizeRange;
 };
 
 #endif

@@ -14,6 +14,10 @@ release_debug:
 	git submodule init && git submodule update
 	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && ${MAKE_CMD}
 
+xcode:
+	git submodule init && git submodule update
+	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=RelWithDebInfo .. -G Xcode && ${MAKE_CMD}
+
 release:
 	git submodule init && git submodule update
 	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Release .. && ${MAKE_CMD}

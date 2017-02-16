@@ -1,6 +1,6 @@
 // Joseph Arhar
 
-#include "game_state/AxisAlignedBox.h"
+#include "AxisAlignedBox.h"
 
 #include <algorithm>
 #include <glm/ext.hpp>
@@ -12,6 +12,25 @@ bool AxisAlignedBox::IsColliding(const AxisAlignedBox& one,
          one.min.y <= two.max.y && one.max.y >= two.min.y &&
          one.min.z <= two.max.z && one.max.z >= two.min.z;
 }
+
+MatrixStack AxisAlignedBox::GetTransform(glm::vec3 position, glm::vec3 scale) {
+  // TODO(jarhar): make this more efficient by caching calculated matrix
+  MatrixStack transform;
+  transform.pushMatrix();
+  transform.loadIdentity();
+  transform.translate(position);
+  // TODO(jarhar): rotate
+  transform.scale(scale);
+  return transform;
+}
+
+AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
+                               glm::vec3 scale,
+                               glm::vec3 position)
+    : AxisAlignedBox(model, GetTransform(position, scale).topMatrix()) {}
+
+AxisAlignedBox::AxisAlignedBox(glm::vec3 min, glm::vec3 max)
+    : min(min), max(max) {}
 
 AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
                                glm::mat4 transform) {
@@ -49,4 +68,15 @@ glm::vec3 AxisAlignedBox::GetMax() {
 std::string AxisAlignedBox::ToString() {
   return "min: " + glm::to_string(GetMin()) + ", max: " +
          glm::to_string(GetMax());
+}
+
+AxisAlignedBox AxisAlignedBox::merge(AxisAlignedBox other) {
+  glm::vec3 otherMin = other.GetMin();
+  glm::vec3 otherMax = other.GetMax();
+
+  return AxisAlignedBox(
+      glm::vec3(std::min(min.x, otherMin.x), std::min(min.z, otherMin.z),
+                std::min(min.z, otherMin.z)),
+      glm::vec3(std::max(max.x, otherMax.x), std::max(max.z, otherMax.z),
+                std::max(max.z, otherMax.z)));
 }

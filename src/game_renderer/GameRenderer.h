@@ -4,13 +4,15 @@
 #define GAME_RENDERER_H_
 
 #include <unordered_map>
-#include "game_state/GameState.h"
-#include "GLFW/glfw3.h"
-#include "Program.h"
-#include "MatrixStack.h"
-#include "GameCamera.h"
+#include <unordered_set>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
-#define TITLE "Rhythm Runner"
+#include "GameCamera.h"
+#include "GameState.h"
+#include "MatrixStack.h"
+#include "Program.h"
+
 #define PLATFORM_PROG "platform_prog"
 
 class GameRenderer {
@@ -18,18 +20,17 @@ class GameRenderer {
   GameRenderer();
   ~GameRenderer();
 
-  void Init(const std::string& resource_dir, std::shared_ptr<GameState> state);
-  void Render(std::shared_ptr<GameState> game_state);
-  void Close();
-  bool WindowShouldClose();
+  void Init(const std::string& resource_dir);
+  void Render(GLFWwindow* window, std::shared_ptr<GameState> game_state);
 
  private:
-  void ImGuiInit();
   void ImGuiRender(std::shared_ptr<GameState> game_state);
 
-  GLFWwindow* window;
   std::unordered_map<std::string, std::shared_ptr<Program>> programs;
   std::shared_ptr<Program> ProgramFromJSON(std::string filepath);
+  static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+  GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
+                   std::shared_ptr<Octree> tree);
 };
 
 #endif
