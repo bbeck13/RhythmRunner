@@ -14,7 +14,7 @@ class MenuRenderer {
   MenuRenderer();
   ~MenuRenderer();
 
-  ProgramMode Render(GLFWwindow* window, std::shared_ptr<MenuState> menu_state);
+  MainProgramMode Render(GLFWwindow* window, std::shared_ptr<MenuState> menu_state);
 };
 
 #endif

@@ -22,7 +22,6 @@ GameRenderer::GameRenderer() {}
 GameRenderer::~GameRenderer() {}
 
 void GameRenderer::Init(const std::string& resource_dir) {
-
   glClearColor(.2f, .2f, .2f, 1.0f);
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
@@ -32,10 +31,10 @@ void GameRenderer::Init(const std::string& resource_dir) {
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
   }
-  
+
   std::shared_ptr<Texture> temp_texture;
-  std::vector<std::string> texture_files = 
-      FileSystemUtils::ListFiles(std::string(ASSET_DIR) + "/textures", "*.json");
+  std::vector<std::string> texture_files = FileSystemUtils::ListFiles(
+      std::string(ASSET_DIR) + "/textures", "*.json");
   for (int i = 0; i < texture_files.size(); i++) {
     temp_texture = GameRenderer::TextureFromJSON(texture_files[i]);
     textures[temp_texture->getName()] = temp_texture;
@@ -43,12 +42,12 @@ void GameRenderer::Init(const std::string& resource_dir) {
 
   // Set up rainbow of colors in color_vector
   // TODO move somewhere else
-  color_vec.push_back(glm::vec3(236.0/255.0, 0, 83.0/255.0));
-  color_vec.push_back(glm::vec3(236.0/255.0, 122.0/255, 0));
-  color_vec.push_back(glm::vec3(236.0/255.0, 205.0/255, 0));
-  color_vec.push_back(glm::vec3(89.0/255.0, 236.0/255, 0));
-  color_vec.push_back(glm::vec3(0/255.0, 172.0/255, 236.0/255.0));
-  color_vec.push_back(glm::vec3(150.0/255.0, 0/255, 236.0/255.0));
+  color_vec.push_back(glm::vec3(236.0 / 255.0, 0, 83.0 / 255.0));
+  color_vec.push_back(glm::vec3(236.0 / 255.0, 122.0 / 255, 0));
+  color_vec.push_back(glm::vec3(236.0 / 255.0, 205.0 / 255, 0));
+  color_vec.push_back(glm::vec3(89.0 / 255.0, 236.0 / 255, 0));
+  color_vec.push_back(glm::vec3(0 / 255.0, 172.0 / 255, 236.0 / 255.0));
+  color_vec.push_back(glm::vec3(150.0 / 255.0, 0 / 255, 236.0 / 255.0));
 }
 
 std::shared_ptr<Texture> GameRenderer::TextureFromJSON(std::string filepath) {
@@ -57,12 +56,12 @@ std::shared_ptr<Texture> GameRenderer::TextureFromJSON(std::string filepath) {
   // Read the flle into the JSON library
   nlohmann::json json_handler;
   json_input_stream >> json_handler;
-  
+
   std::string filename = json_handler["filename"];
   std::string name = json_handler["name"];
   int unit = json_handler["unit"];
   int wrap_mode_x = json_handler["wrap_mode_x"];
-  int wrap_mode_y = json_handler["wrap_mode_y"]; 
+  int wrap_mode_y = json_handler["wrap_mode_y"];
 
   std::shared_ptr<Texture> new_texture;
   new_texture = std::make_shared<Texture>();
@@ -214,7 +213,8 @@ void GameRenderer::Render(GLFWwindow* window,
   int color_count = 0;
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
     if (obj->GetSecondaryType() == SecondaryType::NOTE) {
-      if (std::shared_ptr<Note> note = std::static_pointer_cast<Note>(obj)) {
+      if (std::shared_ptr<gameobject::Note> note =
+              std::static_pointer_cast<gameobject::Note>(obj)) {
         if (!note->GetCollected()) {
           MV = note->GetTransform();
           glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
@@ -224,7 +224,8 @@ void GameRenderer::Render(GLFWwindow* window,
           if (color_count == 5) {
             color_count = 0;
           }
-          glUniform3f(current_program->getUniform("in_obj_color"), cur_color.x, cur_color.y, cur_color.z);
+          glUniform3f(current_program->getUniform("in_obj_color"), cur_color.x,
+                      cur_color.y, cur_color.z);
           note->GetModel()->draw(current_program);
         }
       }

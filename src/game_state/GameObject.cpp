@@ -15,19 +15,19 @@ std::shared_ptr<Texture> GameObject::GetTexture() {
   return texture;
 }
 
-glm::vec3 GameObject::GetPosition() {
+glm::vec3 GameObject::GetPosition() const {
   return position;
 }
 
-glm::vec3 GameObject::GetRotationAxis() {
+glm::vec3 GameObject::GetRotationAxis() const {
   return rotation_axis;
 }
 
-float GameObject::GetRotationAngle() {
+float GameObject::GetRotationAngle() const {
   return rotation_angle;
 }
 
-glm::vec3 GameObject::GetScale() {
+glm::vec3 GameObject::GetScale() const {
   return scale;
 }
 

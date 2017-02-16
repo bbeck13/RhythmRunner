@@ -12,7 +12,7 @@ void Collectible::SetUncollected() {
   this->isCollected = false;
 }
 
-bool Collectible::GetCollected() {
+bool Collectible::GetCollected() const {
   return this->isCollected;
 }
 

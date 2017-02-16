@@ -25,10 +25,10 @@ class GameObject {
   virtual ObjectType GetType() = 0;
   virtual SecondaryType GetSecondaryType() = 0;
 
-  glm::vec3 GetPosition();
-  glm::vec3 GetRotationAxis();
-  float GetRotationAngle();
-  glm::vec3 GetScale();
+  glm::vec3 GetPosition() const;
+  glm::vec3 GetRotationAxis() const;
+  float GetRotationAngle() const;
+  glm::vec3 GetScale() const;
   std::shared_ptr<Texture> GetTexture();  // Texture may be null
   MatrixStack GetTransform();
   AxisAlignedBox GetBoundingBox();

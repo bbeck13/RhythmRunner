@@ -3,3 +3,4 @@ build/
 *.swp
 imgui.ini
 xcode
+compile_commands.json

@@ -80,8 +80,8 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
 
       // Drop the dropping Platforms
     } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
-      std::shared_ptr<DroppingPlatform> dropper =
-          std::dynamic_pointer_cast<DroppingPlatform>(obj);
+      std::shared_ptr<gameobject::DroppingPlatform> dropper =
+          std::dynamic_pointer_cast<gameobject::DroppingPlatform>(obj);
       if (dropper->IsDropping()) {
         obj->SetPosition(obj->GetPosition() +
                          glm::vec3(0.0f, dropper->GetYVelocity(), 0.0f));
@@ -110,8 +110,8 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
       obj->SetPosition(movingObj->GetOriginalPosition());
       // reset the dropping platforms
     } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
-      std::shared_ptr<DroppingPlatform> dropping =
-          std::dynamic_pointer_cast<DroppingPlatform>(obj);
+      std::shared_ptr<gameobject::DroppingPlatform> dropping =
+          std::dynamic_pointer_cast<gameobject::DroppingPlatform>(obj);
       dropping->Reset();
     }
   }
@@ -173,8 +173,9 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
       collision_width += movementVector.y * moving->GetVelocity().y;
     } else if (player->GetGround()->GetSecondaryType() ==
                SecondaryType::DROPPING_PLATFORM) {
-      std::shared_ptr<DroppingPlatform> dropping =
-          std::static_pointer_cast<DroppingPlatform>(player->GetGround());
+      std::shared_ptr<gameobject::DroppingPlatform> dropping =
+          std::static_pointer_cast<gameobject::DroppingPlatform>(
+              player->GetGround());
       // move the player with the dropping platform
       player->SetYVelocity(dropping->GetYVelocity());
     } else {
@@ -250,8 +251,9 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
         // If the ground is now a dropping platform drop it
         if (player->GetGround()->GetSecondaryType() ==
             SecondaryType::DROPPING_PLATFORM) {
-          std::shared_ptr<DroppingPlatform> dropping =
-              std::dynamic_pointer_cast<DroppingPlatform>(player->GetGround());
+          std::shared_ptr<gameobject::DroppingPlatform> dropping =
+              std::dynamic_pointer_cast<gameobject::DroppingPlatform>(
+                  player->GetGround());
           dropping->SetDropping();
         }
       } else {

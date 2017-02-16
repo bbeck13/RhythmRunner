@@ -22,14 +22,20 @@
 class LevelGenerator {
  public:
   LevelGenerator(std::string musicFile);
+  LevelGenerator(
+      std::string musicFile,
+      std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects);
   ~LevelGenerator();
 
   std::shared_ptr<sf::Music> getMusic() { return music; }
   std::shared_ptr<Level> generateLevel();
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> Generate();
 
  private:
   std::shared_ptr<Aquila::WaveFile> wav;
   std::shared_ptr<sf::Music> music;
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> level;
+  bool loaded;
   static std::pair<double, double> sizeRange;
 };
 
