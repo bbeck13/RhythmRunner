@@ -8,21 +8,30 @@
 #include <imgui_impl_glfw_gl3.h>
 #include <queue>
 
-#include "GLSL.h"
-#include "GL/glew.h"
-#include "json.hpp"
-#include "MatrixStack.h"
 #include "FileSystemUtils.h"
-#include "LevelGenerator.h"
-#include "Platform.h"
-#include "MovingPlatform.h"
 #include "InputBindings.h"
-#include "ViewFrustumCulling.h"
+#include "LevelGenerator.h"
+#include "MatrixStack.h"
+#include "MovingPlatform.h"
 #include "Octree.h"
+#include "Platform.h"
+#include "ViewFrustumCulling.h"
+#include "json.hpp"
 
 GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
+
+void GameRenderer::Init(const std::string& resource_dir) {
+  // Initialize all programs from JSON files in assets folder
+  std::shared_ptr<Program> temp_program;
+  std::vector<std::string> json_files =
+      FileSystemUtils::ListFiles(std::string(ASSET_DIR) + "/shaders", "*.json");
+  for (int i = 0; i < json_files.size(); i++) {
+    temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
+    programs[temp_program->getName()] = temp_program;
+  }
+}
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   // Read in the file
@@ -60,57 +69,6 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   return new_program;
 }
 
-void GameRenderer::Init(const std::string& resource_dir) {
-  // OpenGL Setup Boilerplate
-  if (!glfwInit()) {
-    std::cerr << "!glfwInit()" << std::endl;
-    exit(1);
-  }
-  // request the highest possible version of OGL - important for mac
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  window = glfwCreateWindow(mode->width, mode->height, TITLE, monitor, NULL);
-  glfwMakeContextCurrent(window);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glewExperimental = true;
-
-  if (glewInit() != GLEW_OK) {
-    std::cerr << "Failed to initialize GLEW" << std::endl;
-    exit(1);
-  }
-  glGetError();  // weird bootstrap of glGetError
-  std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-  std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
-            << std::endl;
-  glfwSwapInterval(1);  // vsync
-
-  GLSL::checkVersion();
-  glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
-  glEnable(GL_DEPTH_TEST);               // enable z-buffer test
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  // Initialize all programs from JSON files in assets folder
-  std::shared_ptr<Program> temp_program;
-  std::vector<std::string> json_files =
-      FileSystemUtils::ListFiles(std::string(ASSET_DIR) + "/shaders", "*.json");
-  for (int i = 0; i < json_files.size(); i++) {
-    temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
-    programs[temp_program->getName()] = temp_program;
-  }
-
-  ImGuiInit();
-}
-
-void GameRenderer::InitState(std::shared_ptr<GameState> state) {
-  InputBindings::Init(state, this->window);
-}
-
 std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
 GameRenderer::GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
                                std::shared_ptr<Octree> tree) {
@@ -139,13 +97,14 @@ GameRenderer::GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
   return inView;
 }
 
-void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
+void GameRenderer::Render(GLFWwindow* window,
+                          std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
   int width, height;
-  glfwGetFramebufferSize(this->window, &width, &height);
+  glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   float aspect = width / (float)height;
@@ -238,25 +197,8 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
 
   ImGuiRender(game_state);
 
-  glfwSwapBuffers(this->window);
+  glfwSwapBuffers(window);
   glfwPollEvents();
-  if (game_state->Done()) {
-    glfwSetWindowShouldClose(window, GL_TRUE);
-  }
-}
-
-void GameRenderer::Close() {
-  InputBindings::Close();
-  glfwDestroyWindow(window);
-  glfwTerminate();
-}
-
-bool GameRenderer::WindowShouldClose() {
-  return glfwWindowShouldClose(window);
-}
-
-void GameRenderer::ImGuiInit() {
-  ImGui_ImplGlfwGL3_Init(window, false);  // false -> don't use glfw keybindings
 }
 
 void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state) {
@@ -271,7 +213,7 @@ void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state) {
       "Score: " + std::to_string(game_state->GetPlayer()->GetScore());
   ImGui::Text(score_string.c_str());
 
-#ifdef DEBUG  // Print fps and stuff
+#ifdef DEBUG  // Print fps
   static double last_debug_time = glfwGetTime();
   static int frames_since_last_debug = 0;
   static std::string fps_string = "FPS: no data";

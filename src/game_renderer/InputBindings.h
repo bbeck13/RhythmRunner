@@ -7,12 +7,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "GameState.h"
-
 class InputBindings {
  public:
-  static void Init(std::shared_ptr<GameState> game_state, GLFWwindow* window);
-  static void Close();
+  static void Bind(GLFWwindow* window);
 
  private:
   InputBindings();

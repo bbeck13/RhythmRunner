@@ -20,14 +20,12 @@ class Player : public GameObject {
   void Reset();
   float GetYVelocity();
   float GetZVelocity();
-  bool GetSpacebarDown();
   std::shared_ptr<GameObject> GetGround(); // null if no ground
   std::shared_ptr<Shape> GetModel() override;
   ObjectType GetType() override;
   SecondaryType GetSecondaryType() override;
 
   void SetYVelocity(float y_velocity);
-  void SetSpacebarDown(bool spacebar_down);
   void SetGround(std::shared_ptr<GameObject> ground);
   void RemoveGround();
   void SetScore(int score);
@@ -41,7 +39,6 @@ class Player : public GameObject {
   std::shared_ptr<GameObject> ground;
   float y_velocity;
   float z_velocity;
-  bool spacebar_down;
   int score;
 };
 

@@ -2,15 +2,19 @@
 
 #include "GameUpdater.h"
 
+// imgui and glfw are needed for keyboard input
+#include <imgui.h>
+#include <GLFW/glfw3.h>
+
 #include <glm/ext.hpp>
 #include <iostream>
 #include <queue>
 
-#include "Logging.h"
-#include "TimingConstants.h"
-#include "Octree.h"
-#include "MovingObject.h"
 #include "DroppingPlatform.h"
+#include "Logging.h"
+#include "MovingObject.h"
+#include "Octree.h"
+#include "TimingConstants.h"
 
 #define COLLISION_WIDTH 0.15f
 
@@ -152,7 +156,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   }
 
   // determine new velocity, then position, then collision box
-  if (player->GetGround() && player->GetSpacebarDown()) {
+  if (player->GetGround() && ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) {
     // player should jump now
     player->SetYVelocity(PLAYER_JUMP_VELOCITY);
     player->SetZVelocity(0);
