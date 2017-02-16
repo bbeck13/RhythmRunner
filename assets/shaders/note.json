@@ -9,7 +9,8 @@
   "uniforms": [
     "P",
     "V",
-    "MV"
+    "MV",
+    "in_obj_color"
   ],
   "vert": "note_vert.glsl"
 }

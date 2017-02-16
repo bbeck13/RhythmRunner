@@ -23,6 +23,7 @@ GameRenderer::GameRenderer() {}
 GameRenderer::~GameRenderer() {}
 
 void GameRenderer::Init(const std::string& resource_dir) {
+  glClearColor(.2f, .2f, .2f, 1.0f);
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
   std::vector<std::string> json_files =
@@ -31,6 +32,14 @@ void GameRenderer::Init(const std::string& resource_dir) {
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
   }
+  
+  // Set up rainbow of colors in color_vector
+  color_vec.push_back(glm::vec3(236.0/255.0, 0, 83.0/255.0));
+  color_vec.push_back(glm::vec3(236.0/255.0, 122.0/255, 0));
+  color_vec.push_back(glm::vec3(236.0/255.0, 205.0/255, 0));
+  color_vec.push_back(glm::vec3(89.0/255.0, 236.0/255, 0));
+  color_vec.push_back(glm::vec3(0/255.0, 172.0/255, 236.0/255.0));
+  color_vec.push_back(glm::vec3(150.0/255.0, 0/255, 236.0/255.0));
 }
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
@@ -166,6 +175,7 @@ void GameRenderer::Render(GLFWwindow* window,
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
+  int color_count = 0;
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
     if (obj->GetSecondaryType() == SecondaryType::NOTE) {
       if (std::shared_ptr<Note> note = std::static_pointer_cast<Note>(obj)) {
@@ -173,6 +183,12 @@ void GameRenderer::Render(GLFWwindow* window,
           MV = note->GetTransform();
           glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                              glm::value_ptr(MV.topMatrix()));
+          glm::vec3 cur_color = color_vec.at(color_count);
+          color_count++;
+          if (color_count == 5) {
+            color_count = 0;
+          }
+          glUniform3f(current_program->getUniform("in_obj_color"), cur_color.x, cur_color.y, cur_color.z);
           note->GetModel()->draw(current_program);
         }
       }

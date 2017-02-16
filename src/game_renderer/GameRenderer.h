@@ -31,6 +31,7 @@ class GameRenderer {
   static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
   GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
                    std::shared_ptr<Octree> tree);
+  std::vector<glm::vec3> color_vec;
 };
 
 #endif
