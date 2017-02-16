@@ -20,23 +20,26 @@ class Player : public GameObject {
   void Reset();
   float GetYVelocity();
   float GetZVelocity();
+  bool GetDoubleJump();
   std::shared_ptr<GameObject> GetGround(); // null if no ground
   std::shared_ptr<Shape> GetModel() override;
   ObjectType GetType() override;
   SecondaryType GetSecondaryType() override;
+  int GetScore();
 
   void SetYVelocity(float y_velocity);
+  void SetZVelocity(float z_velocity);
+  void SetDoubleJump(bool can_double_jump);
   void SetGround(std::shared_ptr<GameObject> ground);
   void RemoveGround();
   void SetScore(int score);
-  void SetZVelocity(float z_velocity);
-  int GetScore();
 
  private:
   static std::shared_ptr<Shape> shape;
   static bool isInitialized;
 
   std::shared_ptr<GameObject> ground;
+  bool can_double_jump;
   float y_velocity;
   float z_velocity;
   int score;

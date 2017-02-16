@@ -19,12 +19,17 @@ Player::Player()
   this->score = 0;
   this->y_velocity = 0;
   this->z_velocity = 0;
+  this->can_double_jump = false;
 }
 
 Player::~Player() {}
 
 float Player::GetYVelocity() {
   return y_velocity;
+}
+
+bool Player::GetDoubleJump() {
+  return can_double_jump;
 }
 
 std::shared_ptr<GameObject> Player::GetGround() {
@@ -36,6 +41,7 @@ void Player::Reset() {
   score = 0;
   y_velocity = 0;
   z_velocity = 0;
+  can_double_jump = false;
   RemoveGround();
 }
 
@@ -51,6 +57,10 @@ std::shared_ptr<Shape> Player::GetModel() {
 
 void Player::SetYVelocity(float y_velocity) {
   this->y_velocity = y_velocity;
+}
+
+void Player::SetDoubleJump(bool can_double_jump) {
+  this->can_double_jump = can_double_jump;
 }
 
 void Player::SetGround(std::shared_ptr<GameObject> ground) {

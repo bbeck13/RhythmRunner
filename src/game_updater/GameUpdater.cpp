@@ -160,6 +160,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     // player should jump now
     player->SetYVelocity(PLAYER_JUMP_VELOCITY);
     player->SetZVelocity(0);
+    player->SetDoubleJump(true);
     player->RemoveGround();
   } else if (player->GetGround()) {
     if (GameObject::Moves(player->GetGround()->GetSecondaryType())) {
@@ -185,6 +186,14 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   } else {
     // player is in the air, apply gravity
     player->SetYVelocity(previous_player_velocity - PLAYER_GRAVITY);
+    // if player is close to falling, allow double jump
+    if (player->GetYVelocity() < PLAYER_JUMP_VELOCITY / 3.0 &&
+          player->GetDoubleJump() &&
+          ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) {
+      player->SetYVelocity(PLAYER_JUMP_VELOCITY);
+      player->SetZVelocity(0);
+      player->SetDoubleJump(false);
+    }
   }
   // finally update the players position
   player->SetPosition(player->GetPosition() +
