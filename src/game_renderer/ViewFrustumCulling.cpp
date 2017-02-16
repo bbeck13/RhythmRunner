@@ -79,51 +79,94 @@ bool IsCulled(AxisAlignedBox box,
               std::shared_ptr<std::vector<glm::vec4>> planes) {
   float dist;
 
-  // If the max point is on the left side of the plane, cull
-  dist =
+  std::vector<glm::vec3> box_vertices;
+  // Right edge of box
+  box_vertices.push_back(box.GetMax()); 
+  box_vertices.push_back(vec3(box.GetMax().x, box.GetMax().y, box.GetMin().z));
+  box_vertices.push_back(vec3(box.GetMax().x, box.GetMin().y, box.GetMin().z));
+  box_vertices.push_back(vec3(box.GetMax().x, box.GetMin().y, box.GetMax().z));
+
+  // Left edge of box
+  box_vertices.push_back(box.GetMin()); 
+  box_vertices.push_back(vec3(box.GetMin().x, box.GetMax().y, box.GetMin().z));
+  box_vertices.push_back(vec3(box.GetMin().x, box.GetMin().y, box.GetMin().z));
+  box_vertices.push_back(vec3(box.GetMin().x, box.GetMin().y, box.GetMax().z));
+
+  int cull_count = 0;
+  for (glm::vec3 box_vert : box_vertices) {
+    dist =
       DistToPlane(planes->at(VFC_LEFT).x, planes->at(VFC_LEFT).y,
-                  planes->at(VFC_LEFT).z, planes->at(VFC_LEFT).w, box.GetMax());
-  if (dist <= 0) {
+                  planes->at(VFC_LEFT).z, planes->at(VFC_LEFT).w, box_vert);
+    if (dist <= 0) {
+      cull_count++;
+    }
+  }
+  if (cull_count == 8) {
     return true;
   }
 
-  // If the min point is on the right side of the plane, cull
-  dist = DistToPlane(planes->at(VFC_RIGHT).x, planes->at(VFC_RIGHT).y,
-                     planes->at(VFC_RIGHT).z, planes->at(VFC_RIGHT).w,
-                     box.GetMin());
-  if (dist <= 0) {
+  cull_count = 0;
+  for (glm::vec3 box_vert : box_vertices) {
+    dist =
+      DistToPlane(planes->at(VFC_RIGHT).x, planes->at(VFC_RIGHT).y,
+                  planes->at(VFC_RIGHT).z, planes->at(VFC_RIGHT).w, box_vert);
+    if (dist <= 0) {
+      cull_count++;
+    }
+  }
+  if (cull_count == 8) {
     return true;
   }
 
-  // If the min point is above the plane, cull
-  dist =
+  cull_count = 0;
+  for (glm::vec3 box_vert : box_vertices) {
+    dist =
       DistToPlane(planes->at(VFC_TOP).x, planes->at(VFC_TOP).y,
-                  planes->at(VFC_TOP).z, planes->at(VFC_TOP).w, box.GetMin());
-  if (dist <= 0) {
+                  planes->at(VFC_TOP).z, planes->at(VFC_TOP).w, box_vert);
+    if (dist <= 0) {
+      cull_count++;
+    }
+  }
+  if (cull_count == 8) {
     return true;
   }
 
-  // If the max point is below the plane, cull
-  dist = DistToPlane(planes->at(VFC_BOTTOM).x, planes->at(VFC_BOTTOM).y,
-                     planes->at(VFC_BOTTOM).z, planes->at(VFC_BOTTOM).w,
-                     box.GetMax());
-  if (dist <= 0) {
+  cull_count = 0;
+  for (glm::vec3 box_vert : box_vertices) {
+    dist =
+      DistToPlane(planes->at(VFC_BOTTOM).x, planes->at(VFC_BOTTOM).y,
+                  planes->at(VFC_BOTTOM).z, planes->at(VFC_BOTTOM).w, box_vert);
+    if (dist <= 0) {
+      cull_count++;
+    }
+  }
+  if (cull_count == 8) {
     return true;
   }
 
-  // If the max point is in front of the plane, cull
-  dist =
+  cull_count = 0;
+  for (glm::vec3 box_vert : box_vertices) {
+    dist =
       DistToPlane(planes->at(VFC_NEAR).x, planes->at(VFC_NEAR).y,
-                  planes->at(VFC_NEAR).z, planes->at(VFC_NEAR).w, box.GetMax());
-  if (dist <= 0) {
+                  planes->at(VFC_NEAR).z, planes->at(VFC_NEAR).w, box_vert);
+    if (dist <= 0) {
+      cull_count++;
+    }
+  }
+  if (cull_count == 8) {
     return true;
   }
 
-  // If the min point is in behind the plane, cull
-  dist =
+  cull_count = 0;
+  for (glm::vec3 box_vert : box_vertices) {
+    dist =
       DistToPlane(planes->at(VFC_FAR).x, planes->at(VFC_FAR).y,
-                  planes->at(VFC_FAR).z, planes->at(VFC_FAR).w, box.GetMax());
-  if (dist <= 0) {
+                  planes->at(VFC_FAR).z, planes->at(VFC_FAR).w, box_vert);
+    if (dist <= 0) {
+      cull_count++;
+    }
+  }
+  if (cull_count == 8) {
     return true;
   }
 
