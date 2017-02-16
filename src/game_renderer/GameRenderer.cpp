@@ -23,6 +23,7 @@ GameRenderer::GameRenderer() {}
 GameRenderer::~GameRenderer() {}
 
 void GameRenderer::Init(const std::string& resource_dir) {
+  glClearColor(.2f, .2f, .2f, 1.0f);
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
   std::vector<std::string> json_files =
@@ -31,6 +32,14 @@ void GameRenderer::Init(const std::string& resource_dir) {
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
   }
+  
+  // Set up rainbow of colors in color_vector
+  color_vec.push_back(glm::vec3(236.0/255.0, 0, 83.0/255.0));
+  color_vec.push_back(glm::vec3(236.0/255.0, 122.0/255, 0));
+  color_vec.push_back(glm::vec3(236.0/255.0, 205.0/255, 0));
+  color_vec.push_back(glm::vec3(89.0/255.0, 236.0/255, 0));
+  color_vec.push_back(glm::vec3(0/255.0, 172.0/255, 236.0/255.0));
+  color_vec.push_back(glm::vec3(150.0/255.0, 0/255, 236.0/255.0));
 }
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
@@ -95,62 +104,6 @@ GameRenderer::GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
     }
   }
   return inView;
-
-void GameRenderer::Init(const std::string& resource_dir,
-                        std::shared_ptr<GameState> state) {
-  // OpenGL Setup Boilerplate
-  if (!glfwInit()) {
-    std::cerr << "!glfwInit()" << std::endl;
-    exit(1);
-  }
-  // request the highest possible version of OGL - important for mac
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  window = glfwCreateWindow(mode->width, mode->height, TITLE, monitor, NULL);
-  glfwMakeContextCurrent(window);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glewExperimental = true;
-
-  if (glewInit() != GLEW_OK) {
-    std::cerr << "Failed to initialize GLEW" << std::endl;
-    exit(1);
-  }
-  glGetError();  // weird bootstrap of glGetError
-  std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-  std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
-            << std::endl;
-  glfwSwapInterval(1);  // vsync
-
-  InputBindings::Init(state, window);
-
-  GLSL::checkVersion();
-  glClearColor(.2f, .2f, .2f, 1.0f);  // set background color
-  glEnable(GL_DEPTH_TEST);               // enable z-buffer test
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  // Initialize all programs from JSON files in assets folder
-  std::shared_ptr<Program> temp_program;
-  std::vector<std::string> json_files =
-      FileSystemUtils::ListFiles(std::string(ASSET_DIR) + "/shaders", "*.json");
-  for (int i = 0; i < json_files.size(); i++) {
-    temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
-    programs[temp_program->getName()] = temp_program;
-  }
-
-  ImGuiInit();
-
-  color_vec.push_back(glm::vec3(236.0/255.0, 0, 83.0/255.0));
-  color_vec.push_back(glm::vec3(236.0/255.0, 122.0/255, 0));
-  color_vec.push_back(glm::vec3(236.0/255.0, 205.0/255, 0));
-  color_vec.push_back(glm::vec3(89.0/255.0, 236.0/255, 0));
-  color_vec.push_back(glm::vec3(0/255.0, 172.0/255, 236.0/255.0));
-  color_vec.push_back(glm::vec3(150.0/255.0, 0/255, 236.0/255.0));
 }
 
 void GameRenderer::Render(GLFWwindow* window,
@@ -223,19 +176,22 @@ void GameRenderer::Render(GLFWwindow* window,
                      glm::value_ptr(V.topMatrix()));
 
   int color_count = 0;
-  for (std::shared_ptr<Note> note : *level->getNotes()) {
-    if (!ViewFrustumCulling::IsCulled(note->GetBoundingBox(), vfplane) &&
-        !note->GetCollected()) {
-      MV = note->GetTransform();
-      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(MV.topMatrix()));
-      glm::vec3 cur_color = color_vec.at(color_count);
-      color_count++;
-      if (color_count == 5) {
-         color_count = 0;
+  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
+    if (obj->GetSecondaryType() == SecondaryType::NOTE) {
+      if (std::shared_ptr<Note> note = std::static_pointer_cast<Note>(obj)) {
+        if (!note->GetCollected()) {
+          MV = note->GetTransform();
+          glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                             glm::value_ptr(MV.topMatrix()));
+          glm::vec3 cur_color = color_vec.at(color_count);
+          color_count++;
+          if (color_count == 5) {
+            color_count = 0;
+          }
+          glUniform3f(current_program->getUniform("in_obj_color"), cur_color.x, cur_color.y, cur_color.z);
+          note->GetModel()->draw(current_program);
+        }
       }
-      glUniform3f(current_program->getUniform("in_obj_color"), cur_color.x, cur_color.y, cur_color.z);
-      note->GetModel()->draw(current_program);
     }
   }
   current_program->unbind();
