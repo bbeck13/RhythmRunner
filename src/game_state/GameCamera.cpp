@@ -88,3 +88,20 @@ glm::vec3 GameCamera::GetCameraPlayerSpacing() {
 void GameCamera::SetCameraPlayerSpacing(glm::vec3 camera_player_spacing) {
   this->camera_player_spacing = camera_player_spacing;
 }
+
+void GameCamera::revolveAroundLookAt(float radiansVertical, float radiansHorizontal) {
+   printf("previous eye: %f %f %f \n", eyePos.x, eyePos.y, eyePos.z);
+   printf("previous look at: %f %f %f \n", lookAtPos.x, lookAtPos.y, lookAtPos.z);
+   glm::vec3 eyePosRelativeToLookAt = eyePos - lookAtPos;
+   glm::vec3 eyeNormal = glm::cross(eyePosRelativeToLookAt, glm::vec3(1.0f, 0.0f, 1.0f));
+   printf("eye look at: %f %f %f \n", eyePosRelativeToLookAt.x, eyePosRelativeToLookAt.y, eyePosRelativeToLookAt.z);
+
+   auto eyeTranslateOffset = glm::translate(glm::mat4(), -eyePosRelativeToLookAt);
+   auto eyeRotateHorizontal = glm::rotate(eyeTranslateOffset, radiansHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
+   auto eyeRotateVertical = glm::rotate(eyeRotateHorizontal, radiansVertical, eyeNormal);
+   auto eyeInverseTranslation = glm::inverse(eyeTranslateOffset);
+
+   eyePos = glm::vec3(eyeRotateVertical * eyeInverseTranslation * glm::vec4(eyePosRelativeToLookAt, 0.0f)) + lookAtPos;
+
+   printf("new: %f %f %f \n", eyePos.x, eyePos.y, eyePos.z);
+}
