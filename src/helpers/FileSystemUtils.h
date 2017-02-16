@@ -7,8 +7,8 @@
 
 namespace FileSystemUtils {
 
-std::vector<std::string> ListFiles(const std::string& path, const std::string& pattern);
-
+std::vector<std::string> ListFiles(const std::string& path,
+                                   const std::string& pattern);
 }
 
 #endif

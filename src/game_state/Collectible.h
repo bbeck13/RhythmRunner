@@ -10,7 +10,7 @@ class Collectible : public GameObject {
 
   virtual void SetCollected();
   virtual void SetUncollected();
-  virtual bool GetCollected();
+  virtual bool GetCollected() const;
 
   ObjectType GetType() override;
 

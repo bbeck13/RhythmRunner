@@ -12,7 +12,8 @@
 namespace FileSystemUtils {
 
 // Uses glob to list all files in path with pattern matching
-std::vector<std::string> ListFiles(const std::string& path, const std::string& pattern) {
+std::vector<std::string> ListFiles(const std::string& path,
+                                   const std::string& pattern) {
   std::string path_and_pattern = path + "/" + pattern;
   std::vector<std::string> files;
 #ifdef _WIN32
@@ -30,12 +31,11 @@ std::vector<std::string> ListFiles(const std::string& path, const std::string& p
 #else
   glob_t glob_result;
   glob(path_and_pattern.c_str(), GLOB_TILDE, NULL, &glob_result);
-  for (int i = 0; i < glob_result.gl_pathc;++i) {
+  for (int i = 0; i < glob_result.gl_pathc; ++i) {
     files.push_back(std::string(glob_result.gl_pathv[i]));
   }
   globfree(&glob_result);
 #endif
   return files;
 }
-
 }
