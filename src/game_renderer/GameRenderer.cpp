@@ -17,11 +17,13 @@
 #include "json.hpp"
 #include "RendererSetup.h"
 
+Light gLight;
 GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
 
 void GameRenderer::Init(const std::string& resource_dir) {
+
   glClearColor(.2f, .2f, .2f, 1.0f);
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
@@ -39,6 +41,24 @@ void GameRenderer::Init(const std::string& resource_dir) {
   color_vec.push_back(glm::vec3(89.0/255.0, 236.0/255, 0));
   color_vec.push_back(glm::vec3(0/255.0, 172.0/255, 236.0/255.0));
   color_vec.push_back(glm::vec3(150.0/255.0, 0/255, 236.0/255.0));
+    
+  texture0 = std::make_shared<Texture>();
+  texture0->setFilename(std::string(ASSET_DIR) + "/textures/" + "lightgrey.png");
+  texture0->init();
+  texture0->setUnit(0);
+  texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
+    
+  texture1 = std::make_shared<Texture>();
+  texture1->setFilename(std::string(ASSET_DIR) + "/textures/" + "skyblue.jpg");
+  texture1->init();
+  texture1->setUnit(0);
+  texture1->setWrapModes(GL_REPEAT, GL_REPEAT);
+    
+  texture2 = std::make_shared<Texture>();
+  texture2->setFilename(std::string(ASSET_DIR) + "/textures/" + "rainbowglass.jpg");
+  texture2->init();
+  texture2->setUnit(0);
+  texture2->setWrapModes(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
 }
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
@@ -67,7 +87,6 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   for (int i = 0; i < uniforms.size(); i++) {
     new_program->addUniform(uniforms[i]);
   }
-
   // Create the attributes
   std::vector<std::string> attributes = json_handler["attributes"];
   for (int i = 0; i < attributes.size(); i++) {
@@ -133,7 +152,9 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
+    current_program->addUniform("Texture0");
   current_program->bind();
+    texture0->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
@@ -151,7 +172,9 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // moving platforms
   current_program = programs["moving_platform_prog"];
+    current_program->addUniform("Texture1");
   current_program->bind();
+    texture1->bind(current_program->getUniform("Texture1"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
@@ -198,7 +221,9 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // Player
   current_program = programs["player_prog"];
+    current_program->addUniform("Texture2");
   current_program->bind();
+    texture2->bind(current_program->getUniform("Texture2"));
   MV = player->GetTransform();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
