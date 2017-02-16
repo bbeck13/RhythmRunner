@@ -17,10 +17,13 @@
 #include "Platform.h"
 #include "ViewFrustumCulling.h"
 #include "json.hpp"
+#include "Texture.h"
 
 GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
+
+std::shared_ptr<Texture> texture0;
 
 void GameRenderer::Init(const std::string& resource_dir) {
   glClearColor(.2f, .2f, .2f, 1.0f);
@@ -32,6 +35,12 @@ void GameRenderer::Init(const std::string& resource_dir) {
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
   }
+
+  texture0 = std::make_shared<Texture>();
+  texture0->setFilename(std::string(ASSET_DIR) + "/models/crate.bmp");
+  texture0->init();
+  texture0->setUnit(0);
+  texture0->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
   
   // Set up rainbow of colors in color_vector
   color_vec.push_back(glm::vec3(236.0/255.0, 0, 83.0/255.0));
@@ -134,6 +143,7 @@ void GameRenderer::Render(GLFWwindow* window,
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
   current_program->bind();
+  texture0->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
