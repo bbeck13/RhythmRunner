@@ -17,15 +17,6 @@
 #include "json.hpp"
 #include "RendererSetup.h"
 
-std::shared_ptr<Texture> texture0;
-std::shared_ptr<Texture> texture1;
-std::shared_ptr<Texture> texture2;
-
-struct Light {
-    glm::vec4 position;
-    glm::vec3 intensities;
-};
-
 Light gLight;
 GameRenderer::GameRenderer() {}
 
@@ -52,13 +43,13 @@ void GameRenderer::Init(const std::string& resource_dir) {
   color_vec.push_back(glm::vec3(150.0/255.0, 0/255, 236.0/255.0));
     
   texture0 = std::make_shared<Texture>();
-  texture0->setFilename(std::string(ASSET_DIR) + "/textures/" + "rainbow.jpg");
+  texture0->setFilename(std::string(ASSET_DIR) + "/textures/" + "lightgrey.png");
   texture0->init();
   texture0->setUnit(0);
   texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
     
   texture1 = std::make_shared<Texture>();
-  texture1->setFilename(std::string(ASSET_DIR) + "/textures/" + "grass.jpg");
+  texture1->setFilename(std::string(ASSET_DIR) + "/textures/" + "skyblue.jpg");
   texture1->init();
   texture1->setUnit(0);
   texture1->setWrapModes(GL_REPEAT, GL_REPEAT);
@@ -67,7 +58,7 @@ void GameRenderer::Init(const std::string& resource_dir) {
   texture2->setFilename(std::string(ASSET_DIR) + "/textures/" + "rainbowglass.jpg");
   texture2->init();
   texture2->setUnit(0);
-  texture2->setWrapModes(GL_REPEAT, GL_REPEAT);
+  texture2->setWrapModes(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
 }
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
@@ -96,8 +87,6 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   for (int i = 0; i < uniforms.size(); i++) {
     new_program->addUniform(uniforms[i]);
   }
-    new_program->addUniform("light.position");
-    new_program->addUniform("light.intensities");
   // Create the attributes
   std::vector<std::string> attributes = json_handler["attributes"];
   for (int i = 0; i < attributes.size(); i++) {

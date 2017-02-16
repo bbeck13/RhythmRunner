@@ -15,6 +15,11 @@
 
 #define PLATFORM_PROG "platform_prog"
 
+struct Light {
+    glm::vec4 position;
+    glm::vec3 intensities;
+};
+
 class GameRenderer {
  public:
   GameRenderer();
@@ -32,6 +37,9 @@ class GameRenderer {
   GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
                    std::shared_ptr<Octree> tree);
   std::vector<glm::vec3> color_vec;
+  std::shared_ptr<Texture> texture0;
+  std::shared_ptr<Texture> texture1;
+  std::shared_ptr<Texture> texture2;
 };
 
 #endif
