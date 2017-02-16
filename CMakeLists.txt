@@ -6,7 +6,7 @@
 #
 ################################################################################
 cmake_minimum_required(VERSION 2.8)
-project(RhythmRunner CXX)
+project(RhythmRunner C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 file(GLOB_RECURSE RHYTHM_RUNNER_MAIN "src/RhythmRunner.cpp")
