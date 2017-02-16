@@ -20,14 +20,9 @@ void MenuRenderer::Render(GLFWwindow* window,
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  static const ImGuiWindowFlags window_flags;
+  static const ImGuiWindowFlags window_flags = 0;
 
   ImGuiIO& imgui_io = ImGui::GetIO();
-  if (imgui_io.KeysDown[GLFW_KEY_ESCAPE]) {
-    std::cout << "escape down" << std::endl;
-  } else {
-    std::cout << "escape not down" << std::endl;
-  }
 
   ImGui_ImplGlfwGL3_NewFrame();
 
