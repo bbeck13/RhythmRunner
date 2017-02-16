@@ -95,14 +95,8 @@ void Shape::Normalize() {
   // Go through all verticies shift and scale them
   for (size_t v = 0; v < posBuf.size() / 3; v++) {
     posBuf[3 * v + 0] = (posBuf[3 * v + 0] - shiftX) * scaleX;
-    assert(posBuf[3 * v + 0] >= -1.0 - EPSILON_SHAPE);
-    assert(posBuf[3 * v + 0] <= 1.0 + EPSILON_SHAPE);
     posBuf[3 * v + 1] = (posBuf[3 * v + 1] - shiftY) * scaleY;
-    assert(posBuf[3 * v + 1] >= -1.0 - EPSILON_SHAPE);
-    assert(posBuf[3 * v + 1] <= 1.0 + EPSILON_SHAPE);
     posBuf[3 * v + 2] = (posBuf[3 * v + 2] - shiftZ) * scaleZ;
-    assert(posBuf[3 * v + 2] >= -1.0 - EPSILON_SHAPE);
-    assert(posBuf[3 * v + 2] <= 1.0 + EPSILON_SHAPE);
   }
 }
 

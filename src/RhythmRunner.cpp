@@ -39,12 +39,8 @@ void PrintStatus() {
   double current_debug_time = glfwGetTime();
   double elapsed_debug_time = current_debug_time - last_debug_time;
   if (elapsed_debug_time > 1.0) {
-// more than a second has elapsed, so print an update
-#ifdef _WIN32  // printing \r doesn't work on windows
-    std::cout << std::setw(10) << std::setprecision(4)
-              << "FPS: " << (frames_since_last_debug / elapsed_debug_time)
-              << std::endl;
-#else
+  // more than a second has elapsed, so print an update
+#ifndef _WIN32  // printing \r doesn't work on windows
     std::cout << "\r" << std::setw(10) << std::setprecision(4)
               << "FPS: " << (frames_since_last_debug / elapsed_debug_time)
               << std::flush;
@@ -74,7 +70,10 @@ int main(int argc, char** argv) {
   program_mode = ProgramMode::MENU_SCREEN;
 
   while (!glfwWindowShouldClose(window)) {
-    InputBindings::StoreKeypresses();
+    // TODO(jarhar): this is kinda hacky
+    if (program_mode != ProgramMode::GAME_SCREEN) {
+      InputBindings::StoreKeypresses();
+    }
 
     switch (program_mode) {
       case ProgramMode::GAME_SCREEN: {
@@ -97,6 +96,7 @@ int main(int argc, char** argv) {
         // Update().
         //  What if the music starts/stops during one of multiple Update()s?
         while (game_state->GetElapsedTicks() < target_tick_count) {
+          InputBindings::StoreKeypresses();
           game_updater.Update(game_state);
         }
 

@@ -36,6 +36,10 @@ ProgramMode MenuRenderer::Render(GLFWwindow* window,
     // TODO(jarhar): validate music filepath here
     program_mode = ProgramMode::GAME_SCREEN;
   }
+  if (ImGui::Button("Exit [ESCAPE]") ||
+      InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {
+    program_mode = ProgramMode::EXIT;
+  }
   ImGui::End();
 
   ImGui::Render();
