@@ -117,7 +117,6 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   }
 
   // reset timing
-  game_state->SetMusicTimingMode(true);
   game_state->SetTimingStartTick();
   game_state->GetPlayer()->Reset();
 
@@ -258,14 +257,14 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
         }
       } else {
         // The collision was not from above, so reset the game
-        Reset(game_state);
+        game_state->SetDone(true);
         return;
       }
     }
   }
   if (previous_player_box.GetMin().y <
       game_state->GetLevel()->getTree()->GetKillZone()) {
-    Reset(game_state);
+    game_state->SetDone(true);
   }
 }
 

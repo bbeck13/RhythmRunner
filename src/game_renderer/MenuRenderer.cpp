@@ -2,10 +2,9 @@
 
 #include "MenuRenderer.h"
 
-#include <imgui.h>
-#include <imgui_impl_glfw_gl3.h>
-#include <iostream>
 #include <string.h>
+
+#include "InputBindings.h"
 
 #define TEXT_FIELD_LENGTH 256
 
@@ -13,18 +12,15 @@ MenuRenderer::MenuRenderer() {}
 
 MenuRenderer::~MenuRenderer() {}
 
-void MenuRenderer::Render(GLFWwindow* window,
-                          std::shared_ptr<MenuState> menu_state) {
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  glViewport(0, 0, width, height);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ProgramMode MenuRenderer::Render(GLFWwindow* window,
+                                 std::shared_ptr<MenuState> menu_state) {
+  // stay on the main menu until otherwise specified
+  ProgramMode program_mode = ProgramMode::MENU_SCREEN;
 
-  static const ImGuiWindowFlags window_flags = 0;
-
+  RendererSetup::PreRender(window);
   ImGuiIO& imgui_io = ImGui::GetIO();
-
   ImGui_ImplGlfwGL3_NewFrame();
+  static const ImGuiWindowFlags window_flags = 0;
 
   ImGui::Begin("Rhythm Runner", NULL, window_flags);
   ImGui::Text("Music Filepath:");
@@ -35,15 +31,14 @@ void MenuRenderer::Render(GLFWwindow* window,
     // TODO(jarhar): validate music filepath here
     menu_state->SetMusicPath(std::string(music_path_buffer, TEXT_FIELD_LENGTH));
   }
-  if (ImGui::Button("Start [ENTER]") || imgui_io.KeysDown[GLFW_KEY_ENTER]) {
+  if (ImGui::Button("Start [ENTER]") ||
+      InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
     // TODO(jarhar): validate music filepath here
-    // signal for the game to start
-    menu_state->SetMenuMode(MenuMode::START_GAME);
+    program_mode = ProgramMode::GAME_SCREEN;
   }
   ImGui::End();
 
   ImGui::Render();
-
-  glfwSwapBuffers(window);
-  glfwPollEvents();
+  RendererSetup::PostRender(window);
+  return program_mode;
 }

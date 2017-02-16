@@ -28,14 +28,12 @@ class GameState {
   bool Done();
   uint64_t GetElapsedTicks();
   uint64_t GetTimingStartTick();
-  bool GetMusicTimingMode();
 
   void SetLevel(std::shared_ptr<Level> level);
   void SetCamera(std::shared_ptr<GameCamera> camera);
   void SetDone(bool done);
   void IncrementTicks();
   void SetTimingStartTick();
-  void SetMusicTimingMode(bool music_timing_mode);
   void SetItemsInView(
       std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> objects);
 
@@ -48,7 +46,6 @@ class GameState {
   bool done;
   uint64_t elapsed_ticks;
   uint64_t timing_start_tick;
-  bool music_timing_mode;
 };
 
 #endif

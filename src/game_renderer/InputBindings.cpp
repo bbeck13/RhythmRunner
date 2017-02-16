@@ -2,10 +2,10 @@
 
 #include "InputBindings.h"
 
-#include <imgui.h>
-#include <imgui_impl_glfw_gl3.h>
-
 #include "Logging.h"
+
+static ImGuiIO prev_imgui_io;
+static ImGuiIO new_imgui_io;
 
 InputBindings::InputBindings() {}
 
@@ -20,6 +20,15 @@ void InputBindings::Bind(GLFWwindow* window) {
 
   glfwSetScrollCallback(window, ImGui_ImplGlfwGL3_ScrollCallback);
   glfwSetCharCallback(window, ImGui_ImplGlfwGL3_CharCallback);
+}
+
+void InputBindings::StoreKeypresses() {
+  prev_imgui_io = new_imgui_io;
+  new_imgui_io = ImGui::GetIO();
+}
+
+bool InputBindings::KeyNewlyPressed(int key) {
+  return !prev_imgui_io.KeysDown[key] && new_imgui_io.KeysDown[key];
 }
 
 void InputBindings::KeyCallback(GLFWwindow* window,

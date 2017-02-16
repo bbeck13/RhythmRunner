@@ -4,12 +4,17 @@
 #define INPUT_BINDINGS_H_
 
 #include <memory>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+
+#include "RendererSetup.h"
 
 class InputBindings {
  public:
   static void Bind(GLFWwindow* window);
+
+  // These are used to tell if the player "pressed" a button based on whether or
+  // not they were already pressing it during the last frame
+  static void StoreKeypresses();
+  static bool KeyNewlyPressed(int key);
 
  private:
   InputBindings();
