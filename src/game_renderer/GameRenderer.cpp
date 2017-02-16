@@ -21,6 +21,8 @@ GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
 
+std::vector<glm::vec3> color_vec;
+
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   // Read in the file
   std::ifstream json_input_stream(filepath, std::ifstream::in);
@@ -90,7 +92,7 @@ void GameRenderer::Init(const std::string& resource_dir,
   InputBindings::Init(state, window);
 
   GLSL::checkVersion();
-  glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
+  glClearColor(.2f, .2f, .2f, 1.0f);  // set background color
   glEnable(GL_DEPTH_TEST);               // enable z-buffer test
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -105,6 +107,13 @@ void GameRenderer::Init(const std::string& resource_dir,
   }
 
   ImGuiInit();
+
+  color_vec.push_back(glm::vec3(236.0/255.0, 0, 83.0/255.0));
+  color_vec.push_back(glm::vec3(236.0/255.0, 122.0/255, 0));
+  color_vec.push_back(glm::vec3(236.0/255.0, 205.0/255, 0));
+  color_vec.push_back(glm::vec3(89.0/255.0, 236.0/255, 0));
+  color_vec.push_back(glm::vec3(0/255.0, 172.0/255, 236.0/255.0));
+  color_vec.push_back(glm::vec3(150.0/255.0, 0/255, 236.0/255.0));
 }
 
 void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
@@ -155,12 +164,19 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
 
+  int color_count = 0;
   for (std::shared_ptr<Note> note : *level->getNotes()) {
     if (!ViewFrustumCulling::IsCulled(note->GetBoundingBox(), vfplane) &&
         !note->GetCollected()) {
       MV = note->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                          glm::value_ptr(MV.topMatrix()));
+      glm::vec3 cur_color = color_vec.at(color_count);
+      color_count++;
+      if (color_count == 5) {
+         color_count = 0;
+      }
+      glUniform3f(current_program->getUniform("in_obj_color"), cur_color.x, cur_color.y, cur_color.z);
       note->GetModel()->draw(current_program);
     }
   }
@@ -176,7 +192,7 @@ void GameRenderer::Render(std::shared_ptr<GameState> game_state) {
                      glm::value_ptr(V.topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                      glm::value_ptr(MV.topMatrix()));
-  player->GetModel()->draw(current_program);
+  player->GetShape()->draw(current_program);
 
   P->popMatrix();
   V.popMatrix();

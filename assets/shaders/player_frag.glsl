@@ -1,27 +1,15 @@
 #version 330 core
 in vec3 fragNor;
-in float f_light_pos;
-in float f_exp;
-in vec3 f_light_color;
-in vec3 amb_color;
-in vec3 diff_color;
+in vec4 fragPos;
 out vec4 color;
-vec3 new_amb_color;
 
 void main() {
-
-  vec3 lightPos = vec3(f_light_pos, 2, 25);
-  vec3 normal = normalize(fragNor);
-
-  float diffuse = max(0, dot(normal, lightPos));
-  vec3 toEye = -normalize(vec3(fragNor));
-  vec3 h = normalize(toEye + lightPos);
-  
-  float phong_exp = f_exp;
-  float specular = pow(max(0, dot(h, normal)), phong_exp);
-
-  vec3 i = diff_color * (amb_color + f_light_color * diffuse) + f_light_color * specular;
-
-  color = vec4(i, 1.0);
-
+  float amb_str = 0.5f;
+  vec3 ambient = amb_str * vec3(1, 1, 1);
+  vec3 norm = normalize(fragNor);
+  vec3 lightDir = normalize(vec3(150, 50, -4) - fragPos.xyz);
+  float diff = max(dot(norm, lightDir), 0.0);
+  vec3 diffuse = diff * vec3(1, 1, 1);
+  vec3 result = (diffuse + ambient) * vec3(1, 1, 1);
+  color = vec4(result, 1.0);
 }
