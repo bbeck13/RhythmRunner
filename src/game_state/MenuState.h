@@ -11,7 +11,7 @@ class MenuState {
   ~MenuState();
 
   std::string GetMusicPath();
-
+  std::string GetYoutubeVideo(std::string url);
   void SetMusicPath(std::string music_path);
 
  private:

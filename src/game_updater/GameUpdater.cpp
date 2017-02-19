@@ -93,6 +93,7 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset the player
   game_state->SetDone(false);
+  game_state->GetSky()->SetPosition(glm::vec3(0, 0, -10));
 
   // reset collectibles and moving objects
   for (std::shared_ptr<GameObject> obj :
@@ -135,6 +136,7 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
+  std::shared_ptr<Sky> sky = game_state->GetSky();
 
   // Store player state before moving
   AxisAlignedBox previous_player_box = player->GetBoundingBox();
@@ -193,6 +195,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
       player->SetDoubleJump(false);
     }
   }
+  sky->SetPosition(sky->GetPosition() + glm::vec3(DELTA_X_PER_TICK, 0 , 0));
   // finally update the players position
   player->SetPosition(player->GetPosition() +
                       glm::vec3(DELTA_X_PER_TICK, player->GetYVelocity(),

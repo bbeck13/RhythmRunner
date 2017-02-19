@@ -19,9 +19,8 @@ public:
 	void bind(GLint handle);
 	void unbind();
 	void setWrapModes(GLint wrapS, GLint wrapT); // Must be called after init()
-	
-private:
 	std::string filename;
+private:
 	int width;
 	int height;
 	GLuint tid;

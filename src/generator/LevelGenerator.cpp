@@ -32,7 +32,6 @@ tVal mapRange(std::pair<tVal, tVal> a, std::pair<tVal, tVal> b, tVal inVal) {
 
 LevelGenerator::LevelGenerator(std::string musicFile) {
   this->wav = std::make_shared<Aquila::WaveFile>(musicFile);
-
 #ifdef DEBUG
   std::cerr << "Loaded file: " << wav->getFilename() << " ("
             << wav->getBitsPerSample() << "b)" << std::endl;
@@ -60,6 +59,10 @@ LevelGenerator::~LevelGenerator() {}
 std::shared_ptr<Level> LevelGenerator::generateLevel() {
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objs =
       std::make_shared<std::vector<std::shared_ptr<GameObject>>>();
+
+  std::shared_ptr<Aquila::WaveFile> temp = this->wav;
+  // Hard code until figure out why youtube audio is weird
+  this->wav = std::make_shared<Aquila::WaveFile>("/Users/alex/CPE-476/RhythmRunner/assets/music/2.wav");
 
   std::srand(time(NULL));
 
@@ -177,6 +180,8 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
           std::make_shared<Note>(glm::vec3(xPos, yPos + power - .5, zPos)));
     }
   }
+
+  this->wav = temp;
 
 #ifdef DEBUG
   std::cerr << "Generated level!" << std::endl;

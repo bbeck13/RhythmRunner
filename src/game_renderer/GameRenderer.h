@@ -40,6 +40,7 @@ class GameRenderer {
   std::shared_ptr<Texture> texture0;
   std::shared_ptr<Texture> texture1;
   std::shared_ptr<Texture> texture2;
+  std::shared_ptr<Texture> texture3;
 };
 
 #endif

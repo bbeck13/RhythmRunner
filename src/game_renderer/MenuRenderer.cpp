@@ -3,6 +3,7 @@
 #include "MenuRenderer.h"
 
 #include <string.h>
+#include <iostream>
 
 #include "InputBindings.h"
 
@@ -27,13 +28,21 @@ ProgramMode MenuRenderer::Render(GLFWwindow* window,
   static char music_path_buffer[TEXT_FIELD_LENGTH];
   strncpy(music_path_buffer, menu_state->GetMusicPath().c_str(),
           TEXT_FIELD_LENGTH);
+
   if (ImGui::InputText("", music_path_buffer, TEXT_FIELD_LENGTH)) {
     // TODO(jarhar): validate music filepath here
+
+    if (strstr(music_path_buffer, "http")) {
+      strncpy(music_path_buffer, menu_state->GetYoutubeVideo(music_path_buffer).c_str(), TEXT_FIELD_LENGTH);
+    }
     menu_state->SetMusicPath(std::string(music_path_buffer, TEXT_FIELD_LENGTH));
   }
+
+  std::cout << menu_state->GetMusicPath() << std::endl;
   if (ImGui::Button("Start [ENTER]") ||
       InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
     // TODO(jarhar): validate music filepath here
+    menu_state->SetMusicPath(std::string(music_path_buffer, TEXT_FIELD_LENGTH));
     program_mode = ProgramMode::GAME_SCREEN;
   }
   if (ImGui::Button("Exit [ESCAPE]") ||

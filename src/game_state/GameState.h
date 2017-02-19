@@ -11,14 +11,17 @@
 #include "Level.h"
 #include "GameCamera.h"
 #include "Player.h"
+#include "Sky.h"
 
 class GameState {
  public:
   GameState(std::shared_ptr<Level> level,
             std::shared_ptr<GameCamera> camera,
-            std::shared_ptr<Player> player);
+            std::shared_ptr<Player> player,
+            std::shared_ptr<Sky> sky);
   ~GameState();
 
+  std::shared_ptr<Sky> GetSky();
   std::shared_ptr<Level> GetLevel();
   std::shared_ptr<GameCamera> GetCamera();
   std::shared_ptr<Player> GetPlayer();
@@ -38,6 +41,7 @@ class GameState {
       std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> objects);
 
  private:
+  std::shared_ptr<Sky> sky;
   std::shared_ptr<Level> level;
   std::shared_ptr<GameCamera> camera;
   std::shared_ptr<Player> player;
