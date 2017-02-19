@@ -10,6 +10,8 @@
 #include "Octree.h"
 #include "GameObject.h"
 
+#define XBOX_A 11
+
 class GameUpdater {
  public:
   GameUpdater();
@@ -27,6 +29,7 @@ class GameUpdater {
   GetCollidingObjects(AxisAlignedBox primary_object,
                       std::shared_ptr<Octree> tree);
   void StopGame(std::shared_ptr<GameState> game_state);
+  bool JumpInput();
 };
 
 #endif

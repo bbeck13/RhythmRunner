@@ -15,6 +15,7 @@ class InputBindings {
   // not they were already pressing it during the last frame
   static void StoreKeypresses();
   static bool KeyNewlyPressed(int key);
+  static bool ButtonNewlyPressed(int key);
 
  private:
   InputBindings();

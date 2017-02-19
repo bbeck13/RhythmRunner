@@ -7,6 +7,9 @@
 static ImGuiIO prev_imgui_io;
 static ImGuiIO new_imgui_io;
 
+int button_count; 
+static const unsigned char* new_buttons;
+
 InputBindings::InputBindings() {}
 
 InputBindings::~InputBindings() {}
@@ -25,6 +28,11 @@ void InputBindings::Bind(GLFWwindow* window) {
 void InputBindings::StoreKeypresses() {
   prev_imgui_io = new_imgui_io;
   new_imgui_io = ImGui::GetIO();
+  new_buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &button_count);
+}
+
+bool InputBindings::ButtonNewlyPressed(int button) {
+  return new_buttons[button];
 }
 
 bool InputBindings::KeyNewlyPressed(int key) {
