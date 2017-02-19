@@ -16,11 +16,15 @@
 #include "ViewFrustumCulling.h"
 #include "json.hpp"
 #include "RendererSetup.h"
+#include "Sky.h"
 
 Light gLight;
 GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
+
+static int frame_count = 0;
+static int delay = 0;
 
 void GameRenderer::Init(const std::string& resource_dir) {
 
@@ -59,6 +63,12 @@ void GameRenderer::Init(const std::string& resource_dir) {
   texture2->init();
   texture2->setUnit(0);
   texture2->setWrapModes(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
+
+  texture3 = std::make_shared<Texture>();
+  texture3->setFilename(std::string(ASSET_DIR) + "/textures/" + "image-1.jpg");
+  texture3->init();
+  texture3->setUnit(0);
+  texture3->setWrapModes(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
 }
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
@@ -129,6 +139,8 @@ void GameRenderer::Render(GLFWwindow* window,
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
+  std::shared_ptr<Sky> sky = game_state->GetSky();
+  //std::cout << sky->GetPosition()[0] << std::endl;
 
   RendererSetup::PreRender(window);
 
@@ -219,11 +231,32 @@ void GameRenderer::Render(GLFWwindow* window,
   }
   current_program->unbind();
 
+  // Sky
+  current_program = programs["sky_prog"];
+  texture3->setFilename(std::string(ASSET_DIR) + "/textures/" + "image-" + std::to_string(frame_count) + ".jpg");
+  texture3->init();
+  texture3->setUnit(0);
+  texture3->setWrapModes(GL_REPEAT, GL_REPEAT);
+  if (delay % 2 == 0) {
+    frame_count++;
+  }
+  delay++;
+  std::cout << texture3->filename << std::endl; 
+  current_program->bind();
+  texture3->bind(current_program->getUniform("Texture3"));
+  MV = sky->GetTransform();
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                     glm::value_ptr(MV.topMatrix()));
+  sky->GetModel()->draw(current_program);
+
   // Player
   current_program = programs["player_prog"];
-    current_program->addUniform("Texture2");
   current_program->bind();
-    texture2->bind(current_program->getUniform("Texture2"));
+  texture2->bind(current_program->getUniform("Texture2"));
   MV = player->GetTransform();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));

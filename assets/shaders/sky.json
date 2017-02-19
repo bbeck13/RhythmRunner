@@ -4,13 +4,13 @@
     "vertNor",
     "vertTex"
   ],
-  "frag": "player_frag.glsl",
-  "name": "player_prog",
+  "frag": "sky_frag.glsl",
+  "name": "sky_prog",
   "uniforms": [
     "P",
     "V",
     "MV",
-    "Texture2"
+    "Texture3"
   ],
-  "vert": "player_vert.glsl"
+  "vert": "sky_vert.glsl"
 }

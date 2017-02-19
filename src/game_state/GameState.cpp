@@ -4,10 +4,12 @@
 
 GameState::GameState(std::shared_ptr<Level> level,
                      std::shared_ptr<GameCamera> camera,
-                     std::shared_ptr<Player> player)
+                     std::shared_ptr<Player> player,
+                     std::shared_ptr<Sky> sky)
     : level(level),
       camera(camera),
       player(player),
+      sky(sky),
       done(false),
       elapsed_ticks(0),
       timing_start_tick(0) {
@@ -16,6 +18,10 @@ GameState::GameState(std::shared_ptr<Level> level,
 }
 
 GameState::~GameState() {}
+
+std::shared_ptr<Sky> GameState::GetSky() {
+  return this->sky;
+}
 
 std::shared_ptr<Level> GameState::GetLevel() {
   return this->level;

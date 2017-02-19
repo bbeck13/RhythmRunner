@@ -27,7 +27,8 @@ void CreateGame() {
   LevelGenerator level_generator(menu_state->GetMusicPath());
   game_state = std::make_shared<GameState>(level_generator.generateLevel(),
                                            std::make_shared<GameCamera>(),
-                                           std::make_shared<Player>());
+                                           std::make_shared<Player>(),
+                                           std::make_shared<Sky>(glm::vec3(0, 0, -10)));
   game_updater.Init(game_state);
 }
 
