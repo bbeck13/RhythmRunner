@@ -28,7 +28,7 @@ std::string MenuState::GetYoutubeVideo(std::string url) {
   std::string youtube_dl_command = "youtube-dl --id --restrict-filenames --write-info-json -k --prefer-free-formats " + url;
   std::system(youtube_dl_command.c_str());
   std::string ffmpeg_command_audio = "ffmpeg -i " + youtube_id + ".*.webm -qscale 0 " + youtube_id + ".wav";
-  std::string ffmpeg_command_video = "ffmpeg -i scale=320:240 " + youtube_id + ".mkv ../assets/textures/image-%d.jpg";
+  std::string ffmpeg_command_video = "ffmpeg -i " + youtube_id + ".mkv ../assets/textures/image-%d.jpg";
   std::system(ffmpeg_command_audio.c_str());
   std::system(ffmpeg_command_video.c_str());
   std::cout << youtube_id << std::endl;
