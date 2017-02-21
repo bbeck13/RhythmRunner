@@ -157,7 +157,8 @@ LevelGenerator::Generate() {
       if (downs > 2 || ups > 2) {
         glm::vec3 xDelta = glm::vec3(PLATFORM_X_DELTA, -PLATFORM_Y_DELTA, 0.0f);
         std::vector<glm::vec3> path = std::vector<glm::vec3>();
-        path.push_back(objs->at(objs->size() - 2)->GetPosition() + xDelta);
+        path.push_back(objs->at(objs->size() - 2)->GetPosition() + xDelta -
+                       glm::vec3(0, 0.1f, 0.1f));
         path.push_back(objs->at(objs->size() - 1)->GetPosition() + 2 * xDelta);
         path.push_back(objs->at(objs->size() - 3)->GetPosition());
         objs->pop_back();
@@ -166,7 +167,8 @@ LevelGenerator::Generate() {
 
         objs->push_back(std::make_shared<gameobject::MovingPlatform>(
             path.at(2), path,
-            mapRange(sizeRange, std::pair<double, double>(0.01, 0.1), power)));
+            mapRange(sizeRange, std::pair<double, double>(0.01, 0.1),
+                     power + .1)));
         ups = downs = 0;
         moving = 1;
       } else if (moving == 1) {
@@ -175,14 +177,15 @@ LevelGenerator::Generate() {
         if (std::abs(delta) > EPISILON) {
           if (objs->back()->GetSecondaryType() ==
               SecondaryType::DROPPING_PLATFORM) {
-            yPos = objs->back()->GetPosition().y;
+            yPos = objs->back()->GetPosition().y + 0.1f;
           }
           objs->push_back(std::make_shared<gameobject::Platform>(
               glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, 7.0f)));
           dropping = 0;
         } else {
           objs->push_back(std::make_shared<gameobject::DroppingPlatform>(
-              glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, 7.0f)));
+              glm::vec3(xPos, yPos - 0.1f, zPos - 0.1f),
+              glm::vec3(power, .5f, 7.0f)));
           dropping++;
         }
       }

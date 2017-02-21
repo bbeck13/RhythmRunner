@@ -66,7 +66,7 @@ std::shared_ptr<Texture> GameRenderer::TextureFromJSON(std::string filepath) {
 
   std::shared_ptr<Texture> new_texture;
   new_texture = std::make_shared<Texture>();
-  new_texture->setFilename(ASSET_DIR "/textures/" + filename);
+  new_texture->setFilename(std::string(ASSET_DIR) + "/textures/" + filename);
   new_texture->setName(name);
   new_texture->init();
   new_texture->setUnit(unit);
