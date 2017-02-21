@@ -1,7 +1,7 @@
 {
-  "filename": "nightsky.jpg", 
-  "name": "nightsky", 
-  "unit": 1, 
-  "wrap_mode_x": 10497, 
-  "wrap_mode_y": 10497
+   "filename": "nightsky.jpg",
+   "name": "nightsky",
+   "unit": 2,
+   "wrap_mode_x": 10497,
+   "wrap_mode_y": 10497
 }

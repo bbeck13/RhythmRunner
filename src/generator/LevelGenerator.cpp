@@ -9,6 +9,8 @@
 #include "Octree.h"
 #include "MovingPlatform.h"
 #include "DroppingPlatform.h"
+#include "MoonRock.h"
+#include "PlainRock.h"
 
 #define COLLECT 3.2f
 #define EPISILON 0.05f
@@ -124,6 +126,12 @@ LevelGenerator::Generate() {
           yPos += PLATFORM_Y_DELTA;
           if (downs == 1) {
             wobble++;
+            std::shared_ptr<gameobject::PlainRock> new_rock =
+                std::make_shared<gameobject::PlainRock>(
+                    glm::vec3(xPos, yPos + 0.8, zPos - 4), glm::vec3(1, 1, 1));
+            new_rock->SetRotationAxis(glm::vec3(1, 0, 0));
+            new_rock->SetRotationAngle((rand() % 10) + 1);
+            objs->push_back(new_rock);
           } else {
             wobble = 0;
           }
@@ -133,6 +141,12 @@ LevelGenerator::Generate() {
           yPos -= PLATFORM_Y_DELTA;
           if (ups == 1) {
             wobble++;
+            std::shared_ptr<gameobject::MoonRock> new_rock =
+                std::make_shared<gameobject::MoonRock>(
+                    glm::vec3(xPos, yPos + 1.3, zPos + 4), glm::vec3(1, 1, 1));
+            new_rock->SetRotationAxis(glm::vec3(1, 0, 0));
+            new_rock->SetRotationAngle((rand() % 10) + 1);
+            objs->push_back(new_rock);
           } else {
             wobble = 0;
           }
