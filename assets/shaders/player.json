@@ -9,7 +9,8 @@
   "uniforms": [
     "P",
     "V",
-    "MV"
+    "MV",
+    "Texture0"
   ],
   "vert": "player_vert.glsl"
 }

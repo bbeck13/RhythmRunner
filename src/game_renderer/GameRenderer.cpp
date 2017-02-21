@@ -17,7 +17,6 @@
 #include "json.hpp"
 #include "RendererSetup.h"
 
-Light gLight;
 GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
@@ -34,31 +33,45 @@ void GameRenderer::Init(const std::string& resource_dir) {
     programs[temp_program->getName()] = temp_program;
   }
   
+  std::shared_ptr<Texture> temp_texture;
+  std::vector<std::string> texture_files = 
+      FileSystemUtils::ListFiles(std::string(ASSET_DIR) + "/textures", "*.json");
+  for (int i = 0; i < texture_files.size(); i++) {
+    temp_texture = GameRenderer::TextureFromJSON(texture_files[i]);
+    textures[temp_texture->getName()] = temp_texture;
+  }
+
   // Set up rainbow of colors in color_vector
+  // TODO move somewhere else
   color_vec.push_back(glm::vec3(236.0/255.0, 0, 83.0/255.0));
   color_vec.push_back(glm::vec3(236.0/255.0, 122.0/255, 0));
   color_vec.push_back(glm::vec3(236.0/255.0, 205.0/255, 0));
   color_vec.push_back(glm::vec3(89.0/255.0, 236.0/255, 0));
   color_vec.push_back(glm::vec3(0/255.0, 172.0/255, 236.0/255.0));
   color_vec.push_back(glm::vec3(150.0/255.0, 0/255, 236.0/255.0));
-    
-  texture0 = std::make_shared<Texture>();
-  texture0->setFilename(std::string(ASSET_DIR) + "/textures/" + "lightgrey.png");
-  texture0->init();
-  texture0->setUnit(0);
-  texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
-    
-  texture1 = std::make_shared<Texture>();
-  texture1->setFilename(std::string(ASSET_DIR) + "/textures/" + "skyblue.jpg");
-  texture1->init();
-  texture1->setUnit(0);
-  texture1->setWrapModes(GL_REPEAT, GL_REPEAT);
-    
-  texture2 = std::make_shared<Texture>();
-  texture2->setFilename(std::string(ASSET_DIR) + "/textures/" + "rainbowglass.jpg");
-  texture2->init();
-  texture2->setUnit(0);
-  texture2->setWrapModes(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
+}
+
+std::shared_ptr<Texture> GameRenderer::TextureFromJSON(std::string filepath) {
+  // Read in the file
+  std::ifstream json_input_stream(filepath, std::ifstream::in);
+  // Read the flle into the JSON library
+  nlohmann::json json_handler;
+  json_input_stream >> json_handler;
+  
+  std::string filename = json_handler["filename"];
+  std::string name = json_handler["name"];
+  int unit = json_handler["unit"];
+  int wrap_mode_x = json_handler["wrap_mode_x"];
+  int wrap_mode_y = json_handler["wrap_mode_y"]; 
+
+  std::shared_ptr<Texture> new_texture;
+  new_texture = std::make_shared<Texture>();
+  new_texture->setFilename(std::string(ASSET_DIR) + "/textures/" + filename);
+  new_texture->setName(name);
+  new_texture->init();
+  new_texture->setUnit(unit);
+  new_texture->setWrapModes(wrap_mode_x, wrap_mode_y);
+  return new_texture;
 }
 
 std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
@@ -152,9 +165,9 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
-    current_program->addUniform("Texture0");
+  std::shared_ptr<Texture> current_texture = textures["lightgrey"];
   current_program->bind();
-    texture0->bind(current_program->getUniform("Texture0"));
+  current_texture->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
@@ -172,9 +185,9 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // moving platforms
   current_program = programs["moving_platform_prog"];
-    current_program->addUniform("Texture1");
+  current_texture = textures["skyblue"];
   current_program->bind();
-    texture1->bind(current_program->getUniform("Texture1"));
+  current_texture->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
@@ -221,9 +234,9 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // Player
   current_program = programs["player_prog"];
-    current_program->addUniform("Texture2");
+  current_texture = textures["rainbowglass"];
   current_program->bind();
-    texture2->bind(current_program->getUniform("Texture2"));
+  current_texture->bind(current_program->getUniform("Texture0"));
   MV = player->GetTransform();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));

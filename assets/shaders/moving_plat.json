@@ -1,14 +1,16 @@
 {
   "attributes": [
     "vertPos",
-    "vertNor"
+    "vertNor",
+    "vertTex"
   ],
   "frag": "moving_platform_frag.glsl",
   "name": "moving_platform_prog",
   "uniforms": [
     "P",
     "V",
-    "MV"
+    "MV",
+    "Texture0"
   ],
   "vert": "moving_platform_vert.glsl"
 }
