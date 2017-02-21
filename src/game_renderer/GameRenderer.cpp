@@ -16,6 +16,7 @@
 #include "ViewFrustumCulling.h"
 #include "json.hpp"
 #include "RendererSetup.h"
+#include "Sky.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -142,6 +143,7 @@ void GameRenderer::Render(GLFWwindow* window,
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
+  std::shared_ptr<Sky> sky = game_state->GetSky();
 
   RendererSetup::PreRender(window);
 
@@ -245,6 +247,21 @@ void GameRenderer::Render(GLFWwindow* window,
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                      glm::value_ptr(MV.topMatrix()));
   player->GetModel()->draw(current_program);
+
+  // Sky
+  current_program = programs["sky_prog"];
+  current_program->bind();
+  current_texture = game_state->GetVideoTextures()["sky"]->GetCurFrame();
+  //std::cout << current_texture->getName() << std::endl;
+  current_texture->bind(current_program->getUniform("Texture0"));
+  MV = sky->GetTransform();
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                     glm::value_ptr(MV.topMatrix()));
+  sky->GetModel()->draw(current_program);
 
   P->popMatrix();
   V.popMatrix();

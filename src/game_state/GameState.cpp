@@ -4,10 +4,12 @@
 
 GameState::GameState(std::shared_ptr<Level> level,
                      std::shared_ptr<GameCamera> camera,
-                     std::shared_ptr<Player> player)
+                     std::shared_ptr<Player> player,
+                     std::shared_ptr<Sky> sky)
     : level(level),
       camera(camera),
       player(player),
+      sky(sky),
       done(false),
       elapsed_ticks(0),
       timing_start_tick(0) {
@@ -29,6 +31,14 @@ std::shared_ptr<Player> GameState::GetPlayer() {
   return this->player;
 }
 
+std::shared_ptr<Sky> GameState::GetSky() {
+  return this->sky;
+}
+
+std::unordered_map<std::string, std::shared_ptr<VideoTexture>> GameState::GetVideoTextures() {
+   return this->video_textures;
+}
+
 bool GameState::Done() {
   return done;
 }
@@ -39,6 +49,10 @@ uint64_t GameState::GetElapsedTicks() {
 
 uint64_t GameState::GetTimingStartTick() {
   return timing_start_tick;
+}
+
+void GameState::AddVideoTexture(std::string name, std::shared_ptr<VideoTexture> texture) {
+  this->video_textures[name] = texture;
 }
 
 void GameState::SetLevel(std::shared_ptr<Level> level) {

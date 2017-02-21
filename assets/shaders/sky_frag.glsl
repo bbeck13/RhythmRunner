@@ -16,5 +16,5 @@ void main() {
     vec3 diffuse = diff * vec3(1, 1, 1);
     vec3 result = (diffuse + ambient) * vec3(1, 1, 1);
     vec4 surfaceColor = texture(Texture0, fragTexCoord);
-    color = vec4(result * surfaceColor.rgb, surfaceColor.a);
+    color = vec4(surfaceColor.rgb, surfaceColor.a);
 }
