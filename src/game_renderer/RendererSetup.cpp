@@ -37,7 +37,8 @@ GLFWwindow* RendererSetup::InitOpenGL() {
 
   GLSL::checkVersion();
   glClearColor(.12f, .34f, .56f, 1.0f);  // set background color
-  glEnable(GL_DEPTH_TEST);               // enable z-buffer test
+  glEnable(GL_DEPTH_TEST); // enable z-buffer test
+  glDepthFunc(GL_LESS);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

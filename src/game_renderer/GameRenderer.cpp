@@ -157,7 +157,7 @@ void GameRenderer::Render(GLFWwindow* window,
   MatrixStack MV;
 
   P->pushMatrix();
-  P->perspective(45.0f, aspect, 0.01f, 1000.0f);
+  P->perspective(45.0f, aspect, 0.01f, 500.0f);
   V.pushMatrix();
 
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
