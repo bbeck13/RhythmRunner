@@ -1,5 +1,5 @@
 #version 330 core
-uniform sampler2D Texture2;
+uniform sampler2D Texture0;
 
 in vec3 fragNor;
 in vec4 fragPos;
@@ -15,6 +15,6 @@ void main() {
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * vec3(1, 1, 1);
     vec3 result = (diffuse + ambient) * vec3(1, 1, 1);
-    vec4 surfaceColor = texture(Texture2, fragTexCoord);
+    vec4 surfaceColor = texture(Texture0, fragTexCoord);
     color = vec4(result * surfaceColor.rgb, surfaceColor.a);
 }

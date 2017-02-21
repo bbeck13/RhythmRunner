@@ -16,6 +16,7 @@
 #include "MovingObject.h"
 #include "Octree.h"
 #include "TimingConstants.h"
+#include "VideoTexture.h"
 
 #define COLLISION_WIDTH 0.15f
 
@@ -102,6 +103,8 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset the player
   game_state->SetDone(false);
+  game_state->GetSky()->SetPosition(glm::vec3(0, 0, -10));
+  // TODO - iterate over all video textures and reset their playback
 
   // reset collectibles and moving objects
   for (std::shared_ptr<GameObject> obj :
@@ -139,6 +142,7 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
+  std::shared_ptr<Sky> sky = game_state->GetSky();
 
   // Store player state before moving
   AxisAlignedBox previous_player_box = player->GetBoundingBox();
@@ -202,6 +206,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   player->SetPosition(player->GetPosition() +
                       glm::vec3(DELTA_X_PER_TICK, player->GetYVelocity(),
                                 player->GetZVelocity()));
+  sky->SetPosition(sky->GetPosition() + glm::vec3(DELTA_X_PER_TICK, 0, 0));
 
   // collide!
   std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
@@ -290,7 +295,7 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   // Gradually and smoothly move y towards player
   float delta_y = player_position.y - previous_camera_position.y;
   new_camera_position.y =
-      previous_camera_position.y + delta_y * FRACTION_CAMERA_MOVEMENT_PER_TICK;
+      previous_camera_position.y + delta_y * FRACTION_CAMERA_MOVEMENT_PER_TICK + CAMERA_Y_SPACING;
 
   camera->setPosition(new_camera_position);
 

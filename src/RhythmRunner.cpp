@@ -15,6 +15,8 @@
 #include "MenuRenderer.h"
 #include "TimingConstants.h"
 #include "EndRenderer.h"
+#include "Sky.h"
+#include "VideoTexture.h"
 #include "json.hpp"
 #include "LevelJson.h"
 
@@ -128,8 +130,7 @@ int main(int argc, char** argv) {
           }
           game_state = std::make_shared<GameState>(
               level_generator->generateLevel(), std::make_shared<GameCamera>(),
-              std::make_shared<Player>());
-
+              std::make_shared<Player>(), std::make_shared<Sky>());
           game_updater.Init(game_state);
           delete level_generator;
         }
