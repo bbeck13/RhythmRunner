@@ -14,7 +14,7 @@ void main() {
     vec3 lightDir = normalize(vec3(150, 50, -4) - fragPos.xyz);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * vec3(1, 1, 1);
-    vec3 result = (diffuse + ambient) * vec3(0.2, 0.5, 1);
+    vec3 result = (diffuse + ambient) * vec3(1, 1, 1);
     vec4 surfaceColor = texture(Texture0, fragTexCoord);
-    color = vec4(result * surfaceColor.rgb, surfaceColor.a);
+    color = vec4(surfaceColor.rgb, surfaceColor.a);
 }

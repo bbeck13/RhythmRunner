@@ -11,7 +11,7 @@ Platform::Platform() : Obstacle(Platform::platform) {}
 Platform::Platform(glm::vec3 position) : Obstacle(Platform::platform) {
   this->position = position;
   // todo play around with the size
-  this->scale = glm::vec3(4, .5, .5);
+  this->scale = glm::vec3(4, .5, 7);
   this->model = platform;
 }
 

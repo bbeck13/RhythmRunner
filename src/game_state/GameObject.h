@@ -12,8 +12,8 @@
 #include "Texture.h"
 #include "AxisAlignedBox.h"
 
-enum ObjectType { OBSTACLE, COLLECTIBLE, PLAYER };
-enum SecondaryType { NOTE, PLATFORM, BIKE, MOVING_PLATFORM, DROPPING_PLATFORM };
+enum ObjectType { OBSTACLE, COLLECTIBLE, PLAYER, SCENERY };
+enum SecondaryType { NOTE, PLATFORM, BIKE, MOVING_PLATFORM, DROPPING_PLATFORM, SKY };
 
 // GameObjects are 3D entities which can be rendered
 class GameObject {

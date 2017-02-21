@@ -104,7 +104,7 @@ LevelGenerator::Generate() {
     double pregame_platform_width = DELTA_X_PER_SECOND * PREGAME_SECONDS;
     objs->push_back(std::make_shared<gameobject::Platform>(
         glm::vec3(xPos - (pregame_platform_width / 2), yPos, zPos),
-        glm::vec3(pregame_platform_width, 1, 1)));
+        glm::vec3(pregame_platform_width, 1, 7)));
 
     for (int i = 1; i < num_platforms; i++) {
       std::vector<Aquila::SampleType> sample;
@@ -151,7 +151,7 @@ LevelGenerator::Generate() {
           objs->pop_back();
           objs->push_back(std::make_shared<gameobject::Platform>(
               glm::vec3(xPos - 2 * PLATFORM_X_DELTA, yPos, zPos),
-              glm::vec3(power, .5f, .5f)));
+              glm::vec3(power, .5f, 7.0f)));
         }
       }
       if (downs > 2 || ups > 2) {
@@ -178,11 +178,11 @@ LevelGenerator::Generate() {
             yPos = objs->back()->GetPosition().y;
           }
           objs->push_back(std::make_shared<gameobject::Platform>(
-              glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, .5f)));
+              glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, 7.0f)));
           dropping = 0;
         } else {
           objs->push_back(std::make_shared<gameobject::DroppingPlatform>(
-              glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, .5f)));
+              glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, 7.0f)));
           dropping++;
         }
       }
