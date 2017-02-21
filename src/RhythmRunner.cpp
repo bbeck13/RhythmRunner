@@ -19,6 +19,8 @@
 #include "VideoTexture.h"
 #include "json.hpp"
 #include "LevelJson.h"
+#include "Sky.h"
+#include "VideoTexture.h"
 
 #define MUSIC "music/2.wav"
 
