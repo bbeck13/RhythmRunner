@@ -4,17 +4,13 @@
 #include <string>
 #include <iostream>
 
-VideoTexture::VideoTexture() {
+VideoTexture::VideoTexture() {}
 
-}
-
-VideoTexture::~VideoTexture() {
-
-}
+VideoTexture::~VideoTexture() {}
 
 VideoTexture::VideoTexture(std::string folder_path) {
-  std::vector<std::string> texture_files = 
-    FileSystemUtils::ListFiles(std::string(folder_path), "*.json");
+  std::vector<std::string> texture_files =
+      FileSystemUtils::ListFiles(std::string(folder_path), "*.json");
   for (int i = 0; i < texture_files.size(); i++) {
     textures.push_back(GameRenderer::TextureFromJSON(texture_files[i]));
   }
