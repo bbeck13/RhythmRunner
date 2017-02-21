@@ -8,7 +8,7 @@ bool Sky::isInitialized = false;
 Sky::Sky() : Collectible(Sky::shape) {
   this->position = glm::vec3(0, 0, -10);
   // todo play around with the size
-  this->scale = glm::vec3(20, 20, 20);
+  this->scale = glm::vec3(900, 900, 900);
   this->model = shape;
   this->isCollected = false;
 }

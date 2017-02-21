@@ -157,7 +157,7 @@ void GameRenderer::Render(GLFWwindow* window,
   MatrixStack MV;
 
   P->pushMatrix();
-  P->perspective(45.0f, aspect, 0.01f, 100.0f);
+  P->perspective(45.0f, aspect, 0.01f, 1000.0f);
   V.pushMatrix();
 
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
@@ -167,7 +167,7 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
-  std::shared_ptr<Texture> current_texture = textures["lightgrey"];
+  std::shared_ptr<Texture> current_texture = textures["lunarrock"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
@@ -187,7 +187,7 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // moving platforms
   current_program = programs["moving_platform_prog"];
-  current_texture = textures["skyblue"];
+  current_texture = textures["lunarrock"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
@@ -251,7 +251,8 @@ void GameRenderer::Render(GLFWwindow* window,
   // Sky
   current_program = programs["sky_prog"];
   current_program->bind();
-  current_texture = game_state->GetVideoTextures()["sky"]->GetCurFrame();
+  current_texture = textures["nightsky"];
+  //current_texture = game_state->GetVideoTextures()["sky"]->GetCurFrame();
   //std::cout << current_texture->getName() << std::endl;
   current_texture->bind(current_program->getUniform("Texture0"));
   MV = sky->GetTransform();

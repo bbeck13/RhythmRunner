@@ -5,8 +5,8 @@ bool DroppingPlatform::isInitialized = false;
 
 DroppingPlatform::DroppingPlatform(glm::vec3 position)
     : Obstacle(DroppingPlatform::shape), originalPosition(position) {
-  this->position = position;
-  this->scale = glm::vec3(3, .5, .5);
+  this->position = position - glm::vec3(0, 0, 0.01);
+  this->scale = glm::vec3(3, .5, 3);
   this->model = shape;
   dropVel = -0.1f;
   dropping = false;
@@ -14,8 +14,8 @@ DroppingPlatform::DroppingPlatform(glm::vec3 position)
 
 DroppingPlatform::DroppingPlatform(glm::vec3 position, glm::vec3 scale)
     : Obstacle(DroppingPlatform::shape), originalPosition(position) {
-  this->position = position;
-  this->scale = scale;
+  this->position = position - glm::vec3(0, 0, 0.01);
+  this->scale = glm::vec3(3, .5, 3);
   this->model = shape;
   dropVel = -0.1f;
   dropping = false;
