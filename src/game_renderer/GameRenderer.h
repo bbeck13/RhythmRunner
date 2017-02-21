@@ -32,14 +32,13 @@ class GameRenderer {
   void ImGuiRender(std::shared_ptr<GameState> game_state);
 
   std::unordered_map<std::string, std::shared_ptr<Program>> programs;
+  std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
   std::shared_ptr<Program> ProgramFromJSON(std::string filepath);
+  std::shared_ptr<Texture> TextureFromJSON(std::string filepath);
   static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
   GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
                    std::shared_ptr<Octree> tree);
   std::vector<glm::vec3> color_vec;
-  std::shared_ptr<Texture> texture0;
-  std::shared_ptr<Texture> texture1;
-  std::shared_ptr<Texture> texture2;
 };
 
 #endif
