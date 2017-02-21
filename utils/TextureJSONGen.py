@@ -1,7 +1,7 @@
 import json
 import sys
 
-def gen_texture(filename):
+def gen_texture(filename, is_video=False):
   tex_def = {}
   name = filename.split("/")[-1].split(".")[0]
   tex_def["name"] = name

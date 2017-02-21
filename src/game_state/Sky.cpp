@@ -22,8 +22,7 @@ Sky::~Sky() {}
 
 std::shared_ptr<Shape> Sky::GetModel() {
   if (!Sky::isInitialized) {
-    Sky::shape->loadMesh(std::string(ASSET_DIR) + "/" +
-                          std::string(SKY_MESH));
+    Sky::shape->loadMesh(std::string(ASSET_DIR) + "/" + std::string(SKY_MESH));
     Sky::shape->init();
     Sky::isInitialized = true;
   }
