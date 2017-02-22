@@ -17,6 +17,11 @@ include_directories(${CMAKE_SOURCE_DIR}/src/game_updater)
 include_directories(${CMAKE_SOURCE_DIR}/src/helpers)
 include_directories(${CMAKE_SOURCE_DIR}/src/generator)
 file(GLOB_RECURSE GLSL "assets/shaders/*.glsl")
+
+if (UNIX AND NOT APPLE)
+   set(LINUX TRUE)
+endif()
+
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
    add_definitions(-DDEBUG)
 endif()
@@ -33,7 +38,14 @@ set(GLM_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/glm")
 include_directories(${GLM_INCLUDE_DIR})
 
 # GLFW
-set(GLFW_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/glfw")
+if(LINUX)
+   set(GLFW_DIR "$ENV{GLFW_DIR}")
+   if(NOT GLFW_DIR)
+      message(FATAL_ERROR "Please point the environment variable GLFW_DIR to the root directory of your GLFW3 installation.")
+   endif()
+else()
+   set(GLFW_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/glfw")
+endif()
 option(GLFW_BUILD_EXAMPLES "GLFW_BUILD_EXAMPLES" OFF)
 option(GLFW_BUILD_TESTS "GLFW_BUILD_TESTS" OFF)
 option(GLFW_BUILD_DOCS "GLFW_BUILD_DOCS" OFF)
@@ -47,9 +59,21 @@ include_directories(${GLFW_DIR}/include)
 target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES})
 
 # GLEW
-set(GLEW_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/glew-cmake")
-add_subdirectory(${GLEW_DIR})
-target_link_libraries(${CMAKE_PROJECT_NAME} libglew_static)
+if(LINUX)
+   set(GLEW_DIR "$ENV{GLEW_DIR}")
+   if(NOT GLEW_DIR)
+      message(FATAL_ERROR "Please point the environment variable GLEW_DIR to the root directory of your GLEW installation.")
+   endif()
+   #GLEW libraries
+   add_library(glew_static STATIC IMPORTED)
+   set_target_properties(glew_static PROPERTIES
+      IMPORTED_LOCATION ${GLEW_DIR}/lib/libGLEW.a)
+   target_link_libraries(${CMAKE_PROJECT_NAME} glew_static)
+else()
+   set(GLEW_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/glew-cmake")
+   add_subdirectory(${GLEW_DIR})
+   target_link_libraries(${CMAKE_PROJECT_NAME} libglew_static)
+endif()
 include_directories("${GLEW_DIR}/include")
 
 # SFML
