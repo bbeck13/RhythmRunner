@@ -14,10 +14,11 @@ ProgramMode EndRenderer::Render(GLFWwindow* window,
   ProgramMode program_mode = ProgramMode::END_SCREEN;
 
   RendererSetup::PreRender(window);
-  ImGuiIO& imgui_io = ImGui::GetIO();
   ImGui_ImplGlfwGL3_NewFrame();
 
-  ImGui::Begin("Game Over", NULL, 0);  // TODO(jarhar): replace 0
+  // Create a centered window that takes up 50% of the screen
+  RendererSetup::ImGuiCenterWindow(0.5);
+  ImGui::Begin("Game Over", NULL, RendererSetup::TITLE_WINDOW_FLAGS);
 
   ImGui::Text((std::string("Score: ") +
                std::to_string(game_state->GetPlayer()->GetScore()))
