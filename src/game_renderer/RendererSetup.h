@@ -16,6 +16,9 @@ GLFWwindow* InitOpenGL();
 void Close(GLFWwindow* window);
 void PreRender(GLFWwindow* window);
 void PostRender(GLFWwindow* window);
+void ImGuiCenterWindow(double ratio);
+
+const ImGuiWindowFlags TITLE_WINDOW_FLAGS = ImGuiWindowFlags_NoCollapse;
 
 }
 
