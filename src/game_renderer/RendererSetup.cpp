@@ -42,8 +42,11 @@ GLFWwindow* RendererSetup::InitOpenGL() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  // TODO(jarhar): should ImGuiIO settings be set here too? (DisplaySize)
-  ImGui_ImplGlfwGL3_Init(window, false); // false -> don't install callbacks
+  ImGui_ImplGlfwGL3_Init(window, false);  // false -> don't install callbacks
+  ImGuiIO& imgui_io = ImGui::GetIO();
+  imgui_io.IniFilename = NULL;  // Disable imgui.ini
+  imgui_io.Fonts->AddFontFromFileTTF(ASSET_DIR "/fonts/RobotoMono-Regular.ttf",
+                                     24.0f);
 
   return window;
 }
@@ -60,4 +63,16 @@ void RendererSetup::PostRender(GLFWwindow* window) {
 void RendererSetup::Close(GLFWwindow* window) {
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+void RendererSetup::ImGuiCenterWindow(double ratio) {
+  ImGuiIO& imgui_io = ImGui::GetIO();
+  int window_width = imgui_io.DisplaySize.x * ratio;
+  int window_height = imgui_io.DisplaySize.y * ratio;
+  ImGui::SetNextWindowSize(ImVec2(window_width, window_height),
+                           ImGuiSetCond_FirstUseEver);
+  ImGui::SetNextWindowPos(
+      ImVec2(imgui_io.DisplaySize.x / 2 - window_width / 2,
+             imgui_io.DisplaySize.y / 2 - window_height / 2),
+      ImGuiSetCond_FirstUseEver);
 }
