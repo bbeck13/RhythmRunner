@@ -18,19 +18,6 @@
 
 #define MUSIC "music/2.wav"
 
-std::shared_ptr<MenuState> menu_state;
-std::shared_ptr<GameState> game_state;
-
-GameUpdater game_updater;
-
-void CreateGame() {
-  LevelGenerator level_generator(menu_state->GetMusicPath());
-  game_state = std::make_shared<GameState>(level_generator.generateLevel(),
-                                           std::make_shared<GameCamera>(),
-                                           std::make_shared<Player>());
-  game_updater.Init(game_state);
-}
-
 void PrintStatus() {
 #ifdef DEBUG
   static double last_debug_time = glfwGetTime();
@@ -59,13 +46,15 @@ int main(int argc, char** argv) {
 
   ProgramMode program_mode;
 
+  GameUpdater game_updater;
   MenuRenderer menu_renderer;
   EndRenderer end_renderer;
   GameRenderer game_renderer;
   game_renderer.Init(ASSET_DIR);
 
   // Start the game at the Menu
-  menu_state = std::make_shared<MenuState>();
+  std::shared_ptr<GameState> game_state;
+  std::shared_ptr<MenuState> menu_state = std::make_shared<MenuState>();
   menu_state->SetMusicPath(ASSET_DIR "/" MUSIC);
   program_mode = ProgramMode::MENU_SCREEN;
 
@@ -113,7 +102,11 @@ int main(int argc, char** argv) {
 
         if (program_mode == ProgramMode::GAME_SCREEN) {
           // If we are switching to game mode, then create a new game
-          CreateGame();
+          LevelGenerator level_generator(menu_state->GetMusicPath());
+          game_state = std::make_shared<GameState>(
+              level_generator.generateLevel(), std::make_shared<GameCamera>(),
+              std::make_shared<Player>());
+          game_updater.Init(game_state);
         }
         break;
 
