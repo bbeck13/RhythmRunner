@@ -72,16 +72,22 @@ int main(int argc, char** argv) {
         // TODO(jarhar): Does this order make more sense than the opposite?
         game_renderer.Render(window, game_state);
 
-        // get time elapsed in music
-        // then, calculate target ticks elapsed based on music time elapsed
-        int64_t music_offset_micros = game_state->GetLevel()
-                                          ->getMusic()
-                                          ->getPlayingOffset()
-                                          .asMicroseconds();
-        unsigned target_tick_count = music_offset_micros * TICKS_PER_MICRO +
-                                     game_state->GetTimingStartTick();
-        bool song_done = game_state->GetLevel()->getMusic()->getStatus() ==
-                         sf::Music::Status::Stopped;
+        uint64_t target_tick_count;
+        if (game_state->GetLevel()->getMusic()->getStatus() ==
+            sf::Music::Status::Playing) {
+          // get time elapsed in music
+          // then, calculate target ticks elapsed based on music time elapsed
+          int64_t music_offset_micros = game_state->GetLevel()
+                                            ->getMusic()
+                                            ->getPlayingOffset()
+                                            .asMicroseconds();
+          target_tick_count = music_offset_micros * TICKS_PER_MICRO +
+                              game_state->GetStartTick() +
+                              game_state->GetMusicStartTick();
+        } else {
+          double elapsed_seconds = glfwGetTime() - game_state->GetStartTime();
+          target_tick_count = elapsed_seconds * TICKS_PER_SECOND;
+        }
 
         // Run enough ticks to catch up
         // TODO(jarhar): consider basic infinite loop detection here
@@ -93,7 +99,7 @@ int main(int argc, char** argv) {
           game_updater.Update(game_state);
         }
 
-        if (game_state->Done() || song_done) {
+        if (game_state->Done()) {
           program_mode = MainProgramMode::END_SCREEN;
         }
         break;

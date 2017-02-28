@@ -100,8 +100,11 @@ LevelGenerator::Generate() {
     double xPos = -1, yPos = 2, zPos = -5, power = 0, lastPower = 0;
     int lastSample = samplesPerPlatform, ups = 0, downs = 0, wobble = 0,
         dropping = 0, moving = 0;
-    objs->push_back(
-        std::make_shared<gameobject::Platform>(glm::vec3(xPos, yPos, zPos)));
+
+    double pregame_platform_width = DELTA_X_PER_SECOND * PREGAME_SECONDS;
+    objs->push_back(std::make_shared<gameobject::Platform>(
+        glm::vec3(xPos - (pregame_platform_width / 2), yPos, zPos),
+        glm::vec3(pregame_platform_width, 1, 1)));
 
     for (int i = 1; i < num_platforms; i++) {
       std::vector<Aquila::SampleType> sample;

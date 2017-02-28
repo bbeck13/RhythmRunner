@@ -58,11 +58,20 @@ void GameUpdater::Init(std::shared_ptr<GameState> game_state) {
 }
 
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
+  std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
+
   // check to see if the music ended, in which case the level is complete
-  if (game_state->GetLevel()->getMusic()->getStatus() ==
-      sf::Music::Status::Stopped) {
+  if ((music->getStatus() == sf::Music::Status::Stopped) &&
+      (music->getPlayingOffset() != sf::Time::Zero)) {
     StopGame(game_state);
   }
+
+  // check to see if the music should start on this tick
+  if (game_state->GetMusicStartTick() == game_state->GetElapsedTicks()) {
+    music->play();
+    music->setLoop(false);
+  }
+
   UpdateLevel(game_state);
   UpdatePlayer(game_state);
   UpdateCamera(game_state);
@@ -117,19 +126,14 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   }
 
   // reset timing
-  game_state->SetTimingStartTick();
+  game_state->SetStartTime();
   game_state->GetPlayer()->Reset();
 
-  // set the music back to the beginning of the song
+  // stop the music if it is playing
   std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
-  if (music->getStatus() == sf::SoundSource::Status::Playing) {
+  if (music->getStatus() != sf::SoundSource::Status::Stopped) {
     music->setPlayingOffset(sf::Time::Zero);
-  } else if (music->getStatus() == sf::SoundSource::Status::Paused) {
-    music->setPlayingOffset(sf::Time::Zero);
-    music->play();
-  } else {
-    music->play();
-    music->setLoop(false);
+    music->stop();
   }
 }
 

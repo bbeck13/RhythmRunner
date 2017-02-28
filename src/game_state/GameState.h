@@ -27,13 +27,15 @@ class GameState {
 
   bool Done();
   uint64_t GetElapsedTicks();
-  uint64_t GetTimingStartTick();
+  uint64_t GetStartTick();
+  uint64_t GetMusicStartTick();
+  double GetStartTime();
 
   void SetLevel(std::shared_ptr<Level> level);
   void SetCamera(std::shared_ptr<GameCamera> camera);
   void SetDone(bool done);
   void IncrementTicks();
-  void SetTimingStartTick();
+  void SetStartTime();
   void SetItemsInView(
       std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> objects);
 
@@ -45,7 +47,9 @@ class GameState {
       objectsInView;
   bool done;
   uint64_t elapsed_ticks;
-  uint64_t timing_start_tick;
+  uint64_t start_tick;  // value of elapsed_ticks when game started
+  double start_time;    // value of glfwGetTime() when game started
+  uint64_t music_end_tick;
 };
 
 #endif
