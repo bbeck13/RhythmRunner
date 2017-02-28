@@ -267,7 +267,7 @@ void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state) {
       "Score: " + std::to_string(game_state->GetPlayer()->GetScore());
   ImGui::Text(score_string.c_str());
 
-#ifdef DEBUG  // Print fps
+#ifdef DEBUG
   static double last_debug_time = glfwGetTime();
   static int frames_since_last_debug = 0;
   static std::string fps_string = "FPS: no data";
