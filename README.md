@@ -1,5 +1,5 @@
-Rhythm Runner
-=============
+Rhythm Runner [![Build Status](https://travis-ci.org/bbeck13/RhythmRunner.svg?branch=master)](https://travis-ci.org/bbeck13/RhythmRunner)
+========================================================================================================================================
 - [About](#about)
 - [Authors](#authors)
 - [Requirements](#requirements)
