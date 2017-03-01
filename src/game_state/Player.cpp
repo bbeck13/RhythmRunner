@@ -29,8 +29,10 @@ float Player::GetYVelocity() {
 }
 
 bool Player::GetDoubleJump() {
-  //return can_double_jump;
+#ifdef DEBUG
   return true;
+#endif
+  return can_double_jump;
 }
 
 std::shared_ptr<GameObject> Player::GetGround() {
