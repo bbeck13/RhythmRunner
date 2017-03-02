@@ -13,7 +13,6 @@ VideoTexture::~VideoTexture() {
 }
 
 VideoTexture::VideoTexture(std::string folder_path) {
-  //std::cout << folder_path << std::endl;
   std::vector<std::string> texture_files = 
     FileSystemUtils::ListFiles(std::string(folder_path), "*.json");
   for (int i = 0; i < texture_files.size(); i++) {

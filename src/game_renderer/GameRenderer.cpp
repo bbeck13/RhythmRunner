@@ -62,7 +62,7 @@ std::shared_ptr<Texture> GameRenderer::TextureFromJSON(std::string filepath) {
   std::string name = json_handler["name"];
   int unit = json_handler["unit"];
   int wrap_mode_x = json_handler["wrap_mode_x"];
-  int wrap_mode_y = json_handler["wrap_mode_y"]; 
+  int wrap_mode_y = json_handler["wrap_mode_y"];
 
   std::shared_ptr<Texture> new_texture;
   new_texture = std::make_shared<Texture>();
@@ -253,8 +253,6 @@ void GameRenderer::Render(GLFWwindow* window,
   current_program = programs["sky_prog"];
   current_program->bind();
   current_texture = textures["nightsky"];
-  //current_texture = game_state->GetVideoTextures()["sky"]->GetCurFrame();
-  //std::cout << current_texture->getName() << std::endl;
   current_texture->bind(current_program->getUniform("Texture0"));
   MV = sky->GetTransform();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
