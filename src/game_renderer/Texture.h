@@ -26,8 +26,8 @@ private:
   std::string filename;
   int width;
   int height;
-  GLuint tid;
   GLint unit;
+  GLuint tid;
   std::string name;
 	
 };
