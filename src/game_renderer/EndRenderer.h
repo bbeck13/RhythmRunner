@@ -14,7 +14,7 @@ class EndRenderer {
   EndRenderer();
   ~EndRenderer();
 
-  ProgramMode Render(GLFWwindow* window, std::shared_ptr<GameState> game_state);
+  MainProgramMode Render(GLFWwindow* window, std::shared_ptr<GameState> game_state);
 };
 
 #endif

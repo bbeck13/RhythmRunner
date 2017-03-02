@@ -1,7 +1,7 @@
 #include "MovingObject.h"
 #include "GameObject.h"
 
-MovingObject::MovingObject(std::shared_ptr<std::vector<glm::vec3>> path,
+MovingObject::MovingObject(std::vector<glm::vec3> path,
                            glm::vec3 position,
                            float velocity)
     : path(path) {
@@ -10,14 +10,14 @@ MovingObject::MovingObject(std::shared_ptr<std::vector<glm::vec3>> path,
   this->origionalPath = path;
   this->velocity = glm::vec3(velocity, velocity, velocity);
   this->origionalVelocity = this->velocity;
-  if (path->size() > 0) {
-    movementVector = calculateMovementVector(path->at(0), position);
+  if (path.size() > 0) {
+    movementVector = calculateMovementVector(path.at(0), position);
   } else {
     movementVector = glm::vec3(0.0f, 0.0f, 0.0f);
   }
 }
 
-MovingObject::MovingObject(std::shared_ptr<std::vector<glm::vec3>> path,
+MovingObject::MovingObject(std::vector<glm::vec3> path,
                            glm::vec3 position,
                            glm::vec3 velocity)
     : path(path) {
@@ -26,8 +26,8 @@ MovingObject::MovingObject(std::shared_ptr<std::vector<glm::vec3>> path,
   this->origionalPath = path;
   this->velocity = velocity;
   this->origionalVelocity = this->velocity;
-  if (path->size() > 0) {
-    movementVector = calculateMovementVector(path->at(0), position);
+  if (path.size() > 0) {
+    movementVector = calculateMovementVector(path.at(0), position);
   } else {
     movementVector = glm::vec3(0.0f, 0.0f, 0.0f);
   }
@@ -36,8 +36,8 @@ MovingObject::MovingObject(std::shared_ptr<std::vector<glm::vec3>> path,
 void MovingObject::Reset() {
   currentDir = 0;
   velocity = origionalVelocity;
-  if (path->size() > 0) {
-    movementVector = calculateMovementVector(path->at(0), originalPosition);
+  if (path.size() > 0) {
+    movementVector = calculateMovementVector(path.at(0), originalPosition);
   } else {
     movementVector = glm::vec3(0.0f, 0.0f, 0.0f);
   }
@@ -75,27 +75,27 @@ glm::vec3 MovingObject::updatePosition(glm::vec3 position) {
   newPosition.y = position.y + movementVector.y * velocity.y;
   newPosition.z = position.z + movementVector.z * velocity.z;
 
-  if (path->size() > 0) {
+  if (path.size() > 0) {
     // if we moved farther from the goal position rather than closer
-    if (distance(path->at(currentDir), newPosition) >
-        distance(path->at(currentDir), position)) {
+    if (distance(path.at(currentDir), newPosition) >
+        distance(path.at(currentDir), position)) {
       currentDir++;
-      if (currentDir == (int)path->size()) {
+      if (currentDir == (int)path.size()) {
         currentDir = 0;
       }
       movementVector =
-          calculateMovementVector(path->at(currentDir), newPosition);
+          calculateMovementVector(path.at(currentDir), newPosition);
     }
   }
 
   return newPosition;
 }
 
-glm::vec3 MovingObject::GetVelocity() {
+glm::vec3 MovingObject::GetVelocity() const {
   return velocity;
 }
 
-std::shared_ptr<std::vector<glm::vec3>> MovingObject::GetPath() {
+std::vector<glm::vec3> MovingObject::GetPath() const {
   return path;
 }
 
@@ -107,13 +107,13 @@ AxisAlignedBox MovingObject::GetFullBox(std::shared_ptr<Shape> model,
                                         glm::vec3 scale) {
   AxisAlignedBox box(model, scale, originalPosition);
 
-  for (glm::vec3 pos : *path) {
+  for (glm::vec3 pos : path) {
     box = box.merge(AxisAlignedBox(model, scale, pos));
   }
   return box;
 }
 
-void MovingObject::SetPath(std::shared_ptr<std::vector<glm::vec3>> path) {
+void MovingObject::SetPath(std::vector<glm::vec3> path) {
   this->path = path;
 }
 

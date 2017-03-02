@@ -31,4 +31,7 @@
 #define PLAYER_JUMP_VELOCITY PLAYER_JUMP_DELTA_Y_PER_TICK
 #define PLAYER_GRAVITY (PLAYER_JUMP_DELTA_Y_PER_TICK / 40.0)  // dy^2 per tick
 
+// Amount of seconds before the music starts
+#define PREGAME_SECONDS 1
+
 #endif

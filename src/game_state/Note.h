@@ -9,17 +9,25 @@
 
 #define NOTE_MESH "models/note.obj"
 
+namespace gameobject {
 class Note : public Collectible {
-  public:
-    Note(glm::vec3 position);
-    Note(glm::vec3 position, glm::vec3 scale);
-    ~Note();
+ public:
+  Note();
+  Note(glm::vec3 position);
+  Note(glm::vec3 position, glm::vec3 scale);
+  Note(glm::vec3 position,
+       glm::vec3 scale,
+       glm::vec3 rotation_axis,
+       float rotaiton_angle,
+       float collected);
+  ~Note();
 
-    std::shared_ptr<Shape> GetModel() override;
-    SecondaryType GetSecondaryType() override;
+  std::shared_ptr<Shape> GetModel() override;
+  SecondaryType GetSecondaryType() override;
 
-  private:
-    static std::shared_ptr<Shape> shape;
-    static bool isInitialized;
+ private:
+  static std::shared_ptr<Shape> shape;
+  static bool isInitialized;
 };
+}
 #endif

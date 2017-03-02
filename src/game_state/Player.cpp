@@ -1,11 +1,12 @@
 // Joseph Arhar
 
-#include <string>
 #include "Player.h"
+
+#include "TimingConstants.h"
 
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
-const glm::vec3 Player::INITIAL_POSITION(-5, 4, -5);
+const glm::vec3 Player::INITIAL_POSITION(-5 - (DELTA_X_PER_SECOND * PREGAME_SECONDS), 4, -5);
 
 // static
 bool Player::isInitialized = false;
@@ -28,7 +29,8 @@ float Player::GetYVelocity() {
 }
 
 bool Player::GetDoubleJump() {
-  return can_double_jump;
+  //return can_double_jump;
+  return true;
 }
 
 std::shared_ptr<GameObject> Player::GetGround() {

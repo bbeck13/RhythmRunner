@@ -11,17 +11,17 @@
 
 class MovingObject {
  public:
-  MovingObject(std::shared_ptr<std::vector<glm::vec3>> path,
+  MovingObject(std::vector<glm::vec3> path,
                glm::vec3 position,
                float velocity);
 
-  MovingObject(std::shared_ptr<std::vector<glm::vec3>> path,
+  MovingObject(std::vector<glm::vec3> path,
                glm::vec3 position,
                glm::vec3 velocity);
 
-  glm::vec3 GetVelocity();
+  glm::vec3 GetVelocity() const;
 
-  std::shared_ptr<std::vector<glm::vec3>> GetPath();
+  std::vector<glm::vec3> GetPath() const;
 
   glm::vec3 updatePosition(glm::vec3 position);
 
@@ -35,10 +35,10 @@ class MovingObject {
 
   void SetVelocity(float velocity);
 
-  void SetPath(std::shared_ptr<std::vector<glm::vec3>> path);
+  void SetPath(std::vector<glm::vec3> path);
 
  protected:
-  std::shared_ptr<std::vector<glm::vec3>> path;
+  std::vector<glm::vec3> path;
   glm::vec3 movementVector;
   int currentDir;
   glm::vec3 velocity;
@@ -46,7 +46,7 @@ class MovingObject {
   // In case I change it during the level
   glm::vec3 origionalVelocity;
   glm::vec3 originalPosition;
-  std::shared_ptr<std::vector<glm::vec3>> origionalPath;
+  std::vector<glm::vec3> origionalPath;
 
   static double distance(glm::vec3 one, glm::vec3 two);
   static glm::vec3 calculateMovementVector(glm::vec3 goal, glm::vec3 start);

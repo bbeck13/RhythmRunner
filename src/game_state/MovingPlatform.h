@@ -12,13 +12,20 @@
 
 #define MOVING_PLATFORM_MESH "models/platform.obj"
 
+namespace gameobject {
 class MovingPlatform : public MovingObject, public Obstacle {
  public:
+  MovingPlatform();
+  MovingPlatform(glm::vec3 position, std::vector<glm::vec3> path);
   MovingPlatform(glm::vec3 position,
-                 std::shared_ptr<std::vector<glm::vec3>> path);
-  MovingPlatform(glm::vec3 position,
-                 std::shared_ptr<std::vector<glm::vec3>> path,
+                 std::vector<glm::vec3> path,
                  float velocity);
+  MovingPlatform(glm::vec3 position,
+                 glm::vec3 scale,
+                 glm::vec3 rotation_axis,
+                 float rotation_angle,
+                 glm::vec3 velocity,
+                 std::vector<glm::vec3> path);
   ~MovingPlatform();
 
   std::shared_ptr<Shape> GetModel() override;
@@ -29,5 +36,6 @@ class MovingPlatform : public MovingObject, public Obstacle {
   static std::shared_ptr<Shape> platform;
   static bool isInitialized;
 };
+}
 
 #endif

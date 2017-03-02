@@ -5,6 +5,7 @@
 
 // ProgramMode is used to represent different "modes" of operation,
 // or "screens", to be displayed by the main loop
-enum class ProgramMode { MENU_SCREEN, GAME_SCREEN, END_SCREEN, EXIT };
+enum class MainProgramMode { MENU_SCREEN, GAME_SCREEN, END_SCREEN, EXIT };
+enum class LevelProgramMode { MENU_SCREEN, EXIT, GENERATE_LEVEL };
 
 #endif
