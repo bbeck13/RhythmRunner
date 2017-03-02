@@ -11,7 +11,7 @@ MovingPlatform::MovingPlatform()
 MovingPlatform::MovingPlatform(glm::vec3 position, std::vector<glm::vec3> path)
     : MovingObject(path, position, 0.01f), Obstacle(MovingPlatform::platform) {
   this->position = position;
-  this->scale = glm::vec3(3, .6, 7.0f);
+  this->scale = glm::vec3(3, .6, 2.0f);
   this->model = platform;
 }
 
@@ -35,7 +35,7 @@ MovingPlatform::MovingPlatform(glm::vec3 position,
     : MovingObject(path, position, velocity),
       Obstacle(MovingPlatform::platform) {
   this->position = position;
-  this->scale = glm::vec3(3, .6, 7.0f);
+  this->scale = glm::vec3(3, .6, 2.0f);
   this->model = platform;
 }
 

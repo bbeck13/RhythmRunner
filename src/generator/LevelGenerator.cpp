@@ -103,7 +103,7 @@ LevelGenerator::Generate() {
 
     double pregame_platform_width = DELTA_X_PER_SECOND * PREGAME_SECONDS;
     objs->push_back(std::make_shared<gameobject::Platform>(
-        glm::vec3(xPos - (pregame_platform_width / 2), yPos, zPos),
+        glm::vec3(xPos - (pregame_platform_width / 2), yPos + .1, zPos),
         glm::vec3(pregame_platform_width, 1, 7)));
 
     for (int i = 1; i < num_platforms; i++) {

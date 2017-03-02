@@ -10,7 +10,8 @@
     "P",
     "V",
     "MV",
-    "Texture0"
+    "Texture0",
+    "SkyTexture0"
   ],
   "vert": "platform_vert.glsl"
 }
