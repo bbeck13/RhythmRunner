@@ -13,7 +13,6 @@ class Sky : public GameObject {
   Sky();
   Sky(glm::vec3 position, glm::vec3 scale);
   ~Sky();
-
   std::shared_ptr<Shape> GetModel() override;
   ObjectType GetType() override;
   SecondaryType GetSecondaryType() override;
