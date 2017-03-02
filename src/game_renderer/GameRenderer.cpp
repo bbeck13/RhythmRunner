@@ -169,6 +169,7 @@ void GameRenderer::Render(GLFWwindow* window,
   std::shared_ptr<Texture> current_texture = textures["lunarrock"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
+  textures["nightsky"]->bind(current_program->getUniform("SkyTexture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
@@ -189,6 +190,7 @@ void GameRenderer::Render(GLFWwindow* window,
   current_texture = textures["lunarrock"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
+  textures["nightsky"]->bind(current_program->getUniform("SkyTexture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
