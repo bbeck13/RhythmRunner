@@ -5,19 +5,17 @@
 std::shared_ptr<Shape> Sky::shape = std::make_shared<Shape>();
 bool Sky::isInitialized = false;
 
-Sky::Sky() : Collectible(Sky::shape) {
+Sky::Sky() : GameObject(Sky::shape) {
   this->position = glm::vec3(0, 0, -10);
   // todo play around with the size
   this->scale = glm::vec3(900, 900, 900);
   this->model = shape;
-  this->isCollected = false;
 }
 
-Sky::Sky(glm::vec3 position, glm::vec3 scale) : Collectible(Sky::shape) {
+Sky::Sky(glm::vec3 position, glm::vec3 scale) : GameObject(Sky::shape) {
   this->position = position;
   this->scale = scale;
   this->model = shape;
-  this->isCollected = false;
 }
 
 Sky::~Sky() {}
@@ -32,6 +30,10 @@ std::shared_ptr<Shape> Sky::GetModel() {
   return Sky::shape;
 }
 
+ObjectType Sky::GetType() {
+  return ObjectType::SCENERY;
+}
+
 SecondaryType Sky::GetSecondaryType() {
-  return SecondaryType::NOTE;
+  return SecondaryType::SKY;
 }

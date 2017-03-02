@@ -18,7 +18,8 @@
 // Move the camera X% closer to the target every tick
 #define FRACTION_CAMERA_MOVEMENT_PER_TICK 0.2f
 // How far the camera is from the player
-#define CAMERA_Z_SPACING 9.0f
+#define CAMERA_Z_SPACING 12.0f
+#define CAMERA_Y_SPACING 0.2f
 
 class GameCamera {
 public:

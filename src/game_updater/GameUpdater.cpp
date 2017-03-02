@@ -299,7 +299,7 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   // Gradually and smoothly move y towards player
   float delta_y = player_position.y - previous_camera_position.y;
   new_camera_position.y =
-      previous_camera_position.y + delta_y * FRACTION_CAMERA_MOVEMENT_PER_TICK;
+      previous_camera_position.y + delta_y * FRACTION_CAMERA_MOVEMENT_PER_TICK + CAMERA_Y_SPACING;
 
   camera->setPosition(new_camera_position);
 
