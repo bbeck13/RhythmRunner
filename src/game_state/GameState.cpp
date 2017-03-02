@@ -43,8 +43,9 @@ std::shared_ptr<Sky> GameState::GetSky() {
   return this->sky;
 }
 
-std::unordered_map<std::string, std::shared_ptr<VideoTexture>> GameState::GetVideoTextures() {
-   return this->video_textures;
+std::unordered_map<std::string, std::shared_ptr<VideoTexture>>
+GameState::GetVideoTextures() {
+  return this->video_textures;
 }
 
 bool GameState::Done() {
@@ -68,7 +69,8 @@ double GameState::GetStartTime() {
   return start_time;
 }
 
-void GameState::AddVideoTexture(std::string name, std::shared_ptr<VideoTexture> texture) {
+void GameState::AddVideoTexture(std::string name,
+                                std::shared_ptr<VideoTexture> texture) {
   this->video_textures[name] = texture;
 }
 
@@ -102,4 +104,13 @@ void GameState::SetItemsInView(
 std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
 GameState::GetObjectsInView() {
   return objectsInView;
+}
+
+std::shared_ptr<LevelEditorState> GameState::GetLevelEditorState() {
+  return level_editor_state;
+}
+
+void GameState::SetLevelEditorState(
+    std::shared_ptr<LevelEditorState> level_editor_state) {
+  this->level_editor_state = level_editor_state;
 }

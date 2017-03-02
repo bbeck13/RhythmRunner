@@ -30,6 +30,8 @@
   (PLAYER_JUMP_DELTA_Y_PER_SECOND * SECONDS_PER_TICK)
 #define PLAYER_JUMP_VELOCITY PLAYER_JUMP_DELTA_Y_PER_TICK
 #define PLAYER_GRAVITY (PLAYER_JUMP_DELTA_Y_PER_TICK / 40.0)  // dy^2 per tick
+// tag yourself as a one man team you're a one club man
+#define PLAYER_DELTA_Z_PER_TICK 0.05f
 
 // Amount of seconds before the music starts
 #define PREGAME_SECONDS 1

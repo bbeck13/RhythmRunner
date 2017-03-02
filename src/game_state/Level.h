@@ -21,6 +21,8 @@ class Level {
   std::shared_ptr<Octree> getTree();
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> getObjects();
 
+  void AddItem(std::shared_ptr<GameObject> object);
+
  private:
   std::shared_ptr<sf::Music> music;
   std::shared_ptr<Octree> tree;

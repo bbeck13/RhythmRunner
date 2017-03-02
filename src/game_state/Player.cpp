@@ -6,7 +6,10 @@
 
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
-const glm::vec3 Player::INITIAL_POSITION(-2 - (DELTA_X_PER_SECOND * PREGAME_SECONDS), 4, -5);
+const glm::vec3 Player::INITIAL_POSITION(-2 - (DELTA_X_PER_SECOND *
+                                               PREGAME_SECONDS),
+                                         4,
+                                         -5);
 
 // static
 bool Player::isInitialized = false;
@@ -105,4 +108,11 @@ void Player::SetZVelocity(float z_velocity) {
 
 SecondaryType Player::GetSecondaryType() {
   return SecondaryType::BIKE;
+}
+void Player::MoveDownZ() {
+  this->position -= glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK);
+}
+
+void Player::MoveUpZ() {
+  this->position += glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK);
 }

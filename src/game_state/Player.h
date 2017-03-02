@@ -21,13 +21,15 @@ class Player : public GameObject {
   float GetYVelocity();
   float GetZVelocity();
   bool GetDoubleJump();
-  std::shared_ptr<GameObject> GetGround(); // null if no ground
+  std::shared_ptr<GameObject> GetGround();  // null if no ground
   std::shared_ptr<Shape> GetModel() override;
   ObjectType GetType() override;
   SecondaryType GetSecondaryType() override;
   int GetScore();
 
   void SetYVelocity(float y_velocity);
+  void MoveDownZ();
+  void MoveUpZ();
   void SetZVelocity(float z_velocity);
   void SetDoubleJump(bool can_double_jump);
   void SetDucking(bool ducking);

@@ -20,7 +20,6 @@
 
 #define COLLISION_WIDTH 0.15f
 
-// TODO(bnbeck) thread that shit my dude
 std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
 GameUpdater::GetCollidingObjects(AxisAlignedBox primary_object,
                                  std::shared_ptr<Octree> tree) {
@@ -204,7 +203,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     }
   }
 
-  // always check for ducking
+  // always check for ducking (be ware of ducks)
   if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
       ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
     player->SetDucking(true);
@@ -285,6 +284,14 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   if (previous_player_box.GetMin().y <
       game_state->GetLevel()->getTree()->GetKillZone()) {
     StopGame(game_state);
+  }
+
+  // let the player move up/down Z (sock it to me)
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_K]) {
+    player->MoveDownZ();
+  }
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_J]) {
+    player->MoveUpZ();
   }
 }
 
