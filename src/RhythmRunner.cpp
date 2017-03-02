@@ -27,18 +27,6 @@ std::shared_ptr<GameState> game_state;
 
 GameUpdater game_updater;
 
-void CreateGame() {
-  LevelGenerator level_generator(menu_state->GetMusicPath());
-  game_state = std::make_shared<GameState>(level_generator.generateLevel(),
-                                           std::make_shared<GameCamera>(),
-                                           std::make_shared<Player>(),
-                                           std::make_shared<Sky>());
-  // Only Video texture we have right now
-  std::shared_ptr<VideoTexture> vid = std::make_shared<VideoTexture>(std::string(ASSET_DIR) + "/textures/sky");
-  game_state->AddVideoTexture("sky", vid);
-  game_updater.Init(game_state);
-}
-
 void PrintStatus() {
 #ifdef DEBUG
   static double last_debug_time = glfwGetTime();
@@ -145,10 +133,13 @@ int main(int argc, char** argv) {
           } else {
             level_generator = new LevelGenerator(menu_state->GetMusicPath());
           }
-          game_state = std::make_shared<GameState>(
-              level_generator->generateLevel(), std::make_shared<GameCamera>(),
-              std::make_shared<Player>());
-
+          game_state = std::make_shared<GameState>(level_generator->generateLevel(),
+                                           std::make_shared<GameCamera>(),
+                                           std::make_shared<Player>(),
+                                           std::make_shared<Sky>());
+          // Only Video texture we have right now
+          std::shared_ptr<VideoTexture> vid = std::make_shared<VideoTexture>(std::string(ASSET_DIR) + "/textures/sky");
+          game_state->AddVideoTexture("sky", vid);
           game_updater.Init(game_state);
           delete level_generator;
         }

@@ -6,7 +6,7 @@
 
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
-const glm::vec3 Player::INITIAL_POSITION(-5 - (DELTA_X_PER_SECOND * PREGAME_SECONDS), 4, -5);
+const glm::vec3 Player::INITIAL_POSITION(-2 - (DELTA_X_PER_SECOND * PREGAME_SECONDS), 4, -5);
 
 // static
 bool Player::isInitialized = false;
