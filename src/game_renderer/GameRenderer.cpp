@@ -16,6 +16,7 @@
 #include "ViewFrustumCulling.h"
 #include "json.hpp"
 #include "RendererSetup.h"
+#include "Sky.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -33,8 +34,9 @@ void GameRenderer::Init(const std::string& resource_dir) {
   }
 
   std::shared_ptr<Texture> temp_texture;
-  std::vector<std::string> texture_files = FileSystemUtils::ListFiles(
-      std::string(ASSET_DIR) + "/textures", "*.json");
+  std::vector<std::string> texture_files = 
+      FileSystemUtils::ListFiles(std::string(ASSET_DIR) + "/textures", "*.json");
+
   for (int i = 0; i < texture_files.size(); i++) {
     temp_texture = GameRenderer::TextureFromJSON(texture_files[i]);
     textures[temp_texture->getName()] = temp_texture;
@@ -56,7 +58,6 @@ std::shared_ptr<Texture> GameRenderer::TextureFromJSON(std::string filepath) {
   // Read the flle into the JSON library
   nlohmann::json json_handler;
   json_input_stream >> json_handler;
-
   std::string filename = json_handler["filename"];
   std::string name = json_handler["name"];
   int unit = json_handler["unit"];
@@ -141,6 +142,7 @@ void GameRenderer::Render(GLFWwindow* window,
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
+  std::shared_ptr<Sky> sky = game_state->GetSky();
 
   RendererSetup::PreRender(window);
 
@@ -154,7 +156,7 @@ void GameRenderer::Render(GLFWwindow* window,
   MatrixStack MV;
 
   P->pushMatrix();
-  P->perspective(45.0f, aspect, 0.01f, 100.0f);
+  P->perspective(45.0f, aspect, 0.01f, 500.0f);
   V.pushMatrix();
 
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
@@ -164,7 +166,7 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
-  std::shared_ptr<Texture> current_texture = textures["lightgrey"];
+  std::shared_ptr<Texture> current_texture = textures["lunarrock"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
@@ -184,7 +186,7 @@ void GameRenderer::Render(GLFWwindow* window,
 
   // moving platforms
   current_program = programs["moving_platform_prog"];
-  current_texture = textures["skyblue"];
+  current_texture = textures["lunarrock"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
@@ -246,6 +248,20 @@ void GameRenderer::Render(GLFWwindow* window,
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                      glm::value_ptr(MV.topMatrix()));
   player->GetModel()->draw(current_program);
+
+  // Sky
+  current_program = programs["sky_prog"];
+  current_program->bind();
+  current_texture = textures["nightsky"];
+  current_texture->bind(current_program->getUniform("Texture0"));
+  MV = sky->GetTransform();
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                     glm::value_ptr(MV.topMatrix()));
+  sky->GetModel()->draw(current_program);
 
   P->popMatrix();
   V.popMatrix();
