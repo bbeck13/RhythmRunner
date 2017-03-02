@@ -10,18 +10,22 @@
 
 namespace gameobject {
 class MoonRock : public GameObject {
-  public:
-    MoonRock();
-    MoonRock(glm::vec3 position, glm::vec3 scale);
-    ~MoonRock();
+ public:
+  MoonRock();
+  MoonRock(glm::vec3 position, glm::vec3 scale);
+  MoonRock(glm::vec3 position,
+           glm::vec3 scale,
+           glm::vec3 rotation_axis,
+           float rotaiton_angle);
+  ~MoonRock();
 
-    std::shared_ptr<Shape> GetModel() override;
-    ObjectType GetType() override;
-    SecondaryType GetSecondaryType() override;
+  std::shared_ptr<Shape> GetModel() override;
+  ObjectType GetType() override;
+  SecondaryType GetSecondaryType() override;
 
-  private:
-    static std::shared_ptr<Shape> shape;
-    static bool isInitialized;
+ private:
+  static std::shared_ptr<Shape> shape;
+  static bool isInitialized;
 };
 }
 #endif

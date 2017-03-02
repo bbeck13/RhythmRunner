@@ -18,3 +18,7 @@ std::shared_ptr<Octree> Level::getTree() {
 std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> Level::getObjects() {
   return tree->getObjects();
 }
+
+void Level::AddItem(std::shared_ptr<GameObject> object) {
+  this->tree->insert(object);
+}

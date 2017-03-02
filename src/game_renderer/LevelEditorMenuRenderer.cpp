@@ -46,8 +46,9 @@ LevelProgramMode LevelEditorMenuRenderer::Render(
       InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
     program_mode = LevelProgramMode::GENERATE_LEVEL;
   }
-  if (ImGui::Button("Level Editor")) {
-    // TODO bbeck13 do
+  if (ImGui::Button("Level Editor [TAB]") ||
+      InputBindings::KeyNewlyPressed(GLFW_KEY_TAB)) {
+    program_mode = LevelProgramMode::START_EDIT_LEVEL;
   }
   if (ImGui::Button("Exit [ESCAPE]") ||
       InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {

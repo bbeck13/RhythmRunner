@@ -19,13 +19,14 @@ class GameUpdater {
   void Reset(std::shared_ptr<GameState> game_state);
   void Init(std::shared_ptr<GameState> game_state);
 
+  static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+  GetCollidingObjects(AxisAlignedBox primary_object,
+                      std::shared_ptr<Octree> tree);
+
  private:
   void UpdateLevel(std::shared_ptr<GameState> game_state);
   void UpdatePlayer(std::shared_ptr<GameState> game_state);
   void UpdateCamera(std::shared_ptr<GameState> game_state);
-  static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
-  GetCollidingObjects(AxisAlignedBox primary_object,
-                      std::shared_ptr<Octree> tree);
   void StopGame(std::shared_ptr<GameState> game_state);
 };
 

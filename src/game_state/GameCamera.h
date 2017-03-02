@@ -31,6 +31,7 @@ public:
 
    void setPosition(glm::vec3 new_position);
    glm::vec3 getPosition();
+   glm::vec3 getUp();
 
    void setLookAt(glm::vec3 new_lookat);
    glm::vec3 getLookAt();

@@ -14,6 +14,7 @@
 #include "Player.h"
 #include "VideoTexture.h"
 #include "Sky.h"
+#include "LevelEditorState.h"
 
 class GameState {
  public:
@@ -27,7 +28,8 @@ class GameState {
   std::shared_ptr<GameCamera> GetCamera();
   std::shared_ptr<Player> GetPlayer();
   std::shared_ptr<Sky> GetSky();
-  std::unordered_map<std::string, std::shared_ptr<VideoTexture>> GetVideoTextures();
+  std::unordered_map<std::string, std::shared_ptr<VideoTexture>>
+  GetVideoTextures();
   std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
   GetObjectsInView();
 
@@ -36,6 +38,7 @@ class GameState {
   uint64_t GetStartTick();
   uint64_t GetMusicStartTick();
   double GetStartTime();
+  std::shared_ptr<LevelEditorState> GetLevelEditorState();
 
   void AddVideoTexture(std::string name, std::shared_ptr<VideoTexture> texture);
   void SetLevel(std::shared_ptr<Level> level);
@@ -45,6 +48,8 @@ class GameState {
   void SetStartTime();
   void SetItemsInView(
       std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> objects);
+  void SetLevelEditorState(
+      std::shared_ptr<LevelEditorState> level_editor_state);
 
  private:
   std::shared_ptr<Level> level;
@@ -54,6 +59,8 @@ class GameState {
   std::unordered_map<std::string, std::shared_ptr<VideoTexture>> video_textures;
   std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
       objectsInView;
+  std::shared_ptr<LevelEditorState> level_editor_state;
+
   bool done;
   uint64_t elapsed_ticks;
   uint64_t start_tick;  // value of elapsed_ticks when game started

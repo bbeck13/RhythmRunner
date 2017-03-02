@@ -37,12 +37,15 @@ class Octree {
   std::string ToString();
   float GetKillZone();
 
+  void insert(std::shared_ptr<GameObject> object);
+  void remove(std::shared_ptr<GameObject> object);
+
   Node* GetRoot();
 
  private:
   Node* root;
-  float killZone;
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects;
+  void prune();
 
   static std::string ToString(Node* n);
 

@@ -3,6 +3,7 @@
 #include "GameRenderer.h"
 
 #include <fstream>
+#include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <queue>
 
@@ -13,12 +14,18 @@
 #include "MovingPlatform.h"
 #include "Octree.h"
 #include "Platform.h"
+#include "Note.h"
+#include "DroppingPlatform.h"
 #include "ViewFrustumCulling.h"
 #include "json.hpp"
 #include "RendererSetup.h"
 #include "Sky.h"
 #include "MoonRock.h"
 #include "PlainRock.h"
+#include "LevelJson.h"
+#include "GameUpdater.h"
+
+#define TEXT_FIELD_LENGTH 256
 
 GameRenderer::GameRenderer() {}
 
@@ -141,6 +148,16 @@ GameRenderer::GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
 
 void GameRenderer::Render(GLFWwindow* window,
                           std::shared_ptr<GameState> game_state) {
+  RenderIt(window, game_state, false);
+}
+void GameRenderer::RenderLevelEditor(GLFWwindow* window,
+                                     std::shared_ptr<GameState> game_state) {
+  RenderIt(window, game_state, true);
+}
+
+void GameRenderer::RenderIt(GLFWwindow* window,
+                            std::shared_ptr<GameState> game_state,
+                            bool render_level_editor) {
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
@@ -164,7 +181,8 @@ void GameRenderer::Render(GLFWwindow* window,
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
       ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
 
-  game_state->SetItemsInView(GetObjectsInView(vfplane, level->getTree()));
+  game_state->SetItemsInView(
+      GameRenderer::GetObjectsInView(vfplane, level->getTree()));
 
   // Platforms
   std::shared_ptr<Program> current_program = programs["platform_prog"];
@@ -330,12 +348,13 @@ void GameRenderer::Render(GLFWwindow* window,
   P->popMatrix();
   V.popMatrix();
 
-  ImGuiRender(game_state);
+  ImGuiRender(game_state, render_level_editor);
 
   RendererSetup::PostRender(window);
 }
 
-void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state) {
+void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state,
+                               bool level_editor) {
   static const ImGuiWindowFlags static_window_flags =
       ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs;
 
@@ -370,5 +389,200 @@ void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state) {
 
   ImGui::End();
 
+  if (level_editor) {
+    LevelEditorRenderer(game_state);
+  }
+
   ImGui::Render();
+}
+
+void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
+  std::shared_ptr<LevelEditorState> level_state =
+      game_state->GetLevelEditorState();
+  RendererSetup::ImGuiCenterWindow(0.3);
+  ImGui::Begin("Level Editor");
+  glm::vec3 pos = game_state->GetPlayer()->GetPosition();
+  std::string look_at = "Position:{" + std::to_string(pos.x) + ", " +
+                        std::to_string(pos.y) + ", " + std::to_string(pos.z) +
+                        "}";
+
+  ImGui::Text(look_at.c_str());
+  const char* game_object_types[] = {"Platform",  "MovingPlatform",
+                                     "Note",      "DroppingPlatform",
+                                     "PlainRock", "MoonRock"};
+  static int listbox_item_current = -1;
+  ImGui::ListBox("##game_object_select", &listbox_item_current,
+                 game_object_types, 6, 4);
+  static glm::vec3 scale;
+  static glm::vec3 rotation_axis;
+  static glm::vec3 p1;
+  static glm::vec3 p2;
+  static float rotation_angle;
+  static float drop_vel;
+  switch (listbox_item_current) {
+    case 0: {  // Platform
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.5f);
+      ImGui::InputFloat("Y", &scale.y, 0.5f);
+      ImGui::InputFloat("Z", &scale.z, 0.5f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      break;
+    }
+    case 1: {  // moving platform
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.5f);
+      ImGui::InputFloat("Y", &scale.y, 0.5f);
+      ImGui::InputFloat("Z", &scale.z, 0.5f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      ImGui::Text(std::string("Path").c_str());
+      ImGui::InputFloat("Point 1 +X", &p1.x, 0.1f);
+      ImGui::InputFloat("Point 1 +Y", &p1.y, 0.1f);
+      ImGui::InputFloat("Point 1 +Z", &p1.z, 0.1f);
+      ImGui::InputFloat("Point 2 +X", &p2.x, 0.1f);
+      ImGui::InputFloat("Point 2 +Y", &p2.y, 0.1f);
+      ImGui::InputFloat("Point 2 +Z", &p2.z, 0.1f);
+      ImGui::InputFloat("Velocity", &drop_vel, 0.05f);
+      break;
+    }
+    case 2: {  // Note
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.2f);
+      ImGui::InputFloat("Y", &scale.y, 0.2f);
+      ImGui::InputFloat("Z", &scale.z, 0.2f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      break;
+    }
+    case 3: {  // dropping platform
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.5f);
+      ImGui::InputFloat("Y", &scale.y, 0.5f);
+      ImGui::InputFloat("Z", &scale.z, 0.5f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      ImGui::InputFloat("Drop Velocity", &drop_vel, 0.05f);
+      break;
+    }
+    case 4: {  // plain rock
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.2f);
+      ImGui::InputFloat("Y", &scale.y, 0.2f);
+      ImGui::InputFloat("Z", &scale.z, 0.2f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      break;
+    }
+    case 5: {  // moon rock
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.2f);
+      ImGui::InputFloat("Y", &scale.y, 0.2f);
+      ImGui::InputFloat("Z", &scale.z, 0.2f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      break;
+    }
+    default:
+      break;
+  }
+
+  if (ImGui::Button("Add")) {
+    switch (listbox_item_current) {
+      case 0:
+        game_state->GetLevel()->AddItem(std::make_shared<gameobject::Platform>(
+            pos, scale, rotation_axis, rotation_angle));
+        break;
+      case 1: {
+        std::vector<glm::vec3> path = std::vector<glm::vec3>();
+        // move in a triangle
+        path.push_back(pos + p1);
+        path.push_back(pos + p1 + p2);
+        path.push_back(pos);
+        game_state->GetLevel()->AddItem(
+            std::make_shared<gameobject::MovingPlatform>(
+                pos, scale, rotation_axis, rotation_angle,
+                glm::vec3(drop_vel, drop_vel, drop_vel), path));
+        break;
+      }
+      case 2:
+        game_state->GetLevel()->AddItem(std::make_shared<gameobject::Note>(
+            pos, scale, rotation_axis, rotation_angle, false));
+        break;
+      case 3:
+        game_state->GetLevel()->AddItem(
+            std::make_shared<gameobject::DroppingPlatform>(
+                pos, scale, rotation_axis, rotation_angle, drop_vel, false));
+        break;
+      case 4:
+        game_state->GetLevel()->AddItem(std::make_shared<gameobject::PlainRock>(
+            pos, scale, rotation_axis, rotation_angle));
+        break;
+      case 5:
+        game_state->GetLevel()->AddItem(std::make_shared<gameobject::MoonRock>(
+            pos, scale, rotation_axis, rotation_angle));
+        break;
+      default:
+        break;
+    }
+  }
+  if (ImGui::Button("Remove")) {
+    std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
+        colliding_objs = GameUpdater::GetCollidingObjects(
+            game_state->GetPlayer()->GetBoundingBox(),
+            game_state->GetLevel()->getTree());
+
+    if (!colliding_objs->empty()) {
+      game_state->GetLevel()->getTree()->remove(*colliding_objs->begin());
+    }
+  }
+
+  ImGui::End();
+
+  ImGui::Begin("Export Level");
+  static char level_path_buffer[TEXT_FIELD_LENGTH];
+
+  strncpy(level_path_buffer, level_state->GetLevelPath().c_str(),
+          TEXT_FIELD_LENGTH);
+  if (ImGui::InputText("Level Filepath", level_path_buffer,
+                       TEXT_FIELD_LENGTH)) {
+    level_state->SetLevelPath(
+        std::string(level_path_buffer, TEXT_FIELD_LENGTH));
+  }
+  if (ImGui::Button("Save")) {
+    if (!level_state->GetLevelPath().empty()) {
+      nlohmann::json j = *game_state->GetLevel()->getObjects();
+      std::ofstream output(level_state->GetLevelPath());
+      output << j;
+    }
+  }
+  ImGui::End();
+  ImGui::Begin("Camera Sensitivity");
+  std::string camera_move_string =
+      "Movement: " +
+      std::to_string(game_state->GetLevelEditorState()->GetCameraMove());
+  std::string camera_move_yaw_string =
+      "Yaw: " +  // tick yaw
+      std::to_string(game_state->GetLevelEditorState()->GetCameraYawMove());
+  ImGui::Text(camera_move_string.c_str());
+  ImGui::Text(camera_move_yaw_string.c_str());
+  ImGui::End();
 }

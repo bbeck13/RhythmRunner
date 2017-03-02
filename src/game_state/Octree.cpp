@@ -4,13 +4,14 @@
 #include <limits>
 #include <sstream>
 #include <cstdlib>
+#include <queue>
+#include <ctime>
 #include "MovingObject.h"
 
 Octree::Octree(
     std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects)
     : root(constructOctree(objects.get())) {
   this->objects = objects;
-  this->killZone = root->boundingBox.GetMin().y;
 }
 
 Octree::~Octree() {
@@ -22,11 +23,163 @@ Node* Octree::GetRoot() {
 }
 
 float Octree::GetKillZone() {
-  return killZone;
+  return root->boundingBox.GetMin().y;
 }
 
 std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> Octree::getObjects() {
   return objects;
+}
+
+void Octree::insert(std::shared_ptr<GameObject> object) {
+  std::queue<Node*> toVisit;
+  bool inserted = false;
+  AxisAlignedBox primary_object = object->GetBoundingBox();
+  std::vector<std::shared_ptr<GameObject>>* new_object =
+      new std::vector<std::shared_ptr<GameObject>>();
+  new_object->push_back(object);
+
+  toVisit.push(root);
+
+  while (!toVisit.empty() && !inserted) {
+    Node* node = toVisit.front();
+    toVisit.pop();
+    if (AxisAlignedBox::IsColliding(node->boundingBox, primary_object)) {
+      if (node->objects->empty()) {  // Node Abode
+        if (node->children->empty()) {
+          delete node->objects;
+          node->objects = new_object;
+          inserted = true;
+        } else {
+          bool childFound = false;
+          for (Node* child : *(node->children)) {
+            if (AxisAlignedBox::IsColliding(child->boundingBox,
+                                            primary_object)) {
+              toVisit.push(child);
+              childFound = true;
+            }
+          }
+          if (!childFound) {
+            Node* new_node =
+                new Node(new_object, primary_object, new std::vector<Node*>());
+            if (node->children->size() < 8) {
+              node->children->push_back(new_node);
+            } else {
+              std::vector<Node*>* new_children = new std::vector<Node*>();
+              new_children->push_back(new_node);
+              new_children->push_back(node);
+              delete node->children;
+              node->children = new_children;
+            }
+            inserted = true;
+          }
+        }
+      } else {  // Leif Erikson
+        if (node->objects->size() < OBJS_IN_LEAF) {
+          node->objects->push_back(object);
+          inserted = true;
+        } else {
+          std::vector<Node*>* new_children = new std::vector<Node*>();
+
+          new_children->push_back(
+              new Node(new_object, primary_object, new std::vector<Node*>()));
+          new_children->push_back(node);
+
+          delete node->children;
+          node->children = new_children;
+          delete node->objects;
+          node->objects = new std::vector<std::shared_ptr<GameObject>>();
+
+          inserted = true;
+        }
+      }
+    }
+  }
+  if (inserted == false) {  // expand the octree
+    std::vector<Node*>* new_children = new std::vector<Node*>();
+    new_children->push_back(
+        new Node(new_object, primary_object, new std::vector<Node*>()));
+    new_children->push_back(root);
+
+    Node* new_root =
+        new Node(new std::vector<std::shared_ptr<GameObject>>(),
+                 primary_object.merge(root->boundingBox), new_children);
+    root = new_root;
+  }
+  objects->push_back(object);
+}
+
+void Octree::remove(std::shared_ptr<GameObject> object) {
+  std::queue<Node*> toVisit;
+  toVisit.push(root);
+  AxisAlignedBox primary_object = object->GetBoundingBox();
+
+  while (!toVisit.empty()) {
+    Node* node = toVisit.front();
+    toVisit.pop();
+    if (node->objects->empty()) {
+      for (Node* child : *(node->children)) {
+        if (AxisAlignedBox::IsColliding(child->boundingBox, primary_object)) {
+          if (child->objects->empty()) {
+            toVisit.push(child);
+          } else {
+            auto it = std::find(child->objects->begin(), child->objects->end(),
+                                object);
+
+            if (it != child->objects->end()) {
+              // stackoverflow.com/honey_I_shrunk_the_kids
+              std::swap(*it, child->objects->back());
+              child->objects->pop_back();
+            }
+            if (child->objects->empty()) {
+              auto orphan = std::find(node->children->begin(),
+                                      node->children->end(), child);
+              // https://www.irishtimes.com/news/social-affairs/tuam-babies-significant-quantities-of-human-remains-found-at-former-home-1.2996599
+              // heard this on the radio the other day gave me the idea for this
+              if (orphan != node->children->end()) {
+                std::swap(*orphan, node->children->back());
+                node->children->pop_back();  // I unironically like pop music
+              }
+              srand(time(0));
+              int randomn = rand() % 2;
+              if (randomn ==
+                  1) {  // you don't need to prune your garden all the damn time
+                prune();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  auto it = std::find(objects->begin(), objects->end(), object);
+  if (it != objects->end()) {
+    objects->erase(it);
+  }
+}
+
+void Octree::prune() {
+  std::queue<Node*> toVisit;
+  toVisit.push(root);
+
+  while (!toVisit.empty()) {
+    Node* node = toVisit.front();
+    toVisit.pop();
+    if (node->objects->empty()) {
+      for (Node* child : *(node->children)) {
+        if (child->children->empty()) {
+          auto orphan =
+              std::find(node->children->begin(), node->children->end(), child);
+          if (orphan != node->children->end()) {
+            std::swap(*orphan, node->children->back());
+            child->objects->pop_back();
+          }
+        } else {
+          toVisit.push(child);
+        }
+      }
+    }
+  }
 }
 
 Node* Octree::constructOctree(std::vector<std::shared_ptr<GameObject>>* objs) {

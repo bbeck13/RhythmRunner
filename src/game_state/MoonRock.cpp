@@ -13,10 +13,21 @@ MoonRock::MoonRock() : GameObject(MoonRock::shape) {
   this->model = shape;
 }
 
-MoonRock::MoonRock(glm::vec3 position, glm::vec3 scale) : GameObject(MoonRock::shape) {
+MoonRock::MoonRock(glm::vec3 position, glm::vec3 scale)
+    : GameObject(MoonRock::shape) {
   this->position = position;
   this->scale = scale;
   this->model = shape;
+}
+MoonRock::MoonRock(glm::vec3 position,
+                   glm::vec3 scale,
+                   glm::vec3 rotation_axis,
+                   float rotaiton_angle)
+    : GameObject(MoonRock::shape) {
+  this->position = position;
+  this->scale = scale;
+  this->rotation_axis = rotation_axis;
+  this->rotation_angle = rotaiton_angle;
 }
 
 MoonRock::~MoonRock() {}
@@ -24,7 +35,7 @@ MoonRock::~MoonRock() {}
 std::shared_ptr<Shape> MoonRock::GetModel() {
   if (!MoonRock::isInitialized) {
     MoonRock::shape->loadMesh(std::string(ASSET_DIR) + "/" +
-                          std::string(ROCK_MESH));
+                              std::string(ROCK_MESH));
     MoonRock::shape->init();
     MoonRock::isInitialized = true;
   }
@@ -32,7 +43,7 @@ std::shared_ptr<Shape> MoonRock::GetModel() {
 }
 
 ObjectType MoonRock::GetType() {
-  return ObjectType::SCENERY;
+  return ObjectType::OBSTACLE;
 }
 
 SecondaryType MoonRock::GetSecondaryType() {

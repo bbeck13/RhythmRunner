@@ -13,10 +13,22 @@ PlainRock::PlainRock() : GameObject(PlainRock::shape) {
   this->model = shape;
 }
 
-PlainRock::PlainRock(glm::vec3 position, glm::vec3 scale) : GameObject(PlainRock::shape) {
+PlainRock::PlainRock(glm::vec3 position, glm::vec3 scale)
+    : GameObject(PlainRock::shape) {
   this->position = position;
   this->scale = scale;
   this->model = shape;
+}
+
+PlainRock::PlainRock(glm::vec3 position,
+                     glm::vec3 scale,
+                     glm::vec3 rotation_axis,
+                     float rotation_angle)
+    : GameObject(PlainRock::shape) {
+  this->position = position;
+  this->scale = scale;
+  this->rotation_axis = rotation_axis;
+  this->rotation_angle = rotation_angle;
 }
 
 PlainRock::~PlainRock() {}
@@ -24,7 +36,7 @@ PlainRock::~PlainRock() {}
 std::shared_ptr<Shape> PlainRock::GetModel() {
   if (!PlainRock::isInitialized) {
     PlainRock::shape->loadMesh(std::string(ASSET_DIR) + "/" +
-                          std::string(PLAIN_ROCK_MESH));
+                               std::string(PLAIN_ROCK_MESH));
     PlainRock::shape->init();
     PlainRock::isInitialized = true;
   }
@@ -32,7 +44,7 @@ std::shared_ptr<Shape> PlainRock::GetModel() {
 }
 
 ObjectType PlainRock::GetType() {
-  return ObjectType::SCENERY;
+  return ObjectType::OBSTACLE;
 }
 
 SecondaryType PlainRock::GetSecondaryType() {
