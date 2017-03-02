@@ -17,6 +17,7 @@
 #include "json.hpp"
 #include "RendererSetup.h"
 #include "Sky.h"
+#include "MoonRock.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -250,6 +251,7 @@ void GameRenderer::Render(GLFWwindow* window,
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                      glm::value_ptr(MV.topMatrix()));
   player->GetModel()->draw(current_program);
+  current_program->unbind();
 
   // Sky
   current_program = programs["sky_prog"];
@@ -264,7 +266,30 @@ void GameRenderer::Render(GLFWwindow* window,
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                      glm::value_ptr(MV.topMatrix()));
   sky->GetModel()->draw(current_program);
+  current_program->unbind();
 
+  // Moon Rocks
+  current_program = programs["rock_prog"];
+  current_program->bind();
+  current_texture = textures["rock"];
+  current_texture->bind(current_program->getUniform("Texture0"));
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
+    if (obj->GetSecondaryType() == SecondaryType::MOONROCK) {
+      if (std::shared_ptr<gameobject::MoonRock> rock =
+              std::static_pointer_cast<gameobject::MoonRock>(obj)) {
+          MV = rock->GetTransform();
+          glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                             glm::value_ptr(MV.topMatrix()));
+          rock->GetModel()->draw(current_program);
+      }
+    }
+  }
+  current_program->unbind();
+ 
   P->popMatrix();
   V.popMatrix();
 

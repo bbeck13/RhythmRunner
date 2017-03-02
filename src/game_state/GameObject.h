@@ -13,7 +13,7 @@
 #include "AxisAlignedBox.h"
 
 enum ObjectType { OBSTACLE, COLLECTIBLE, PLAYER, SCENERY };
-enum SecondaryType { NOTE, PLATFORM, BIKE, MOVING_PLATFORM, DROPPING_PLATFORM, SKY };
+enum SecondaryType { NOTE, PLATFORM, BIKE, MOVING_PLATFORM, DROPPING_PLATFORM, SKY, MOONROCK };
 
 // GameObjects are 3D entities which can be rendered
 class GameObject {

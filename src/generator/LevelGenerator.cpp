@@ -9,6 +9,7 @@
 #include "Octree.h"
 #include "MovingPlatform.h"
 #include "DroppingPlatform.h"
+#include "MoonRock.h"
 
 #define COLLECT 3.2f
 #define EPISILON 0.05f
@@ -97,6 +98,8 @@ LevelGenerator::Generate() {
     int samplesPerPlatform = MS_PER_PLATFORM * (wav->getSamplesCount() /
                                                 (double)wav->getAudioLength());
 
+    int new_z = 0;
+
     double xPos = -1, yPos = 2, zPos = -5, power = 0, lastPower = 0;
     int lastSample = samplesPerPlatform, ups = 0, downs = 0, wobble = 0,
         dropping = 0, moving = 0;
@@ -179,6 +182,16 @@ LevelGenerator::Generate() {
           }
           objs->push_back(std::make_shared<gameobject::Platform>(
               glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, .5f)));
+          if ((rand() % 2) + 1 == 1) {
+             new_z = zPos + ((rand() % 12) - 6);
+             while (new_z > -7 && new_z < -3) {
+                new_z = zPos + ((rand() % 10) - 6);
+             }
+             std::shared_ptr<gameobject::MoonRock> new_rock = std::make_shared<gameobject::MoonRock>(glm::vec3(xPos, yPos + 1, new_z), glm::vec3(1, 1, 1));
+             new_rock->SetRotationAxis(glm::vec3(1, 0, 0));
+             new_rock->SetRotationAngle((rand() % 10) + 1);
+             objs->push_back(new_rock);
+          }
           dropping = 0;
         } else {
           objs->push_back(std::make_shared<gameobject::DroppingPlatform>(

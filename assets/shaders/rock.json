@@ -1,0 +1,16 @@
+{
+  "attributes": [
+    "vertPos",
+    "vertNor",
+    "vertTex"
+  ],
+  "frag": "rock_frag.glsl",
+  "name": "rock_prog",
+  "uniforms": [
+    "P",
+    "V",
+    "MV",
+    "Texture0"
+  ],
+  "vert": "rock_vert.glsl"
+}
