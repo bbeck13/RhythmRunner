@@ -22,11 +22,6 @@
 
 #define MUSIC "music/2.wav"
 
-std::shared_ptr<MenuState> menu_state;
-std::shared_ptr<GameState> game_state;
-
-GameUpdater game_updater;
-
 void PrintStatus() {
 #ifdef DEBUG
   static double last_debug_time = glfwGetTime();
