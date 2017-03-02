@@ -81,10 +81,6 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
 }
 
 void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
-  std::shared_ptr<VideoTexture> sky = game_state->GetVideoTextures()["sky"];
-  // Fix timing
-  sky->IncrementFrame();
-
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
     // Moving the moving objects
     if (GameObject::Moves(obj->GetSecondaryType())) {
@@ -108,6 +104,7 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset the player
   game_state->SetDone(false);
   game_state->GetSky()->SetPosition(glm::vec3(0, 0, -10));
+  game_state->GetVideoTextures()["sky"]->ResetFrameCount();
 
   // TODO - iterate over all video textures and reset their playback
   // reset collectibles and moving objects
