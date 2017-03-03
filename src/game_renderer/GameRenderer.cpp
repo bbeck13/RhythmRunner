@@ -17,6 +17,7 @@
 #include "json.hpp"
 #include "RendererSetup.h"
 #include "Sky.h"
+#include "PythonExtension.h"
 
 GameRenderer::GameRenderer() {}
 
@@ -49,6 +50,8 @@ void GameRenderer::Init(const std::string& resource_dir) {
   color_vec.push_back(glm::vec3(89.0 / 255.0, 236.0 / 255, 0));
   color_vec.push_back(glm::vec3(0 / 255.0, 172.0 / 255, 236.0 / 255.0));
   color_vec.push_back(glm::vec3(150.0 / 255.0, 0 / 255, 236.0 / 255.0));
+
+  PythonExtension::GetYoutubeVideo("youtubeDL", "get_video", "urlurl");
 }
 
 std::shared_ptr<Texture> GameRenderer::TextureFromJSON(std::string filepath) {
