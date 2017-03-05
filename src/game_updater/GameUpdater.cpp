@@ -203,6 +203,15 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
       player->SetDoubleJump(false);
     }
   }
+
+  // always check for ducking
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
+      ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
+    player->SetDucking(true);
+  } else {
+    player->SetDucking(false);
+  }
+
   // finally update the players position
   player->SetPosition(player->GetPosition() +
                       glm::vec3(DELTA_X_PER_TICK, player->GetYVelocity(),

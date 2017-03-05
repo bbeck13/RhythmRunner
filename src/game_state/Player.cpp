@@ -16,6 +16,8 @@ Player::Player() : GameObject(Player::shape), y_velocity(0) {
   SetPosition(Player::INITIAL_POSITION);
   this->model = shape;
   this->scale = glm::vec3(0.8, 0.8, 0.8);
+  this->rotation_axis = glm::vec3(1.0, 0.0, 0.0);
+  this->rotation_angle = 0.0f;
   this->score = 0;
   this->y_velocity = 0;
   this->z_velocity = 0;
@@ -63,6 +65,14 @@ void Player::SetYVelocity(float y_velocity) {
 
 void Player::SetDoubleJump(bool can_double_jump) {
   this->can_double_jump = can_double_jump;
+}
+
+void Player::SetDucking(bool ducking) {
+  if (ducking) {
+    this->rotation_angle = 1.05f;
+  } else {
+    this->rotation_angle = 0.0f;
+  }
 }
 
 void Player::SetGround(std::shared_ptr<GameObject> ground) {
