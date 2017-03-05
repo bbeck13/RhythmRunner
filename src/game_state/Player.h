@@ -30,6 +30,7 @@ class Player : public GameObject {
   void SetYVelocity(float y_velocity);
   void SetZVelocity(float z_velocity);
   void SetDoubleJump(bool can_double_jump);
+  void SetDucking(bool ducking);
   void SetGround(std::shared_ptr<GameObject> ground);
   void RemoveGround();
   void SetScore(int score);
