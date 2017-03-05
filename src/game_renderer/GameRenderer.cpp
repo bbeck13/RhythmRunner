@@ -22,10 +22,12 @@
 #include "Sky.h"
 #include "MoonRock.h"
 #include "PlainRock.h"
+#include "Monster.h"
 #include "LevelJson.h"
 #include "GameUpdater.h"
 
 #define TEXT_FIELD_LENGTH 256
+#define SHOW_ME_THE_MENU_ITEMS 4
 
 GameRenderer::GameRenderer() {}
 
@@ -257,6 +259,25 @@ void GameRenderer::RenderIt(GLFWwindow* window,
   }
   current_program->unbind();
 
+  // Monsters
+  current_program = programs["monster_prog"];
+  current_texture = textures["rainbowglass"];
+  current_program->bind();
+  current_texture->bind(current_program->getUniform("Texture0"));
+  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                     glm::value_ptr(P->topMatrix()));
+  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                     glm::value_ptr(V.topMatrix()));
+  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
+    if (obj->GetSecondaryType() == SecondaryType::MONSTER) {
+      MV = obj->GetTransform();
+      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                         glm::value_ptr(MV.topMatrix()));
+      obj->GetModel()->draw(current_program);
+    }
+  }
+  current_program->unbind();
+
   // Player
   current_program = programs["player_prog"];
   current_texture = textures["rainbowglass"];
@@ -407,18 +428,21 @@ void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
                         "}";
 
   ImGui::Text(look_at.c_str());
-  const char* game_object_types[] = {"Platform",  "MovingPlatform",
-                                     "Note",      "DroppingPlatform",
-                                     "PlainRock", "MoonRock"};
+  const char* game_object_types[] = {
+      "Platform",  "MovingPlatform", "Note",   "DroppingPlatform",
+      "PlainRock", "MoonRock",       "Monster"};
   static int listbox_item_current = -1;
+  // TODO Snake Plisken is there a way to do number of members of a c array
   ImGui::ListBox("##game_object_select", &listbox_item_current,
-                 game_object_types, 6, 4);
+                 game_object_types, 7, SHOW_ME_THE_MENU_ITEMS);
   static glm::vec3 scale;
   static glm::vec3 rotation_axis;
   static glm::vec3 p1;
   static glm::vec3 p2;
   static float rotation_angle;
   static float drop_vel;
+  static float distanceX;
+  static float distanceZ;
   switch (listbox_item_current) {
     case 0: {  // Platform
       ImGui::Text(std::string("Scale").c_str());
@@ -501,6 +525,20 @@ void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
       ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
       break;
     }
+    case 6: {  // monster
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.2f);
+      ImGui::InputFloat("Y", &scale.y, 0.2f);
+      ImGui::InputFloat("Z", &scale.z, 0.2f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      ImGui::InputFloat("Velocity", &drop_vel, 0.05f);
+      ImGui::InputFloat("Travel X", &distanceX, 0.05f);
+      ImGui::InputFloat("Travel Z", &distanceZ, 0.05f);
+    }
     default:
       break;
   }
@@ -540,6 +578,11 @@ void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
         game_state->GetLevel()->AddItem(std::make_shared<gameobject::MoonRock>(
             pos, scale, rotation_axis, rotation_angle));
         break;
+      case 6:
+        game_state->GetLevel()->AddItem(std::make_shared<gameobject::Monster>(
+            pos, scale, rotation_axis, rotation_angle,
+            glm::vec3(drop_vel, drop_vel, drop_vel), distanceX, distanceZ));
+
       default:
         break;
     }

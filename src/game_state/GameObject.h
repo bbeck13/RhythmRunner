@@ -21,7 +21,8 @@ enum SecondaryType {
   DROPPING_PLATFORM,
   SKY,
   MOONROCK,
-  PLAINROCK
+  PLAINROCK,
+  MONSTER
 };
 
 // GameObjects are 3D entities which can be rendered

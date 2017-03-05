@@ -86,6 +86,7 @@ void std::to_json(nlohmann::json& j,
   std::vector<gameobject::Note> notes;
   std::vector<gameobject::MoonRock> moonRocks;
   std::vector<gameobject::PlainRock> plainRocks;
+  std::vector<gameobject::Monster> monsters;
 
   for (std::shared_ptr<GameObject> obj : level) {
     if (std::shared_ptr<gameobject::MovingPlatform> platform =
@@ -107,6 +108,9 @@ void std::to_json(nlohmann::json& j,
     } else if (std::shared_ptr<gameobject::PlainRock> rock =
                    std::dynamic_pointer_cast<gameobject::PlainRock>(obj)) {
       plainRocks.push_back(*rock);
+    } else if (std::shared_ptr<gameobject::Monster> monster =
+                   std::dynamic_pointer_cast<gameobject::Monster>(obj)) {
+      monsters.push_back(*monster);
     } else {
       std::cerr << "NO! I don't want that. " << obj->GetType() << " "
                 << obj->GetSecondaryType() << std::endl;
@@ -118,7 +122,8 @@ void std::to_json(nlohmann::json& j,
                      {"dropping_platforms", droppingPlatforms},
                      {"notes", notes},
                      {"moon_rocks", moonRocks},
-                     {"plain_rocks", plainRocks}};
+                     {"plain_rocks", plainRocks},
+                     {"monsters", monsters}};
 }
 
 void std::from_json(const nlohmann::json& j,
@@ -146,6 +151,10 @@ void std::from_json(const nlohmann::json& j,
   for (auto& item : j["plain_rocks"]) {
     gameobject::PlainRock rock = item;
     level.push_back(std::make_shared<gameobject::PlainRock>(rock));
+  }
+  for (auto& item : j["monsters"]) {
+    gameobject::Monster monster = item;
+    level.push_back(std::make_shared<gameobject::Monster>(monster));
   }
 }
 
@@ -258,4 +267,35 @@ void std::from_json(const nlohmann::json& j,
   for (auto& item : j) {
     items.push_back(item);
   }
+}
+
+void std::to_json(nlohmann::json& j,
+                  const std::vector<gameobject::Monster>& items) {
+  for (auto& item : items) {
+    j.push_back(item);
+  }
+}
+void std::from_json(const nlohmann::json& j,
+                    std::vector<gameobject::Monster>& items) {
+  for (auto& item : j) {
+    items.push_back(item);
+  }
+}
+
+void gameobject::to_json(nlohmann::json& j,
+                         const gameobject::Monster& monster) {
+  j = nlohmann::json{{"position", monster.GetPosition()},
+                     {"scale", monster.GetScale()},
+                     {"rotation_axis", monster.GetRotationAxis()},
+                     {"rotation_angle", monster.GetRotationAngle()},
+                     {"velocity", monster.GetVelocity()},
+                     {"path", monster.GetPath()}};
+}
+
+void gameobject::from_json(const nlohmann::json& j,
+                           gameobject::Monster& monster) {
+  monster = Monster(
+      j["position"].get<glm::vec3>(), j["scale"].get<glm::vec3>(),
+      j["rotation_axis"].get<glm::vec3>(), j["rotation_angle"].get<float>(),
+      j["velocity"].get<glm::vec3>(), j["path"].get<std::vector<glm::vec3>>());
 }

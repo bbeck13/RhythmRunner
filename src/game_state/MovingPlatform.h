@@ -5,6 +5,7 @@
 #include <glm/ext.hpp>
 #include <vector>
 #include <memory>
+
 #include "GameObject.h"
 #include "Obstacle.h"
 #include "Shape.h"

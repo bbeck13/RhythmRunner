@@ -47,7 +47,8 @@ AxisAlignedBox GameObject::GetBoundingBox() {
 }
 
 bool GameObject::Moves(SecondaryType type) {
-  return type == SecondaryType::MOVING_PLATFORM;
+  return type == SecondaryType::MOVING_PLATFORM ||
+         type == SecondaryType::MONSTER;
 }
 
 void GameObject::SetPosition(glm::vec3 position) {
