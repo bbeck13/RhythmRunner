@@ -16,6 +16,8 @@ DroppingPlatform::DroppingPlatform(glm::vec3 position,
   this->originalPosition = position;
   this->position = position;
   this->scale = scale;
+  this->rotation_axis = rotation_axis;
+  this->rotation_angle = rotation_angle;
   this->model = shape;
   this->dropVel = dropVel;
   this->dropping = dropping;
@@ -24,7 +26,7 @@ DroppingPlatform::DroppingPlatform(glm::vec3 position,
 DroppingPlatform::DroppingPlatform(glm::vec3 position)
     : Obstacle(DroppingPlatform::shape), originalPosition(position) {
   this->position = position;
-  this->scale = glm::vec3(3, .5, 7);
+  this->scale = glm::vec3(3, .5, 4);
   this->model = shape;
   dropVel = -0.1f;
   dropping = false;

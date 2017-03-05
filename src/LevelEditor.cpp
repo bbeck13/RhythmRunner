@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
   LevelEditorUpdater updater;
   std::shared_ptr<MenuState> menu_state = std::make_shared<MenuState>();
   menu_state->SetMusicPath(ASSET_DIR "/" MUSIC);
-  menu_state->SetLevelPath(ASSET_DIR "/levels/my_level");
   std::shared_ptr<GameState> game_state;
   LevelProgramMode program_mode = LevelProgramMode::MENU_SCREEN;
   GameRenderer game_renderer;
@@ -112,6 +111,8 @@ int main(int argc, char** argv) {
             std::string(ASSET_DIR) + "/textures/sky");
         game_state->AddVideoTexture("sky", vid);
         game_state->SetLevelEditorState(std::make_shared<LevelEditorState>());
+        game_state->GetLevelEditorState()->SetLevelPath(
+            menu_state->GetLevelPath());
 
         program_mode = LevelProgramMode::EDIT_LEVEL;
         break;

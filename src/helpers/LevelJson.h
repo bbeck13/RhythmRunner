@@ -13,6 +13,7 @@
 #include "Note.h"
 #include "PlainRock.h"
 #include "MoonRock.h"
+#include "Monster.h"
 #include "json.hpp"
 
 namespace glm {
@@ -52,6 +53,15 @@ void from_json(const nlohmann::json& j,
                std::vector<gameobject::PlainRock>& items);
 
 void to_json(nlohmann::json& j,
+             const std::vector<gameobject::PlainRock>& items);
+void from_json(const nlohmann::json& j,
+               std::vector<gameobject::PlainRock>& items);
+
+void to_json(nlohmann::json& j, const std::vector<gameobject::Monster>& items);
+void from_json(const nlohmann::json& j,
+               std::vector<gameobject::Monster>& items);
+
+void to_json(nlohmann::json& j,
              const std::vector<std::shared_ptr<GameObject>>& level);
 void from_json(const nlohmann::json& j,
                std::vector<std::shared_ptr<GameObject>>& level);
@@ -75,6 +85,9 @@ void from_json(const nlohmann::json& j, MoonRock& rock);
 
 void to_json(nlohmann::json& j, const PlainRock& rock);
 void from_json(const nlohmann::json& j, PlainRock& rock);
+
+void to_json(nlohmann::json& j, const Monster& monster);
+void from_json(const nlohmann::json& j, Monster& monster);
 }
 
 #endif
