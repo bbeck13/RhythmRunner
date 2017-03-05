@@ -7,7 +7,12 @@
 #include "Logging.h"
 
 // TODO(jarhar): make this constructor require all fields
-GameObject::GameObject(std::shared_ptr<Shape> model) : model(model) {}
+GameObject::GameObject(std::shared_ptr<Shape> model) : model(model) {
+  this->position = glm::vec3(0.0f, 0.0f, 0.0f);
+  this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+  this->rotation_angle = 0.0f;
+  this->rotation_axis = glm::vec3(0.0f, 1.0f, 0.0f);
+}
 
 GameObject::~GameObject() {}
 
@@ -32,7 +37,8 @@ glm::vec3 GameObject::GetScale() const {
 }
 
 MatrixStack GameObject::GetTransform() {
-  return AxisAlignedBox::GetTransform(GetPosition(), GetScale());
+  return AxisAlignedBox::GetTransform(GetPosition(), GetScale(),
+                                      GetRotationAngle(), GetRotationAxis());
 }
 
 AxisAlignedBox GameObject::GetBoundingBox() {

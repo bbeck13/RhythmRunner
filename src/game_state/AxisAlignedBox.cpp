@@ -13,21 +13,29 @@ bool AxisAlignedBox::IsColliding(const AxisAlignedBox& one,
          one.min.z <= two.max.z && one.max.z >= two.min.z;
 }
 
-MatrixStack AxisAlignedBox::GetTransform(glm::vec3 position, glm::vec3 scale) {
+MatrixStack AxisAlignedBox::GetTransform(glm::vec3 position, glm::vec3 scale,
+                                         float angle, glm::vec3 axis) {
   // TODO(jarhar): make this more efficient by caching calculated matrix
   MatrixStack transform;
   transform.pushMatrix();
   transform.loadIdentity();
   transform.translate(position);
-  // TODO(jarhar): rotate
+  transform.rotate(angle, axis);
   transform.scale(scale);
   return transform;
 }
 
 AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
+                               glm::vec3 scale, glm::vec3 position)
+   : AxisAlignedBox(model, scale, position, 0.0f, glm::vec3(0,1,0)) {}
+
+AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
                                glm::vec3 scale,
-                               glm::vec3 position)
-    : AxisAlignedBox(model, GetTransform(position, scale).topMatrix()) {}
+                               glm::vec3 position,
+                               float angle,
+                               glm::vec3 axis)
+    : AxisAlignedBox(model, GetTransform(position, scale,
+                                         angle, axis).topMatrix()) {}
 
 AxisAlignedBox::AxisAlignedBox(glm::vec3 min, glm::vec3 max)
     : min(min), max(max) {}
