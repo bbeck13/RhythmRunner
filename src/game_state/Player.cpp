@@ -70,11 +70,20 @@ void Player::SetDoubleJump(bool can_double_jump) {
   this->can_double_jump = can_double_jump;
 }
 
-void Player::SetDucking(bool ducking) {
-  if (ducking) {
-    this->rotation_angle = 1.05f;
-  } else {
-    this->rotation_angle = 0.0f;
+void Player::SetDucking(DuckDir ducking) {
+  switch (ducking) {
+    case NONE:
+      this->rotation_angle = 0.0f;
+      break;
+    case LEFT:
+      this->rotation_angle = -1.05f;
+      break;
+    case RIGHT:
+      this->rotation_angle = 1.05f;
+      break;
+    default:
+      this->rotation_angle = 0.0f;
+      break;
   }
 }
 

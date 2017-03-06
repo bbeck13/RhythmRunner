@@ -19,10 +19,10 @@
 #define DELTA_X_PER_TICK (DELTA_X_PER_SECOND * SECONDS_PER_TICK)
 
 // Platforms
-#define MS_PER_PLATFORM 400
+#define MS_PER_PLATFORM 600
 // Spacing between platform positions - no regard for platform size/scale
 #define PLATFORM_X_DELTA (DELTA_X_PER_MS * MS_PER_PLATFORM)
-#define PLATFORM_Y_DELTA 0.5
+#define PLATFORM_Y_DELTA 1.0
 
 // Player Movement
 #define PLAYER_JUMP_DELTA_Y_PER_SECOND 10.0  // Jump velocity

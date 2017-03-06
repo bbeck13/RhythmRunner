@@ -16,7 +16,7 @@ class DroppingPlatform : public Obstacle {
   DroppingPlatform(glm::vec3 position,
                    glm::vec3 scale,
                    glm::vec3 rotation_axis,
-                   float rotaiton_angle,
+                   float rotation_angle,
                    float dropVel,
                    bool dropping);
 
