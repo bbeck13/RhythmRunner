@@ -13,7 +13,6 @@
 namespace RendererSetup {
 
 GLFWwindow* InitOpenGL();
-GLFWwindow* InitLevelEditor();
 void Close(GLFWwindow* window);
 void PreRender(GLFWwindow* window);
 void PostRender(GLFWwindow* window);
