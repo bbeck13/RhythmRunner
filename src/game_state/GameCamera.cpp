@@ -5,15 +5,21 @@
 
 #include <algorithm>
 
+#include "TimingConstants.h"
+
 GameCamera::GameCamera() {
   ViewMatrix.pushMatrix();
   ViewMatrix.lookAt(eyePos, lookAtPos, up);
+  this->camera_player_spacing =
+      glm::vec3(CAMERA_VIEW_1_X, CAMERA_VIEW_1_Y, CAMERA_VIEW_1_Z);
 }
 
 GameCamera::GameCamera(glm::vec3 eyePos, glm::vec3 lookAtPos, glm::vec3 up) {
   this->eyePos = eyePos;
   this->lookAtPos = lookAtPos;
   this->up = up;
+  this->camera_player_spacing =
+      glm::vec3(CAMERA_VIEW_1_X, CAMERA_VIEW_1_Y, CAMERA_VIEW_1_Z);
 }
 
 MatrixStack GameCamera::getView() {
@@ -73,4 +79,12 @@ MatrixStack GameCamera::pivot(int width, int height, double xpos, double ypos) {
   ViewMatrix.lookAt(eyePos, lookAtPos, up);
 
   return ViewMatrix;
+}
+
+glm::vec3 GameCamera::GetCameraPlayerSpacing() {
+  return camera_player_spacing;
+}
+
+void GameCamera::SetCameraPlayerSpacing(glm::vec3 camera_player_spacing) {
+  this->camera_player_spacing = camera_player_spacing;
 }

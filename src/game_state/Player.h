@@ -7,6 +7,8 @@
 
 #define PLAYER_MESH "models/body_of_bike.obj"
 
+enum DuckDir { NONE, LEFT, RIGHT };
+
 class Player : public GameObject {
  public:
   // Represents change in velocity per tick
@@ -32,7 +34,7 @@ class Player : public GameObject {
   void MoveUpZ();
   void SetZVelocity(float z_velocity);
   void SetDoubleJump(bool can_double_jump);
-  void SetDucking(bool ducking);
+  void SetDucking(DuckDir ducking);
   void SetGround(std::shared_ptr<GameObject> ground);
   void RemoveGround();
   void SetScore(int score);

@@ -9,8 +9,6 @@
 #include "ProgramMode.h"
 
 #define CURSOR_IN_FRONT 8
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 480
 
 LevelEditorUpdater::LevelEditorUpdater() {}
 LevelEditorUpdater::~LevelEditorUpdater() {}
@@ -33,25 +31,27 @@ void LevelEditorUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   bool scrimshaw = false;  // Call me Ishmael
   float camera_move = game_state->GetLevelEditorState()->GetCameraMove();
   float camera_yaw_move = game_state->GetLevelEditorState()->GetCameraYawMove();
+  int width, height;
+  glfwGetWindowSize(game_state->GetWindow(), &width, &height);
 
   if (ImGui::GetIO().KeysDown[GLFW_KEY_D]) {
-    camera->pivot(WINDOW_WIDTH, WINDOW_HEIGHT,
-                  (WINDOW_WIDTH / 2) - camera_yaw_move, WINDOW_HEIGHT / 2);
+    camera->pivot(width, height, (width / 2.0f) - camera_yaw_move,
+                  height / 2.0f);
     scrimshaw = true;
   }
   if (ImGui::GetIO().KeysDown[GLFW_KEY_A]) {
-    camera->pivot(WINDOW_WIDTH, WINDOW_HEIGHT,
-                  (WINDOW_WIDTH / 2) + camera_yaw_move, WINDOW_HEIGHT / 2);
+    camera->pivot(width, height, (width / 2.0f) + camera_yaw_move,
+                  height / 2.0f);
     scrimshaw = true;
   }
   if (ImGui::GetIO().KeysDown[GLFW_KEY_W]) {
-    camera->pivot(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH / 2,
-                  (WINDOW_HEIGHT / 2) - camera_yaw_move);
+    camera->pivot(width, height, width / 2.0f,
+                  (height / 2.0f) - camera_yaw_move);
     scrimshaw = true;
   }
   if (ImGui::GetIO().KeysDown[GLFW_KEY_S]) {
-    camera->pivot(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH / 2,
-                  (WINDOW_HEIGHT / 2) + camera_yaw_move);
+    camera->pivot(width, height, width / 2.0f,
+                  (height / 2.0f) + camera_yaw_move);
     scrimshaw = true;
   }
 

@@ -34,7 +34,9 @@ GameUpdater::GetCollidingObjects(AxisAlignedBox primary_object,
     if (node->objects->empty()) {
       for (Node* child : *(node->children)) {
         if (AxisAlignedBox::IsColliding(child->boundingBox, primary_object)) {
-          toVisit.push(child);
+          if (!(child->objects->empty() && child->children->empty())) {
+            toVisit.push(child);
+          }
         }
       }
     } else {
@@ -95,6 +97,13 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
         obj->SetPosition(obj->GetPosition() +
                          glm::vec3(0.0f, dropper->GetYVelocity(), 0.0f));
       }
+    } else if (obj->GetSecondaryType() == SecondaryType::NOTE) {
+      std::shared_ptr<gameobject::Note> note =
+          std::dynamic_pointer_cast<gameobject::Note>(obj);
+      // spin to win
+      note->SetRotationAxis(glm::vec3(0, 1, 0));
+      note->SetRotationAngle(
+          note->GetRotationAngle() > 6 ? 0 : note->GetRotationAngle() + 0.05f);
     }
   }
 }
@@ -204,11 +213,18 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   }
 
   // always check for ducking (be ware of ducks)
+  // let the player move up/down Z (sock it to me)
   if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
       ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
-    player->SetDucking(true);
+    player->SetDucking(DuckDir::RIGHT);
+  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT]) {
+    player->MoveDownZ();
+    player->SetDucking(DuckDir::LEFT);
+  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT]) {
+    player->MoveUpZ();
+    player->SetDucking(DuckDir::RIGHT);
   } else {
-    player->SetDucking(false);
+    player->SetDucking(DuckDir::NONE);
   }
 
   // finally update the players position
@@ -285,14 +301,6 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
       game_state->GetLevel()->getTree()->GetKillZone()) {
     StopGame(game_state);
   }
-
-  // let the player move up/down Z (sock it to me)
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_K]) {
-    player->MoveDownZ();
-  }
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_J]) {
-    player->MoveUpZ();
-  }
 }
 
 void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
@@ -300,26 +308,36 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
 
   glm::vec3 player_position = game_state->GetPlayer()->GetPosition();
   glm::vec3 previous_camera_position = camera->getPosition();
+  glm::vec3 camera_spacing = camera->GetCameraPlayerSpacing();
   glm::vec3 new_camera_position;
+  int width, height;
+  glfwGetWindowSize(game_state->GetWindow(), &width, &height);
 
   // Z position is fixed
-  new_camera_position.z = player_position.z + CAMERA_Z_SPACING;
+  new_camera_position.z = player_position.z + camera_spacing.z;
 
   // Always keep camera aligned with player on x axis.
   // Make camera look ahead of the player
-  new_camera_position.x = player_position.x + FORWARD_CAMERA_SPACING;
+  new_camera_position.x = player_position.x + camera_spacing.x;
 
   // Gradually and smoothly move y towards player
   float delta_y = player_position.y - previous_camera_position.y;
   new_camera_position.y = previous_camera_position.y +
                           delta_y * FRACTION_CAMERA_MOVEMENT_PER_TICK +
-                          CAMERA_Y_SPACING;
+                          camera_spacing.y;
 
   camera->setPosition(new_camera_position);
-
-  // Always look directly at the player.
-  // Add FORWARD_CAMERA_SPACING to align camera
+  // Always look directly in front of the player.
   camera->setLookAt(player_position + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0));
+
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_1]) {  // view 1
+    camera->SetCameraPlayerSpacing(
+        glm::vec3(FORWARD_CAMERA_SPACING, CAMERA_Y_SPACING, CAMERA_Z_SPACING));
+  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_2]) {  // views from the 6
+    // 2.5d my ass Zoe!
+    camera->SetCameraPlayerSpacing(
+        glm::vec3(CAMERA_VIEW_1_X, CAMERA_VIEW_1_Y, CAMERA_VIEW_1_Z));
+  }
 }
 
 void GameUpdater::StopGame(std::shared_ptr<GameState> game_state) {

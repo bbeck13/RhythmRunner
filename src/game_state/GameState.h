@@ -7,6 +7,8 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include "GameObject.h"
 #include "Level.h"
@@ -21,7 +23,8 @@ class GameState {
   GameState(std::shared_ptr<Level> level,
             std::shared_ptr<GameCamera> camera,
             std::shared_ptr<Player> player,
-            std::shared_ptr<Sky> sky);
+            std::shared_ptr<Sky> sky,
+            GLFWwindow* window);
   ~GameState();
 
   std::shared_ptr<Level> GetLevel();
@@ -30,8 +33,7 @@ class GameState {
   std::shared_ptr<Sky> GetSky();
   std::unordered_map<std::string, std::shared_ptr<VideoTexture>>
   GetVideoTextures();
-  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
-  GetObjectsInView();
+  std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView();
 
   bool Done();
   uint64_t GetElapsedTicks();
@@ -39,6 +41,7 @@ class GameState {
   uint64_t GetMusicStartTick();
   double GetStartTime();
   std::shared_ptr<LevelEditorState> GetLevelEditorState();
+  GLFWwindow* GetWindow();
 
   void AddVideoTexture(std::string name, std::shared_ptr<VideoTexture> texture);
   void SetLevel(std::shared_ptr<Level> level);
@@ -46,8 +49,7 @@ class GameState {
   void SetDone(bool done);
   void IncrementTicks();
   void SetStartTime();
-  void SetItemsInView(
-      std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> objects);
+  void SetItemsInView(std::unordered_set<std::shared_ptr<GameObject>>* objects);
   void SetLevelEditorState(
       std::shared_ptr<LevelEditorState> level_editor_state);
 
@@ -57,9 +59,9 @@ class GameState {
   std::shared_ptr<Player> player;
   std::shared_ptr<Sky> sky;
   std::unordered_map<std::string, std::shared_ptr<VideoTexture>> video_textures;
-  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
-      objectsInView;
+  std::unordered_set<std::shared_ptr<GameObject>>* objectsInView;
   std::shared_ptr<LevelEditorState> level_editor_state;
+  GLFWwindow* window;
 
   bool done;
   uint64_t elapsed_ticks;

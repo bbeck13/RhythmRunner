@@ -65,9 +65,12 @@ void Octree::insert(std::shared_ptr<GameObject> object) {
               node->children->push_back(new_node);
             } else {
               std::vector<Node*>* new_children = new std::vector<Node*>();
+              Node* old_node =
+                  new Node(node->objects, node->boundingBox, node->children);
               new_children->push_back(new_node);
-              new_children->push_back(node);
+              new_children->push_back(old_node);
               delete node->children;
+              node->boundingBox = node->boundingBox.merge(primary_object);
               node->children = new_children;
             }
             inserted = true;
@@ -85,9 +88,10 @@ void Octree::insert(std::shared_ptr<GameObject> object) {
           new_children->push_back(node);
 
           delete node->children;
-          node->children = new_children;
           delete node->objects;
+          node->children = new_children;
           node->objects = new std::vector<std::shared_ptr<GameObject>>();
+          node->boundingBox = node->boundingBox.merge(primary_object);
 
           inserted = true;
         }
@@ -201,7 +205,7 @@ Node* Octree::constructOctree(std::vector<std::shared_ptr<GameObject>>* objs) {
   std::vector<Node*>* children = new std::vector<Node*>();
 
   // TODO(bnbeck) profile quad tree vs octree
-  for (AxisAlignedBox a : splitQuad(bb)) {
+  for (AxisAlignedBox a : splitOct(bb)) {
     std::vector<std::shared_ptr<GameObject>>* objects =
         getObjectsInBox(objs, a);
     if (!objects->empty()) {
