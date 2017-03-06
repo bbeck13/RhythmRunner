@@ -25,7 +25,7 @@
 #define MUSIC "music/2.wav"
 
 int main(int argc, char** argv) {
-  GLFWwindow* window = RendererSetup::InitLevelEditor();
+  GLFWwindow* window = RendererSetup::InitOpenGL();
   InputBindings::Bind(window);
 
   LevelEditorMenuRenderer menu_renderer;
