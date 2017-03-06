@@ -22,7 +22,8 @@
 #include "Sky.h"
 #include "VideoTexture.h"
 
-#define MUSIC "music/2.wav"
+#define MUSIC "music/3.wav"
+#define LEVEL "levels/demo_level"
 
 void PrintStatus() {
 #ifdef DEBUG
@@ -62,6 +63,7 @@ int main(int argc, char** argv) {
   std::shared_ptr<GameState> game_state;
   std::shared_ptr<MenuState> menu_state = std::make_shared<MenuState>();
   menu_state->SetMusicPath(ASSET_DIR "/" MUSIC);
+  menu_state->SetLevelPath(ASSET_DIR "/" LEVEL);
   program_mode = MainProgramMode::MENU_SCREEN;
 
   while (!glfwWindowShouldClose(window)) {
@@ -132,7 +134,7 @@ int main(int argc, char** argv) {
           }
           game_state = std::make_shared<GameState>(
               level_generator->generateLevel(), std::make_shared<GameCamera>(),
-              std::make_shared<Player>(), std::make_shared<Sky>());
+              std::make_shared<Player>(), std::make_shared<Sky>(), window);
           // Only Video texture we have right now
           std::shared_ptr<VideoTexture> vid = std::make_shared<VideoTexture>(
               std::string(ASSET_DIR) + "/textures/sky");

@@ -9,7 +9,7 @@ Monster::Monster()
       Obstacle(Monster::shape) {}
 
 Monster::Monster(glm::vec3 position)
-    : MovingObject(Monster::default_path(position, 8, 0), position, 0.03f),
+    : MovingObject(Monster::default_path(position, 8, 3), position, 0.03f),
       Obstacle(Monster::shape) {
   this->position = position;
   this->scale = glm::vec3(1, 1, 1);

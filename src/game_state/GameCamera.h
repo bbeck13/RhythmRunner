@@ -20,35 +20,41 @@
 // How far the camera is from the player
 #define CAMERA_Z_SPACING 12.0f
 #define CAMERA_Y_SPACING 0.2f
+#define CAMERA_VIEW_1_X -6
+#define CAMERA_VIEW_1_Y .5
+#define CAMERA_VIEW_1_Z 3
 
 class GameCamera {
-public:
-   GameCamera();
-   GameCamera(glm::vec3 eyePos, glm::vec3 lookAtPos, glm::vec3 up);
+ public:
+  GameCamera();
+  GameCamera(glm::vec3 eyePos, glm::vec3 lookAtPos, glm::vec3 up);
 
-   MatrixStack getView();
-   MatrixStack pivot(int width, int height, double xpos, double ypos);
+  MatrixStack getView();
+  MatrixStack pivot(int width, int height, double xpos, double ypos);
 
-   void setPosition(glm::vec3 new_position);
-   glm::vec3 getPosition();
-   glm::vec3 getUp();
+  void setPosition(glm::vec3 new_position);
+  glm::vec3 getPosition();
+  glm::vec3 getUp();
+  glm::vec3 GetCameraPlayerSpacing();
 
-   void setLookAt(glm::vec3 new_lookat);
-   glm::vec3 getLookAt();
+  void setLookAt(glm::vec3 new_lookat);
+  glm::vec3 getLookAt();
 
-   void Refresh();
+  void SetCameraPlayerSpacing(glm::vec3 camera_player_spacing);
 
-private:
-   MatrixStack ViewMatrix = MatrixStack();
-   glm::vec3 eyePos = glm::vec3(0,1,0);
-   glm::vec3 lookAtPos = glm::vec3(0,0,-5);
-   glm::vec3 up = glm::vec3(0, 1, 0);
-   float obeta = -(M_PI_2);
-   float oalpha = 0;
-   float beta = 0;
-   float alpha = 0;
-   float limit = DEGREES_IN_CIRCLE / M_PI / VIEWING_ANGLE;
+  void Refresh();
 
+ private:
+  glm::vec3 camera_player_spacing;
+  MatrixStack ViewMatrix = MatrixStack();
+  glm::vec3 eyePos = glm::vec3(0, 1, 0);
+  glm::vec3 lookAtPos = glm::vec3(0, 0, -5);
+  glm::vec3 up = glm::vec3(0, 1, 0);
+  float obeta = -(M_PI_2);
+  float oalpha = 0;
+  float beta = 0;
+  float alpha = 0;
+  float limit = DEGREES_IN_CIRCLE / M_PI / VIEWING_ANGLE;
 };
 
 #endif

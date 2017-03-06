@@ -6,7 +6,7 @@
 #include "AxisAlignedBox.h"
 
 // TODO(bnbeck) play around with this value it can change the performace a lot
-#define OBJS_IN_LEAF 20
+#define OBJS_IN_LEAF 25
 
 class Node {
  public:

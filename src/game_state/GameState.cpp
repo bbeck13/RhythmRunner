@@ -2,30 +2,35 @@
 
 #include "GameState.h"
 
-#include <GLFW/glfw3.h>
-
 #include "TimingConstants.h"
 
 GameState::GameState(std::shared_ptr<Level> level,
                      std::shared_ptr<GameCamera> camera,
                      std::shared_ptr<Player> player,
-                     std::shared_ptr<Sky> sky)
+                     std::shared_ptr<Sky> sky,
+                     GLFWwindow* window)
     : level(level),
       camera(camera),
       player(player),
       sky(sky),
+      window(window),
       done(false),
       elapsed_ticks(0),
       start_tick(0),
       start_time(0) {
-  objectsInView =
-      std::make_shared<std::unordered_set<std::shared_ptr<GameObject>>>();
+  objectsInView = new std::unordered_set<std::shared_ptr<GameObject>>();
   this->music_end_tick =
       level->getMusic()->getDuration().asMicroseconds() * TICKS_PER_MICRO +
       GetMusicStartTick();
 }
 
-GameState::~GameState() {}
+GameState::~GameState() {
+  delete objectsInView;
+}
+
+GLFWwindow* GameState::GetWindow() {
+  return this->window;
+}
 
 std::shared_ptr<Level> GameState::GetLevel() {
   return this->level;
@@ -97,12 +102,12 @@ void GameState::SetStartTime() {
 }
 
 void GameState::SetItemsInView(
-    std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> objects) {
+    std::unordered_set<std::shared_ptr<GameObject>>* objects) {
+  delete objectsInView;
   this->objectsInView = objects;
 }
 
-std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
-GameState::GetObjectsInView() {
+std::unordered_set<std::shared_ptr<GameObject>>* GameState::GetObjectsInView() {
   return objectsInView;
 }
 

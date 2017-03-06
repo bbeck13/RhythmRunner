@@ -31,9 +31,9 @@ class GameRenderer {
                          std::shared_ptr<GameState> game_state);
   static std::shared_ptr<Program> ProgramFromJSON(std::string filepath);
   static std::shared_ptr<Texture> TextureFromJSON(std::string filepath);
-  static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
-  GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
-                   std::shared_ptr<Octree> tree);
+  static std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView(
+      std::shared_ptr<std::vector<glm::vec4>> vfplane,
+      std::shared_ptr<Octree> tree);
 
  private:
   void RenderIt(GLFWwindow* window,

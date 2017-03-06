@@ -1,5 +1,7 @@
 #include "ViewFrustumCulling.h"
 
+#include <iostream>
+
 namespace ViewFrustumCulling {
 
 // Code from CPE-476 lab
@@ -56,8 +58,8 @@ std::shared_ptr<std::vector<glm::vec4>> GetViewFrustumPlanes(glm::mat4 P,
   Near.w = comp[3][3] + comp[3][2];
   normal = glm::vec3(Near.x, Near.y, Near.z);
   normal_length = glm::length(normal);
-  planes->push_back(Near / normal_length);
   Near = Near / normal_length;
+  planes->push_back(Near);
 
   Far.x = comp[0][3] - comp[0][2];
   Far.y = comp[1][3] - comp[1][2];
@@ -65,8 +67,8 @@ std::shared_ptr<std::vector<glm::vec4>> GetViewFrustumPlanes(glm::mat4 P,
   Far.w = comp[3][3] - comp[3][2];
   normal = glm::vec3(Far.x, Far.y, Far.z);
   normal_length = glm::length(normal);
-  planes->push_back(Far / normal_length);
   Far = Far / normal_length;
+  planes->push_back(Far);
 
   return planes;
 }
@@ -81,13 +83,13 @@ bool IsCulled(AxisAlignedBox box,
 
   std::vector<glm::vec3> box_vertices;
   // Right edge of box
-  box_vertices.push_back(box.GetMax()); 
+  box_vertices.push_back(box.GetMax());
   box_vertices.push_back(vec3(box.GetMax().x, box.GetMax().y, box.GetMin().z));
   box_vertices.push_back(vec3(box.GetMax().x, box.GetMin().y, box.GetMin().z));
   box_vertices.push_back(vec3(box.GetMax().x, box.GetMin().y, box.GetMax().z));
 
   // Left edge of box
-  box_vertices.push_back(box.GetMin()); 
+  box_vertices.push_back(box.GetMin());
   box_vertices.push_back(vec3(box.GetMin().x, box.GetMax().y, box.GetMin().z));
   box_vertices.push_back(vec3(box.GetMin().x, box.GetMin().y, box.GetMin().z));
   box_vertices.push_back(vec3(box.GetMin().x, box.GetMin().y, box.GetMax().z));
@@ -95,8 +97,8 @@ bool IsCulled(AxisAlignedBox box,
   int cull_count = 0;
   for (glm::vec3 box_vert : box_vertices) {
     dist =
-      DistToPlane(planes->at(VFC_LEFT).x, planes->at(VFC_LEFT).y,
-                  planes->at(VFC_LEFT).z, planes->at(VFC_LEFT).w, box_vert);
+        DistToPlane(planes->at(VFC_LEFT).x, planes->at(VFC_LEFT).y,
+                    planes->at(VFC_LEFT).z, planes->at(VFC_LEFT).w, box_vert);
     if (dist <= 0) {
       cull_count++;
     }
@@ -108,8 +110,33 @@ bool IsCulled(AxisAlignedBox box,
   cull_count = 0;
   for (glm::vec3 box_vert : box_vertices) {
     dist =
-      DistToPlane(planes->at(VFC_RIGHT).x, planes->at(VFC_RIGHT).y,
-                  planes->at(VFC_RIGHT).z, planes->at(VFC_RIGHT).w, box_vert);
+        DistToPlane(planes->at(VFC_RIGHT).x, planes->at(VFC_RIGHT).y,
+                    planes->at(VFC_RIGHT).z, planes->at(VFC_RIGHT).w, box_vert);
+    if (dist <= 0) {
+      cull_count++;
+    }
+  }
+  if (cull_count == 8) {
+    return true;
+  }
+
+  cull_count = 0;
+  for (glm::vec3 box_vert : box_vertices) {
+    dist = DistToPlane(planes->at(VFC_TOP).x, planes->at(VFC_TOP).y,
+                       planes->at(VFC_TOP).z, planes->at(VFC_TOP).w, box_vert);
+    if (dist <= 0) {
+      cull_count++;
+    }
+  }
+  if (cull_count == 8) {
+    return true;
+  }
+
+  cull_count = 0;
+  for (glm::vec3 box_vert : box_vertices) {
+    dist = DistToPlane(planes->at(VFC_BOTTOM).x, planes->at(VFC_BOTTOM).y,
+                       planes->at(VFC_BOTTOM).z, planes->at(VFC_BOTTOM).w,
+                       box_vert);
     if (dist <= 0) {
       cull_count++;
     }
@@ -121,8 +148,8 @@ bool IsCulled(AxisAlignedBox box,
   cull_count = 0;
   for (glm::vec3 box_vert : box_vertices) {
     dist =
-      DistToPlane(planes->at(VFC_TOP).x, planes->at(VFC_TOP).y,
-                  planes->at(VFC_TOP).z, planes->at(VFC_TOP).w, box_vert);
+        DistToPlane(planes->at(VFC_NEAR).x, planes->at(VFC_NEAR).y,
+                    planes->at(VFC_NEAR).z, planes->at(VFC_NEAR).w, box_vert);
     if (dist <= 0) {
       cull_count++;
     }
@@ -133,35 +160,8 @@ bool IsCulled(AxisAlignedBox box,
 
   cull_count = 0;
   for (glm::vec3 box_vert : box_vertices) {
-    dist =
-      DistToPlane(planes->at(VFC_BOTTOM).x, planes->at(VFC_BOTTOM).y,
-                  planes->at(VFC_BOTTOM).z, planes->at(VFC_BOTTOM).w, box_vert);
-    if (dist <= 0) {
-      cull_count++;
-    }
-  }
-  if (cull_count == 8) {
-    return true;
-  }
-
-  cull_count = 0;
-  for (glm::vec3 box_vert : box_vertices) {
-    dist =
-      DistToPlane(planes->at(VFC_NEAR).x, planes->at(VFC_NEAR).y,
-                  planes->at(VFC_NEAR).z, planes->at(VFC_NEAR).w, box_vert);
-    if (dist <= 0) {
-      cull_count++;
-    }
-  }
-  if (cull_count == 8) {
-    return true;
-  }
-
-  cull_count = 0;
-  for (glm::vec3 box_vert : box_vertices) {
-    dist =
-      DistToPlane(planes->at(VFC_FAR).x, planes->at(VFC_FAR).y,
-                  planes->at(VFC_FAR).z, planes->at(VFC_FAR).w, box_vert);
+    dist = DistToPlane(planes->at(VFC_FAR).x, planes->at(VFC_FAR).y,
+                       planes->at(VFC_FAR).z, planes->at(VFC_FAR).w, box_vert);
     if (dist <= 0) {
       cull_count++;
     }

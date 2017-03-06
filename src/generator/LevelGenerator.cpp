@@ -11,6 +11,7 @@
 #include "DroppingPlatform.h"
 #include "MoonRock.h"
 #include "PlainRock.h"
+#include "Monster.h"
 
 #define COLLECT 3.2f
 #define EPISILON 0.05f
@@ -72,6 +73,7 @@ std::shared_ptr<std::vector<std::shared_ptr<GameObject>>>
 LevelGenerator::Generate() {
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objs =
       std::make_shared<std::vector<std::shared_ptr<GameObject>>>();
+  sources = std::make_shared<std::vector<Aquila::SignalSource>>();
   if (loaded) {
     objs = level;
   } else {
@@ -83,7 +85,9 @@ LevelGenerator::Generate() {
     std::pair<double, double> range;
     Aquila::SampleType maxValue = 0, minValue = 0;
 
-    for (size_t j = 0; j < wav->getSamplesCount(); ++j) {
+    size_t j;
+    double avgpower = 0;
+    for (j = 0; j < wav->getSamplesCount(); ++j) {
       std::vector<Aquila::SampleType> v = {wav->sample(j)};
       Aquila::SignalSource src(v, wav->getSampleFrequency());
       if (Aquila::power(src) > maxValue) {
@@ -92,6 +96,8 @@ LevelGenerator::Generate() {
       if (Aquila::power(src) < minValue) {
         minValue = Aquila::power(src);
       }
+      avgpower -= avgpower / (float)wav->getSamplesCount();
+      avgpower += Aquila::power(src) / (float)wav->getSamplesCount();
     }
     range = std::pair<double, double>(minValue, maxValue);
 
@@ -101,7 +107,7 @@ LevelGenerator::Generate() {
 
     double xPos = -1, yPos = 2, zPos = -5, power = 0, lastPower = 0;
     int lastSample = samplesPerPlatform, ups = 0, downs = 0, wobble = 0,
-        dropping = 0, moving = 0;
+        dropping = 0, moving = 0, monsters = 0;
 
     double pregame_platform_width = DELTA_X_PER_SECOND * PREGAME_SECONDS;
     objs->push_back(std::make_shared<gameobject::Platform>(
@@ -119,8 +125,18 @@ LevelGenerator::Generate() {
       lastSample += samplesPerPlatform;
       Aquila::SignalSource src(sample, wav->getSampleFrequency());
       power = mapRange(range, sizeRange, Aquila::power(src));
+      sources->push_back(src);
       double delta = power - lastPower;
       lastPower = power;
+      if (Aquila::power(src) > (avgpower * 2.0) && monsters == 0) {
+        objs->push_back(std::make_shared<gameobject::Monster>(
+            glm::vec3(xPos, yPos + 2.5f, zPos)));
+        monsters = 1;
+      } else if (monsters < 3 && monsters != 0) {
+        monsters++;
+      } else {
+        monsters = 0;
+      }
       if (std::abs(delta) > EPISILON) {
         if (delta > 0) {
           yPos += PLATFORM_Y_DELTA;
@@ -128,9 +144,8 @@ LevelGenerator::Generate() {
             wobble++;
             std::shared_ptr<gameobject::PlainRock> new_rock =
                 std::make_shared<gameobject::PlainRock>(
-                    glm::vec3(xPos, yPos + 0.8, zPos - 4), glm::vec3(1, 1, 1));
-            new_rock->SetRotationAxis(glm::vec3(1, 0, 0));
-            new_rock->SetRotationAngle((rand() % 10) + 1);
+                    glm::vec3(xPos, yPos + 0.8, zPos - power),
+                    glm::vec3(1, 1, 1));
             objs->push_back(new_rock);
           } else {
             wobble = 0;
@@ -143,9 +158,8 @@ LevelGenerator::Generate() {
             wobble++;
             std::shared_ptr<gameobject::MoonRock> new_rock =
                 std::make_shared<gameobject::MoonRock>(
-                    glm::vec3(xPos, yPos + 1.3, zPos + 4), glm::vec3(1, 1, 1));
-            new_rock->SetRotationAxis(glm::vec3(1, 0, 0));
-            new_rock->SetRotationAngle((rand() % 10) + 1);
+                    glm::vec3(xPos, yPos + 1.5, zPos + power),
+                    glm::vec3(1, 1, 1));
             objs->push_back(new_rock);
           } else {
             wobble = 0;
@@ -194,18 +208,23 @@ LevelGenerator::Generate() {
             yPos = objs->back()->GetPosition().y + 0.1f;
           }
           objs->push_back(std::make_shared<gameobject::Platform>(
-              glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, 7.0f)));
+              glm::vec3(xPos, yPos, zPos), glm::vec3(power, .5f, 4.0f)));
           dropping = 0;
         } else {
           objs->push_back(std::make_shared<gameobject::DroppingPlatform>(
               glm::vec3(xPos, yPos - 0.1f, zPos - 0.1f),
-              glm::vec3(power, .5f, 7.0f)));
+              glm::vec3(power, .5f, 4.0f)));
           dropping++;
         }
       }
       if (power > COLLECT) {
-        objs->push_back(std::make_shared<gameobject::Note>(
-            glm::vec3(xPos, yPos + power - .5, zPos)));
+        if (power > 4) {
+          objs->push_back(std::make_shared<gameobject::Note>(
+              glm::vec3(xPos, yPos + power - .5, zPos - 4 + power * 2)));
+        } else {
+          objs->push_back(std::make_shared<gameobject::Note>(
+              glm::vec3(xPos, yPos + power - .5, zPos - 6 + power * 2)));
+        }
       }
     }
   }
@@ -218,7 +237,7 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
 #endif
   std::shared_ptr<Octree> tree = std::make_shared<Octree>(Generate());
   std::shared_ptr<Level> level =
-      std::make_shared<Level>(this->getMusic(), tree);
+      std::make_shared<Level>(this->getMusic(), tree, sources);
 #ifdef DEBUG
   std::cerr << "Generated octree!!" << std::endl;
 #endif

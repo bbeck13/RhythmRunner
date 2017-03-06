@@ -120,11 +120,11 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   return new_program;
 }
 
-std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
-GameRenderer::GetObjectsInView(std::shared_ptr<std::vector<glm::vec4>> vfplane,
-                               std::shared_ptr<Octree> tree) {
-  std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> inView =
-      std::make_shared<std::unordered_set<std::shared_ptr<GameObject>>>();
+std::unordered_set<std::shared_ptr<GameObject>>* GameRenderer::GetObjectsInView(
+    std::shared_ptr<std::vector<glm::vec4>> vfplane,
+    std::shared_ptr<Octree> tree) {
+  std::unordered_set<std::shared_ptr<GameObject>>* inView =
+      new std::unordered_set<std::shared_ptr<GameObject>>();
   std::queue<Node*> toVisit;
   toVisit.push(tree->GetRoot());
   while (!toVisit.empty()) {
@@ -177,7 +177,8 @@ void GameRenderer::RenderIt(GLFWwindow* window,
   MatrixStack MV;
 
   P->pushMatrix();
-  P->perspective(45.0f, aspect, 0.01f, 500.0f);
+  // small far for aggressive culling
+  P->perspective(45.0f, aspect, 0.01f, 150.0f);
   V.pushMatrix();
 
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
@@ -186,9 +187,33 @@ void GameRenderer::RenderIt(GLFWwindow* window,
   game_state->SetItemsInView(
       GameRenderer::GetObjectsInView(vfplane, level->getTree()));
 
+  // large far for sexy looks
+  P->popMatrix();
+  P->pushMatrix();
+  P->perspective(45.0f, aspect, 0.01f, 1000.0f);
+
+  // Ground
+  std::shared_ptr<Program> current_program;
+  std::shared_ptr<Texture> current_texture;
+  if (player->GetGround()) {
+    current_program = programs["player_prog"];
+    current_texture = textures["rainbowass"];
+    current_program->bind();
+    current_texture->bind(current_program->getUniform("Texture0"));
+    MV = player->GetGround()->GetTransform();
+    glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+                       glm::value_ptr(P->topMatrix()));
+    glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                       glm::value_ptr(V.topMatrix()));
+    glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                       glm::value_ptr(MV.topMatrix()));
+    player->GetGround()->GetModel()->draw(current_program);
+    current_program->unbind();
+  }
+
   // Platforms
-  std::shared_ptr<Program> current_program = programs["platform_prog"];
-  std::shared_ptr<Texture> current_texture = textures["lunarrock"];
+  current_program = programs["platform_prog"];
+  current_texture = textures["lunarrock"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
   textures["nightsky"]->bind(current_program->getUniform("SkyTexture0"));
@@ -261,7 +286,7 @@ void GameRenderer::RenderIt(GLFWwindow* window,
 
   // Monsters
   current_program = programs["monster_prog"];
-  current_texture = textures["rainbowglass"];
+  current_texture = textures["rainbowass"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
@@ -321,10 +346,12 @@ void GameRenderer::RenderIt(GLFWwindow* window,
     if (obj->GetSecondaryType() == SecondaryType::MOONROCK) {
       if (std::shared_ptr<gameobject::MoonRock> rock =
               std::static_pointer_cast<gameobject::MoonRock>(obj)) {
-        MV = rock->GetTransform();
-        glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                           glm::value_ptr(MV.topMatrix()));
-        rock->GetModel()->draw(current_program);
+        if (obj != player->GetGround()) {
+          MV = rock->GetTransform();
+          glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+                             glm::value_ptr(MV.topMatrix()));
+          rock->GetModel()->draw(current_program);
+        }
       }
     }
   }
@@ -616,6 +643,10 @@ void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
       std::ofstream output(level_state->GetLevelPath());
       output << j;
     }
+  }
+  if (ImGui::Button("Refresh Tree")) {
+    game_state->GetLevel()->SetTree(
+        std::make_shared<Octree>(game_state->GetLevel()->getObjects()));
   }
   ImGui::End();
   ImGui::Begin("Camera Sensitivity");
