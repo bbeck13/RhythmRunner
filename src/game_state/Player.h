@@ -13,6 +13,7 @@ enum DuckDir { NONE, LEFT, RIGHT };
 
 class Player : public GameObject {
  public:
+  enum Animation { GROUNDED = 0, JUMPING = 1 };
   // Represents size of gap between grounded platform
   static const float PLATFORM_SPACING;
   // TODO(jarhar): consider removing initial position
@@ -45,12 +46,23 @@ class Player : public GameObject {
   void RemoveGround();
   void SetScore(int score);
 
+  void SnapToGround();
+  void ChangeAnimation(Animation new_animation, uint64_t current_tick);
+  void Animate(uint64_t current_tick);
+  void Jump(uint64_t current_tick);
+
  private:
   std::shared_ptr<GameObject> ground;
   bool can_double_jump;
   float y_velocity;
   float z_velocity;
   int score;
+
+  Animation current_animation;
+  uint64_t animation_start_tick;
+  float wheel_rotation_speed;
+  std::shared_ptr<PhysicalObject> rear_wheel;
+  std::shared_ptr<PhysicalObject> front_wheel;
 };
 
 #endif

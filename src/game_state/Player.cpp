@@ -5,6 +5,8 @@
 #include "TimingConstants.h"
 
 #define WHEEL_SCALE 0.4
+#define WHEEL_ROTATION_PER_SECOND 12.0
+#define WHEEL_ROTATION_PER_TICK (WHEEL_ROTATION_PER_SECOND * SECONDS_PER_TICK)
 
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
@@ -21,14 +23,14 @@ Player::Player(glm::vec3 position,
       score(0),
       y_velocity(0),
       z_velocity(0),
-      can_double_jump(false) {
-  std::shared_ptr<PhysicalObject> rear_wheel = std::make_shared<PhysicalObject>(
-      WHEEL_MESH, glm::vec3(-1.2, -0.3, 0), glm::vec3(1, 0, 0), 0,
+      can_double_jump(false),
+      current_animation(Animation::JUMPING), wheel_rotation_speed(0) {
+  rear_wheel = std::make_shared<PhysicalObject>(
+      WHEEL_MESH, glm::vec3(-1.2, -0.3, 0), glm::vec3(0, 0, -1), 0,
       glm::vec3(WHEEL_SCALE, WHEEL_SCALE, WHEEL_SCALE));
-  std::shared_ptr<PhysicalObject> front_wheel =
-      std::make_shared<PhysicalObject>(
-          WHEEL_MESH, glm::vec3(0.9, -0.3, 0), glm::vec3(1, 0, 0), 0,
-          glm::vec3(WHEEL_SCALE, WHEEL_SCALE, WHEEL_SCALE));
+  front_wheel = std::make_shared<PhysicalObject>(
+      WHEEL_MESH, glm::vec3(0.9, -0.3, 0), glm::vec3(0, 0, -1), 0,
+      glm::vec3(WHEEL_SCALE, WHEEL_SCALE, WHEEL_SCALE));
 
   AddSubObject(rear_wheel);
   AddSubObject(front_wheel);
@@ -122,4 +124,48 @@ void Player::MoveDownZ() {
 
 void Player::MoveUpZ() {
   SetPosition(GetPosition() + glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
+}
+
+void Player::SnapToGround() {
+  if (!GetGround()) {
+    return;
+  }
+
+  AxisAlignedBox bounding_box = GetBoundingBox();
+  AxisAlignedBox ground_box = GetGround()->GetBoundingBox();
+
+  SetPosition(
+      glm::vec3(GetPosition().x,
+                ground_box.GetMax().y + Player::PLATFORM_SPACING +
+                    (bounding_box.GetMax().y - bounding_box.GetMin().y) / 2 +
+                    (GetPosition().y - bounding_box.GetCenter().y),
+                GetPosition().z));
+}
+
+void Player::ChangeAnimation(Animation new_animation, uint64_t current_tick) {
+  animation_start_tick = current_tick - 1;  // TODO(jarhar): this is hacky
+  current_animation = new_animation;
+}
+
+void Player::Animate(uint64_t current_tick) {
+  // Rotate the wheels
+  if (current_animation == Animation::GROUNDED) {
+    wheel_rotation_speed = WHEEL_ROTATION_PER_TICK;
+  } else if (current_animation == Animation::JUMPING) {
+    wheel_rotation_speed *= 0.98;
+  }
+  rear_wheel->SetRotationAngle(rear_wheel->GetRotationAngle() +
+                               wheel_rotation_speed);
+  front_wheel->SetRotationAngle(front_wheel->GetRotationAngle() +
+                                wheel_rotation_speed);
+
+  // TODO(jarhar): set player rotation based on y velocity
+}
+
+void Player::Jump(uint64_t current_tick) {
+  // TODO(jarhar): create a particle effect here?
+  ChangeAnimation(Animation::JUMPING, current_tick);
+  SetYVelocity(PLAYER_JUMP_VELOCITY);
+  SetZVelocity(0);
+  RemoveGround();
 }
