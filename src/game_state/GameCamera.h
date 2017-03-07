@@ -9,14 +9,15 @@
 #include <memory>
 
 #include "MatrixStack.h"
+#include "Player.h"
 
 #define CAMERA_SPEED 0.4
 #define DEGREES_IN_CIRCLE 360.0f
 #define VIEWING_ANGLE 160.0f
-// Keep the camera this many units in front of the player
-#define FORWARD_CAMERA_SPACING 6.0f
-// Move the camera X% closer to the target every tick
-#define FRACTION_CAMERA_MOVEMENT_PER_TICK 0.2f
+// Keep the look at this many units in front of the player
+#define FORWARD_CAMERA_SPACING 5.0f
+// How fast the camera moves when rotating around look at
+#define CAMERA_YAW_MOVE 30.0f
 // How far the camera is from the player
 #define CAMERA_Z_SPACING 12.0f
 #define CAMERA_Y_SPACING 0.2f
@@ -44,13 +45,16 @@ class GameCamera {
 
   void SetCameraPlayerSpacing(glm::vec3 camera_player_spacing);
 
+  void Reset();
+
   void Refresh();
 
  private:
   glm::vec3 camera_player_spacing;
   MatrixStack ViewMatrix = MatrixStack();
-  glm::vec3 eyePos = glm::vec3(0, 1, 0);
-  glm::vec3 lookAtPos = glm::vec3(0, 0, -5);
+  glm::vec3 lookAtPos = Player::INITIAL_POSITION +
+                        glm::vec3(FORWARD_CAMERA_SPACING, 0, 0);
+  glm::vec3 eyePos = lookAtPos + glm::vec3(-8,2,1);
   glm::vec3 up = glm::vec3(0, 1, 0);
   float obeta = -(M_PI_2);
   float oalpha = 0;
