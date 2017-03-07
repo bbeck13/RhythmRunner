@@ -36,6 +36,12 @@ class GameRenderer {
       std::shared_ptr<Octree> tree);
 
  private:
+  void RenderMiniMap(GLFWwindow* window,
+                std::shared_ptr<GameState> game_state,
+                bool render_level_editor);
+  void RenderNormalView(GLFWwindow* window,
+                std::shared_ptr<GameState> game_state,
+                bool render_level_editor);
   void RenderIt(GLFWwindow* window,
                 std::shared_ptr<GameState> game_state,
                 bool render_level_editor);
