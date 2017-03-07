@@ -4,7 +4,7 @@
 #include <iostream>
 
 Sky::Sky(glm::vec3 position, glm::vec3 scale)
-    : GameObject(SKY_MESH, position, glm::vec3(), 0, scale) {}
+    : GameObject(SKY_MESH, position, glm::vec3(1, 0, 0), 0, scale) {}
 
 Sky::~Sky() {}
 
