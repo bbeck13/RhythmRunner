@@ -609,16 +609,16 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   V.popMatrix();
 }
 
-void GameRenderer::ImGuiRenderBegin() {
+void GameRenderer::ImGuiRenderBegin(std::shared_ptr<GameState> game_state) {
   ImGui_ImplGlfwGL3_NewFrame();
 
 #ifdef DEBUG
   RendererSetup::ImGuiTopRightCornerWindow(0.2);
   ImGui::Begin("Debug Info", NULL, static_window_flags);
+
   static double last_debug_time = glfwGetTime();
   static int frames_since_last_debug = 0;
   static std::string fps_string = "FPS: no data";
-
   double current_debug_time = glfwGetTime();
   double elapsed_debug_time = current_debug_time - last_debug_time;
   if (elapsed_debug_time > 1.0) {
@@ -631,8 +631,11 @@ void GameRenderer::ImGuiRenderBegin() {
     frames_since_last_debug = 0;
   }
   frames_since_last_debug++;
-
   ImGui::Text(fps_string.c_str());
+  ImGui::Text((std::string("Player Animation: ") +
+               std::to_string(game_state->GetPlayer()->GetAnimation()))
+                  .c_str());
+
   ImGui::End();
 #endif
 }
@@ -645,7 +648,7 @@ MainProgramMode GameRenderer::ImGuiRenderGame(
     std::shared_ptr<GameState> game_state) {
   MainProgramMode next_mode = MainProgramMode::GAME_SCREEN;
 
-  ImGuiRenderBegin();
+  ImGuiRenderBegin(game_state);
 
   RendererSetup::ImGuiTopLeftCornerWindow(0.2);
   ImGui::Begin("Stats", NULL, static_window_flags);
@@ -721,7 +724,7 @@ MainProgramMode GameRenderer::ImGuiRenderGame(
 
 LevelProgramMode GameRenderer::ImGuiRenderEditor(
     std::shared_ptr<GameState> game_state) {
-  ImGuiRenderBegin();
+  ImGuiRenderBegin(game_state);
 
   std::shared_ptr<LevelEditorState> level_state =
       game_state->GetLevelEditorState();

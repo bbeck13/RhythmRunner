@@ -59,6 +59,11 @@ void GameUpdater::Init(std::shared_ptr<GameState> game_state) {
   Reset(game_state);
 }
 
+void GameUpdater::PostGameUpdate(std::shared_ptr<GameState> game_state) {
+  // animate the player after you win or lose
+  game_state->GetPlayer()->Animate(0);  // TODO(jarhar): 0 is poop
+}
+
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   if (game_state->ReachedEndOfLevel()) {
     game_state->SetPlayingState(GameState::PlayingState::SUCCESS);
@@ -73,7 +78,8 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
 
   // check to see if the music should start on this tick
   std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
-  if (game_state->GetMusicStartTick() == game_state->GetElapsedTicks()) {
+  if ((game_state->GetMusicStartTick() >= game_state->GetElapsedTicks()) &&
+      (music->getStatus() != sf::SoundSource::Status::Playing)) {
     music->play();
     music->setLoop(false);
   }
@@ -111,6 +117,8 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset the player
+  game_state->GetPlayer()->ChangeAnimation(Player::Animation::JUMPING,
+                                           game_state->GetElapsedTicks());
   game_state->SetPlayingState(GameState::PlayingState::PLAYING);
   game_state->GetSky()->SetPosition(glm::vec3(0, 0, -10));
   game_state->GetVideoTextures()["sky"]->ResetFrameCount();
@@ -225,12 +233,14 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
       ImGui::GetIO().KeysDown[GLFW_KEY_H]) {
     player->MoveDownZ();
     player->SetDucking(DuckDir::LEFT);
-    camera->setPosition(prevCameraPos - glm::vec3(0,0,PLAYER_DELTA_Z_PER_TICK));
+    camera->setPosition(prevCameraPos -
+                        glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
   } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT] ||
              ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
     player->MoveUpZ();
     player->SetDucking(DuckDir::RIGHT);
-    camera->setPosition(prevCameraPos + glm::vec3(0,0,PLAYER_DELTA_Z_PER_TICK));
+    camera->setPosition(prevCameraPos +
+                        glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
   } else {
     player->SetDucking(DuckDir::NONE);
   }
@@ -332,29 +342,30 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   float maxCameraYLimit = player_position[1] + 3.5;
 
   if (ImGui::GetIO().KeysDown[GLFW_KEY_D]) {
-    camera->revolveAroundLookAt(0.0f, CAMERA_YAW_MOVE/1000.0f);
+    camera->revolveAroundLookAt(0.0f, CAMERA_YAW_MOVE / 1000.0f);
   }
   if (ImGui::GetIO().KeysDown[GLFW_KEY_A]) {
-    camera->revolveAroundLookAt(0.0f, -1*CAMERA_YAW_MOVE/1000.0f);
+    camera->revolveAroundLookAt(0.0f, -1 * CAMERA_YAW_MOVE / 1000.0f);
   }
   if (game_state->GetPlayer()->GetGround()) {
     if (ImGui::GetIO().KeysDown[GLFW_KEY_W]) {
       glm::vec3 prevCameraPos = camera->getPosition();
-      camera->revolveAroundLookAt(CAMERA_YAW_MOVE/1000.0f, 0.0f);
+      camera->revolveAroundLookAt(CAMERA_YAW_MOVE / 1000.0f, 0.0f);
       if (camera->getPosition()[1] > maxCameraYLimit) {
         camera->setPosition(prevCameraPos);
       }
     }
     if (ImGui::GetIO().KeysDown[GLFW_KEY_S]) {
       glm::vec3 prevCameraPos = camera->getPosition();
-      camera->revolveAroundLookAt(-1*CAMERA_YAW_MOVE/1000.0f, 0.0f);
+      camera->revolveAroundLookAt(-1 * CAMERA_YAW_MOVE / 1000.0f, 0.0f);
       if (camera->getPosition()[1] < minCameraYLimit) {
         camera->setPosition(prevCameraPos);
       }
     }
   }
 
-  camera->setPosition(camera->getPosition() + glm::vec3(DELTA_X_PER_TICK, 0, 0));
+  camera->setPosition(camera->getPosition() +
+                      glm::vec3(DELTA_X_PER_TICK, 0, 0));
 
   // Always look directly at the player.
   // Add FORWARD_CAMERA_SPACING to align camera
@@ -374,13 +385,11 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   }
   glm::vec3 newCameraPos = camera->getPosition();
   if (newCameraPos[1] < minCameraYLimit) {
-    camera->setPosition(glm::vec3(newCameraPos[0],
-                                  minCameraYLimit,
-                                  newCameraPos[2]));
+    camera->setPosition(
+        glm::vec3(newCameraPos[0], minCameraYLimit, newCameraPos[2]));
   } else if (newCameraPos[1] > maxCameraYLimit) {
-    camera->setPosition(glm::vec3(newCameraPos[0],
-                                  maxCameraYLimit,
-                                  newCameraPos[2]));
+    camera->setPosition(
+        glm::vec3(newCameraPos[0], maxCameraYLimit, newCameraPos[2]));
   }
 }
 

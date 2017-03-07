@@ -41,7 +41,7 @@ class GameRenderer {
  private:
   void RenderObjects(GLFWwindow* window, std::shared_ptr<GameState> game_state);
   void RenderMinimap(GLFWwindow* window, std::shared_ptr<GameState> game_state);
-  void ImGuiRenderBegin();
+  void ImGuiRenderBegin(std::shared_ptr<GameState> game_state);
   void ImGuiRenderEnd();
   MainProgramMode ImGuiRenderGame(std::shared_ptr<GameState> game_state);
   LevelProgramMode ImGuiRenderEditor(std::shared_ptr<GameState> game_state);

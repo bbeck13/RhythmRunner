@@ -155,7 +155,14 @@ void GameState::SetPlayingState(PlayingState playing_state) {
       }
       break;
     case GameState::PlayingState::FAILURE:
+      if (music->getStatus() == sf::SoundSource::Status::Playing) {
+        music->stop();
+      }
+      player->ChangeAnimation(Player::Animation::FAILURE, elapsed_ticks);
+      break;
     case GameState::PlayingState::SUCCESS:
+      player->ChangeAnimation(Player::Animation::SUCCESS, elapsed_ticks);
+
       // stop the music
       if (music->getStatus() == sf::SoundSource::Status::Playing) {
         music->stop();

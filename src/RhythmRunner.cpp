@@ -103,22 +103,27 @@ int main(int argc, char** argv) {
 
       // continue to GAME_SCREEN
       case MainProgramMode::GAME_SCREEN: {
-        uint64_t target_tick_count =
-            game_updater.CalculateTargetTicks(game_state);
-
-        if (game_state->GetElapsedTicks() >= target_tick_count) {
-          // fix for InputBindings::KeyNewlyPressed when game is paused
-          InputBindings::StoreKeypresses();
-        }
-
-        // Run enough ticks to catch up
-        // TODO(jarhar): consider basic infinite loop detection here
-        // TODO(jarhar): consider re-assessing timing after each call to
-        // Update().
-        //  What if the music starts/stops during one of multiple Update()s?
-        while (game_state->GetElapsedTicks() < target_tick_count) {
-          InputBindings::StoreKeypresses();
-          game_updater.Update(game_state);
+        switch (game_state->GetPlayingState()) {
+          case GameState::PlayingState::FAILURE:
+          case GameState::PlayingState::SUCCESS:
+            game_updater.PostGameUpdate(game_state);
+          case GameState::PlayingState::PAUSED:
+            InputBindings::StoreKeypresses();
+            break;
+          case GameState::PlayingState::PLAYING: {
+            uint64_t target_tick_count =
+                game_updater.CalculateTargetTicks(game_state);
+            // Run enough ticks to catch up
+            // TODO(jarhar): consider basic infinite loop detection here
+            // TODO(jarhar): consider re-assessing timing after each call to
+            // Update().
+            //  What if the music starts/stops during one of multiple Update()s?
+            while (game_state->GetElapsedTicks() < target_tick_count) {
+              InputBindings::StoreKeypresses();
+              game_updater.Update(game_state);
+            }
+            break;
+          }
         }
 
         program_mode = game_renderer.Render(window, game_state);
