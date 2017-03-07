@@ -36,7 +36,7 @@ class PhysicalObject {
 
   void AddSubObject(std::shared_ptr<PhysicalObject> sub_object);
 
- private:
+ protected:
   glm::vec3 position;
   glm::vec3 rotation_axis;
   float rotation_angle;

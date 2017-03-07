@@ -15,7 +15,7 @@
 #define DEGREES_IN_CIRCLE 360.0f
 #define VIEWING_ANGLE 160.0f
 // Keep the look at this many units in front of the player
-#define FORWARD_CAMERA_SPACING 5.0f
+#define FORWARD_CAMERA_SPACING 2.5f
 // How fast the camera moves when rotating around look at
 #define CAMERA_YAW_MOVE 15.0f
 // How far the camera is from the player
