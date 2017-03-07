@@ -11,7 +11,7 @@
 class Sky : public GameObject {
  public:
   Sky(glm::vec3 position = glm::vec3(0, 0, -10),
-      glm::vec3 scale = glm::vec3(900, 900, 1100));
+      glm::vec3 scale = glm::vec3(900, 900, 900));
   virtual ~Sky();
 
   ObjectType GetType() override;
