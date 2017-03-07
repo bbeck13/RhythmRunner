@@ -353,18 +353,18 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
   player->SetScale(glm::vec3(1, 1, 1));
 
   // Sky
-  current_program = programs["sky_prog"];
-  current_program->bind();
-  current_texture = textures["nightsky"];
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                     glm::value_ptr(sky->GetTransform()));
-  sky->GetModel()->draw(current_program);
-  current_program->unbind();
+  //current_program = programs["sky_prog"];
+  //current_program->bind();
+  //current_texture = textures["nightsky"];
+  //current_texture->bind(current_program->getUniform("Texture0"));
+  //glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+  //                   glm::value_ptr(P->topMatrix()));
+  //glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+  //                   glm::value_ptr(V.topMatrix()));
+  //glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+  //                   glm::value_ptr(sky->GetTransform()));
+  //sky->GetModel()->draw(current_program);
+  //current_program->unbind();
 
   // Moon Rocks
   current_program = programs["rock_prog"];
@@ -413,7 +413,7 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
   // Sky
   current_program = programs["sky_prog"];
   current_program->bind();
-  current_texture = textures["nightsky"];
+  current_texture = textures["rainbowass"];
   current_texture->bind(current_program->getUniform("Texture0"));
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
@@ -421,7 +421,7 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
                      glm::value_ptr(V.topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
                      glm::value_ptr(sky->GetTransform()));
-  sky->GetModel()->draw(current_program);
+  //sky->GetModel()->draw(current_program);
 
   P->popMatrix();
   V.popMatrix();
@@ -576,18 +576,18 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   current_program->unbind();
 
   // Sky
-  current_program = programs["sky_prog"];
-  current_program->bind();
-  current_texture = textures["nightsky"];
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                     glm::value_ptr(sky->GetTransform()));
-  sky->GetModel()->draw(current_program);
-  current_program->unbind();
+  //current_program = programs["sky_prog"];
+  //current_program->bind();
+  //current_texture = textures["nightsky"];
+  //current_texture->bind(current_program->getUniform("Texture0"));
+  //glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+  //                   glm::value_ptr(P->topMatrix()));
+  //glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+  //                   glm::value_ptr(V.topMatrix()));
+  //glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+  //                   glm::value_ptr(sky->GetTransform()));
+  //sky->GetModel()->draw(current_program);
+  //current_program->unbind();
 
   // Moon Rocks
   current_program = programs["rock_prog"];
