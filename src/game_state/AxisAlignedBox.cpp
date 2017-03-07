@@ -13,29 +13,25 @@ bool AxisAlignedBox::IsColliding(const AxisAlignedBox& one,
          one.min.z <= two.max.z && one.max.z >= two.min.z;
 }
 
-MatrixStack AxisAlignedBox::GetTransform(glm::vec3 position, glm::vec3 scale,
-                                         float angle, glm::vec3 axis) {
-  // TODO(jarhar): make this more efficient by caching calculated matrix
+glm::mat4 AxisAlignedBox::GetTransform(glm::vec3 position,
+                                       glm::vec3 scale,
+                                       float angle,
+                                       glm::vec3 axis) {
   MatrixStack transform;
   transform.pushMatrix();
   transform.loadIdentity();
   transform.translate(position);
   transform.rotate(angle, axis);
   transform.scale(scale);
-  return transform;
+  return transform.topMatrix();
 }
-
-AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
-                               glm::vec3 scale, glm::vec3 position)
-   : AxisAlignedBox(model, scale, position, 0.0f, glm::vec3(0,1,0)) {}
 
 AxisAlignedBox::AxisAlignedBox(std::shared_ptr<Shape> model,
                                glm::vec3 scale,
                                glm::vec3 position,
                                float angle,
                                glm::vec3 axis)
-    : AxisAlignedBox(model, GetTransform(position, scale,
-                                         angle, axis).topMatrix()) {}
+    : AxisAlignedBox(model, GetTransform(position, scale, angle, axis)) {}
 
 AxisAlignedBox::AxisAlignedBox(glm::vec3 min, glm::vec3 max)
     : min(min), max(max) {}
@@ -73,6 +69,11 @@ glm::vec3 AxisAlignedBox::GetMax() {
   return max;
 }
 
+glm::vec3 AxisAlignedBox::GetCenter() {
+  return glm::vec3(min.x + (max.x - min.x) / 2, min.y + (max.y - min.y) / 2,
+                   min.z + (max.z - min.z) / 2);
+}
+
 std::string AxisAlignedBox::ToString() {
   return "min: " + glm::to_string(GetMin()) + ", max: " +
          glm::to_string(GetMax());
@@ -83,8 +84,8 @@ AxisAlignedBox AxisAlignedBox::merge(AxisAlignedBox other) {
   glm::vec3 otherMax = other.GetMax();
 
   return AxisAlignedBox(
-      glm::vec3(std::min(min.x, otherMin.x), std::min(min.z, otherMin.z),
+      glm::vec3(std::min(min.x, otherMin.x), std::min(min.y, otherMin.y),
                 std::min(min.z, otherMin.z)),
-      glm::vec3(std::max(max.x, otherMax.x), std::max(max.z, otherMax.z),
+      glm::vec3(std::max(max.x, otherMax.x), std::max(max.y, otherMax.y),
                 std::max(max.z, otherMax.z)));
 }

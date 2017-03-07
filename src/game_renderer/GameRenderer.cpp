@@ -29,6 +29,34 @@
 #define TEXT_FIELD_LENGTH 256
 #define SHOW_ME_THE_MENU_ITEMS 4
 
+namespace {
+
+void DrawPhysicalObjectTree(std::shared_ptr<Program> program,
+                            MatrixStack P,
+                            MatrixStack V,
+                            std::shared_ptr<PhysicalObject> physical_object) {
+  std::queue<std::shared_ptr<PhysicalObject>> queue;
+  queue.push(physical_object);
+
+  while (!queue.empty()) {
+    std::shared_ptr<PhysicalObject> object = queue.front();
+    queue.pop();
+
+    glUniformMatrix4fv(program->getUniform("P"), 1, GL_FALSE,
+                       glm::value_ptr(P.topMatrix()));
+    glUniformMatrix4fv(program->getUniform("V"), 1, GL_FALSE,
+                       glm::value_ptr(V.topMatrix()));
+    glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
+                       glm::value_ptr(object->GetTransform()));
+    object->GetModel()->draw(program);
+
+    for (std::shared_ptr<PhysicalObject> sub_object : object->GetSubObjects()) {
+      queue.push(sub_object);
+    }
+  }
+}
+}
+
 GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
@@ -200,13 +228,12 @@ void GameRenderer::RenderIt(GLFWwindow* window,
     current_texture = textures["rainbowass"];
     current_program->bind();
     current_texture->bind(current_program->getUniform("Texture0"));
-    MV = player->GetGround()->GetTransform();
     glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                        glm::value_ptr(P->topMatrix()));
     glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                        glm::value_ptr(V.topMatrix()));
     glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                       glm::value_ptr(MV.topMatrix()));
+                       glm::value_ptr(player->GetGround()->GetTransform()));
     player->GetGround()->GetModel()->draw(current_program);
     current_program->unbind();
   }
@@ -224,9 +251,8 @@ void GameRenderer::RenderIt(GLFWwindow* window,
 
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
     if (obj->GetSecondaryType() == SecondaryType::PLATFORM) {
-      MV = obj->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(MV.topMatrix()));
+                         glm::value_ptr(obj->GetTransform()));
       obj->GetModel()->draw(current_program);
     }
   }
@@ -245,9 +271,8 @@ void GameRenderer::RenderIt(GLFWwindow* window,
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
     if (obj->GetSecondaryType() == SecondaryType::MOVING_PLATFORM ||
         obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
-      MV = obj->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(MV.topMatrix()));
+                         glm::value_ptr(obj->GetTransform()));
       obj->GetModel()->draw(current_program);
     }
   }
@@ -267,9 +292,8 @@ void GameRenderer::RenderIt(GLFWwindow* window,
       if (std::shared_ptr<gameobject::Note> note =
               std::static_pointer_cast<gameobject::Note>(obj)) {
         if (!note->GetCollected()) {
-          MV = note->GetTransform();
           glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                             glm::value_ptr(MV.topMatrix()));
+                             glm::value_ptr(note->GetTransform()));
           glm::vec3 cur_color = color_vec.at(color_count);
           color_count++;
           if (color_count == 5) {
@@ -295,9 +319,8 @@ void GameRenderer::RenderIt(GLFWwindow* window,
                      glm::value_ptr(V.topMatrix()));
   for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
     if (obj->GetSecondaryType() == SecondaryType::MONSTER) {
-      MV = obj->GetTransform();
       glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(MV.topMatrix()));
+                         glm::value_ptr(obj->GetTransform()));
       obj->GetModel()->draw(current_program);
     }
   }
@@ -308,14 +331,8 @@ void GameRenderer::RenderIt(GLFWwindow* window,
   current_texture = textures["rainbowglass"];
   current_program->bind();
   current_texture->bind(current_program->getUniform("Texture0"));
-  MV = player->GetTransform();
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                     glm::value_ptr(MV.topMatrix()));
-  player->GetModel()->draw(current_program);
+  DrawPhysicalObjectTree(current_program, *P, V,
+                         std::static_pointer_cast<PhysicalObject>(player));
   current_program->unbind();
 
   // Sky
@@ -323,13 +340,12 @@ void GameRenderer::RenderIt(GLFWwindow* window,
   current_program->bind();
   current_texture = textures["nightsky"];
   current_texture->bind(current_program->getUniform("Texture0"));
-  MV = sky->GetTransform();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                     glm::value_ptr(MV.topMatrix()));
+                     glm::value_ptr(sky->GetTransform()));
   sky->GetModel()->draw(current_program);
   current_program->unbind();
 
@@ -347,9 +363,8 @@ void GameRenderer::RenderIt(GLFWwindow* window,
       if (std::shared_ptr<gameobject::MoonRock> rock =
               std::static_pointer_cast<gameobject::MoonRock>(obj)) {
         if (obj != player->GetGround()) {
-          MV = rock->GetTransform();
           glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                             glm::value_ptr(MV.topMatrix()));
+                             glm::value_ptr(rock->GetTransform()));
           rock->GetModel()->draw(current_program);
         }
       }
@@ -370,9 +385,8 @@ void GameRenderer::RenderIt(GLFWwindow* window,
     if (obj->GetSecondaryType() == SecondaryType::PLAINROCK) {
       if (std::shared_ptr<gameobject::PlainRock> rock =
               std::static_pointer_cast<gameobject::PlainRock>(obj)) {
-        MV = rock->GetTransform();
         glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                           glm::value_ptr(MV.topMatrix()));
+                           glm::value_ptr(rock->GetTransform()));
         rock->GetModel()->draw(current_program);
       }
     }
@@ -384,13 +398,12 @@ void GameRenderer::RenderIt(GLFWwindow* window,
   current_program->bind();
   current_texture = textures["nightsky"];
   current_texture->bind(current_program->getUniform("Texture0"));
-  MV = sky->GetTransform();
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
                      glm::value_ptr(V.topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                     glm::value_ptr(MV.topMatrix()));
+                     glm::value_ptr(sky->GetTransform()));
   sky->GetModel()->draw(current_program);
 
   P->popMatrix();
@@ -599,11 +612,11 @@ void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
         break;
       case 4:
         game_state->GetLevel()->AddItem(std::make_shared<gameobject::PlainRock>(
-            pos, scale, rotation_axis, rotation_angle));
+            pos, scale, rotation_angle, rotation_axis));
         break;
       case 5:
         game_state->GetLevel()->AddItem(std::make_shared<gameobject::MoonRock>(
-            pos, scale, rotation_axis, rotation_angle));
+            pos, scale, rotation_angle, rotation_axis));
         break;
       case 6:
         game_state->GetLevel()->AddItem(std::make_shared<gameobject::Monster>(

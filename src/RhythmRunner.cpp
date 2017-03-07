@@ -79,8 +79,22 @@ int main(int argc, char** argv) {
         game_renderer.Render(window, game_state);
 
         uint64_t target_tick_count;
-        if (game_state->GetLevel()->getMusic()->getStatus() ==
-            sf::Music::Status::Playing) {
+#ifdef DEBUG  // Step-by-step mode for debugging
+        static bool step_mode = false;
+        if (ImGui::GetIO().KeyShift && ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
+          step_mode = true;
+        }
+        if (step_mode) {
+          target_tick_count = game_state->GetElapsedTicks();
+          if (InputBindings::KeyNewlyPressed(GLFW_KEY_K)) {
+            target_tick_count++;
+          } else {
+            InputBindings::StoreKeypresses();
+          }
+        } else
+#endif
+            if (game_state->GetLevel()->getMusic()->getStatus() ==
+                sf::Music::Status::Playing) {
           // get time elapsed in music
           // then, calculate target ticks elapsed based on music time elapsed
           int64_t music_offset_micros = game_state->GetLevel()

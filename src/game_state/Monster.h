@@ -16,7 +16,7 @@ namespace gameobject {
 class Monster : public MovingObject, public Obstacle {
  public:
   Monster();
-  Monster(glm::vec3 position);
+  Monster(glm::vec3 position, glm::vec3 scale = glm::vec3(1, 1, 1));
   Monster(glm::vec3 position,
           glm::vec3 scale,
           glm::vec3 rotation_axis,
@@ -30,8 +30,8 @@ class Monster : public MovingObject, public Obstacle {
           float rotation_angle,
           glm::vec3 velocity,
           std::vector<glm::vec3> path);
-  ~Monster();
-  std::shared_ptr<Shape> GetModel() override;
+  virtual ~Monster();
+
   ObjectType GetType() override;
   SecondaryType GetSecondaryType() override;
 
@@ -39,8 +39,6 @@ class Monster : public MovingObject, public Obstacle {
   static std::vector<glm::vec3> default_path(glm::vec3 position,
                                              float distanceX,
                                              float distanceZ);
-  static std::shared_ptr<Shape> shape;
-  static bool isInitialized;
 };
 }
 
