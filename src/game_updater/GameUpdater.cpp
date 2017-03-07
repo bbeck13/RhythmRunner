@@ -18,7 +18,7 @@
 #include "TimingConstants.h"
 #include "VideoTexture.h"
 
-#define COLLISION_WIDTH 0.15f
+#define COLLISION_WIDTH 0.420f
 
 std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
 GameUpdater::GetCollidingObjects(AxisAlignedBox primary_object,
