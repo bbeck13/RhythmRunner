@@ -12,22 +12,14 @@
 namespace gameobject {
 class Note : public Collectible {
  public:
-  Note();
-  Note(glm::vec3 position);
-  Note(glm::vec3 position, glm::vec3 scale);
-  Note(glm::vec3 position,
-       glm::vec3 scale,
-       glm::vec3 rotation_axis,
-       float rotaiton_angle,
-       float collected);
-  ~Note();
+  Note(glm::vec3 position = glm::vec3(),
+       glm::vec3 scale = glm::vec3(0.5, 0.5, 0.5),
+       glm::vec3 rotation_axis = glm::vec3(),
+       float rotation_angle = 0,
+       bool collected = false);
+  virtual ~Note();
 
-  std::shared_ptr<Shape> GetModel() override;
   SecondaryType GetSecondaryType() override;
-
- private:
-  static std::shared_ptr<Shape> shape;
-  static bool isInitialized;
 };
 }
 #endif

@@ -4,29 +4,35 @@
 #define PLAYER_H_
 
 #include "GameObject.h"
+#include "PhysicalObject.h"
 
 #define PLAYER_MESH "models/body_of_bike.obj"
+#define WHEEL_MESH "models/note.obj"
 
 enum DuckDir { NONE, LEFT, RIGHT };
 
 class Player : public GameObject {
  public:
-  // Represents change in velocity per tick
+  // Represents size of gap between grounded platform
   static const float PLATFORM_SPACING;
   // TODO(jarhar): consider removing initial position
   static const glm::vec3 INITIAL_POSITION;
 
-  Player();
-  ~Player();
+  Player(glm::vec3 position = INITIAL_POSITION,
+         glm::vec3 rotation_axis = glm::vec3(1, 0, 0),
+         float rotation_angle = 0,
+         glm::vec3 scale = glm::vec3(0.8, 0.8, 0.8));
+  virtual ~Player();
+
+  ObjectType GetType() override;
+  SecondaryType GetSecondaryType() override;
 
   void Reset();
+
   float GetYVelocity();
   float GetZVelocity();
   bool GetDoubleJump();
   std::shared_ptr<GameObject> GetGround();  // null if no ground
-  std::shared_ptr<Shape> GetModel() override;
-  ObjectType GetType() override;
-  SecondaryType GetSecondaryType() override;
   int GetScore();
 
   void SetYVelocity(float y_velocity);
@@ -40,9 +46,6 @@ class Player : public GameObject {
   void SetScore(int score);
 
  private:
-  static std::shared_ptr<Shape> shape;
-  static bool isInitialized;
-
   std::shared_ptr<GameObject> ground;
   bool can_double_jump;
   float y_velocity;

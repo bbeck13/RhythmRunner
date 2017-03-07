@@ -187,8 +187,8 @@ void gameobject::to_json(nlohmann::json& j, const MoonRock& rock) {
 }
 void gameobject::from_json(const nlohmann::json& j, MoonRock& rock) {
   rock = MoonRock(j["position"].get<glm::vec3>(), j["scale"].get<glm::vec3>(),
-                  j["rotation_axis"].get<glm::vec3>(),
-                  j["rotation_angle"].get<float>());
+                  j["rotation_angle"].get<float>(),
+                  j["rotation_axis"].get<glm::vec3>());
 }
 
 void gameobject::to_json(nlohmann::json& j, const PlainRock& rock) {
@@ -200,8 +200,8 @@ void gameobject::to_json(nlohmann::json& j, const PlainRock& rock) {
 
 void gameobject::from_json(const nlohmann::json& j, PlainRock& rock) {
   rock = PlainRock(j["position"].get<glm::vec3>(), j["scale"].get<glm::vec3>(),
-                   j["rotation_axis"].get<glm::vec3>(),
-                   j["rotation_angle"].get<float>());
+                   j["rotation_angle"].get<float>(),
+                   j["rotation_axis"].get<glm::vec3>());
 }
 
 void gameobject::from_json(const nlohmann::json& j, Note& note) {

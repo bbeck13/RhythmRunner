@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "GLSL.h"
+#include "ShapeManager.h"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 480
@@ -55,6 +56,8 @@ GLFWwindow* RendererSetup::InitOpenGL() {
   imgui_io.IniFilename = NULL;  // Disable imgui.ini
   imgui_io.Fonts->AddFontFromFileTTF(ASSET_DIR "/fonts/RobotoMono-Regular.ttf",
                                      24.0f);
+
+  ShapeManager::InitGL();
 
   return window;
 }

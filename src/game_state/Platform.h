@@ -5,8 +5,8 @@
 
 #include <glm/ext.hpp>
 
-#include "GameObject.h"
 #include "Obstacle.h"
+#include "GameObject.h"
 #include "json.hpp"
 
 #define PLATFORM_MESH "models/platform.obj"
@@ -14,21 +14,14 @@
 namespace gameobject {
 class Platform : public Obstacle {
  public:
-  Platform();
-  Platform(glm::vec3 position);
-  Platform(glm::vec3 position, glm::vec3 scale);
-  Platform(glm::vec3 position,
-           glm::vec3 scale,
-           glm::vec3 rotation_axis,
-           float rotaiton_angle);
+  Platform(glm::vec3 position = glm::vec3(),
+           glm::vec3 scale = glm::vec3(4, .5, 4),
+           glm::vec3 rotation_axis = glm::vec3(),
+           float rotaiton_angle = 0);
   ~Platform();
 
-  std::shared_ptr<Shape> GetModel() override;
   SecondaryType GetSecondaryType() override;
-
- private:
-  static std::shared_ptr<Shape> platform;
-  static bool isInitialized;
 };
 }
+
 #endif

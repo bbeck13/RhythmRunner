@@ -279,7 +279,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
         player->SetPosition(
             glm::vec3(player->GetPosition().x,
                       colliding_max_y + Player::PLATFORM_SPACING +
-                          (player_box.GetMax().y - player_box.GetMin().y) / 2,
+                          (player_box.GetMax().y - player_box.GetMin().y) / 2 +
+                          (player->GetPosition().y - player_box.GetCenter().y),
                       player->GetPosition().z));
         player_min_y = player->GetBoundingBox().GetMin().y;
         // If the ground is now a dropping platform drop it

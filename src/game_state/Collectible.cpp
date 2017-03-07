@@ -1,6 +1,13 @@
 #include "Collectible.h"
 
-Collectible::Collectible(std::shared_ptr<Shape> shape) : GameObject(shape) {}
+Collectible::Collectible(const std::string& shape_path,
+                         bool isCollected,
+                         glm::vec3 position,
+                         glm::vec3 rotation_axis,
+                         float rotation_angle,
+                         glm::vec3 scale)
+    : GameObject(shape_path, position, rotation_axis, rotation_angle, scale),
+      isCollected(isCollected) {}
 
 Collectible::~Collectible() {}
 
