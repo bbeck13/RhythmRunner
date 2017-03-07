@@ -17,7 +17,7 @@
 // Keep the look at this many units in front of the player
 #define FORWARD_CAMERA_SPACING 5.0f
 // How fast the camera moves when rotating around look at
-#define CAMERA_YAW_MOVE 30.0f
+#define CAMERA_YAW_MOVE 15.0f
 // How far the camera is from the player
 #define CAMERA_Z_SPACING 12.0f
 #define CAMERA_Y_SPACING 0.2f
