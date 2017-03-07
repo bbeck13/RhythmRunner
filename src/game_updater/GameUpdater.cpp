@@ -166,7 +166,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     if (previous_player_box.GetMin().x > ground_box.GetMax().x) {
       // Ground is no longer beneath player
       player->RemoveGround();
-      player->ChangeAnimation(Player::Animation::JUMPING, game_state->GetElapsedTicks());
+      player->ChangeAnimation(Player::Animation::JUMPING,
+                              game_state->GetElapsedTicks());
     }
   }
 
@@ -176,7 +177,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     player->Jump(game_state->GetElapsedTicks());
     player->SetDoubleJump(true);
     player->RemoveGround();
-    player->ChangeAnimation(Player::Animation::JUMPING, game_state->GetElapsedTicks());
+    player->ChangeAnimation(Player::Animation::JUMPING,
+                            game_state->GetElapsedTicks());
   } else if (player->GetGround()) {
     if (GameObject::Moves(player->GetGround()->GetSecondaryType())) {
       std::shared_ptr<MovingObject> moving =
@@ -215,10 +217,12 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
       ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
     player->SetDucking(DuckDir::RIGHT);
-  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT]) {
+  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT] ||
+             ImGui::GetIO().KeysDown[GLFW_KEY_H]) {
     player->MoveDownZ();
     player->SetDucking(DuckDir::LEFT);
-  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT]) {
+  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT] ||
+             ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
     player->MoveUpZ();
     player->SetDucking(DuckDir::RIGHT);
   } else {
