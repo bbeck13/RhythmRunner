@@ -141,6 +141,7 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset timing
   game_state->SetStartTime();
   game_state->GetPlayer()->Reset();
+  game_state->GetCamera()->Reset();
 
   // stop the music if it is playing
   std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
@@ -319,27 +320,25 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
 
   glm::vec3 player_position = game_state->GetPlayer()->GetPosition();
-  glm::vec3 previous_camera_position = camera->getPosition();
   glm::vec3 camera_spacing = camera->GetCameraPlayerSpacing();
-  glm::vec3 new_camera_position;
-  int width, height;
-  glfwGetWindowSize(game_state->GetWindow(), &width, &height);
 
-  // Z position is fixed
-  new_camera_position.z = player_position.z + camera_spacing.z;
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_D]) {
+    camera->revolveAroundLookAt(0.0f, CAMERA_YAW_MOVE/1000.0f);
+  }
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_A]) {
+    camera->revolveAroundLookAt(0.0f, -1*CAMERA_YAW_MOVE/1000.0f);
+  }
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_W]) {
+    camera->revolveAroundLookAt(CAMERA_YAW_MOVE/1000.0f, 0.0f);
+  }
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_S]) {
+    camera->revolveAroundLookAt(-1*CAMERA_YAW_MOVE/1000.0f, 0.0f);
+  }
 
-  // Always keep camera aligned with player on x axis.
-  // Make camera look ahead of the player
-  new_camera_position.x = player_position.x + camera_spacing.x;
+  camera->setPosition(camera->getPosition() + glm::vec3(DELTA_X_PER_TICK, 0, 0));
 
-  // Gradually and smoothly move y towards player
-  float delta_y = player_position.y - previous_camera_position.y;
-  new_camera_position.y = previous_camera_position.y +
-                          delta_y * FRACTION_CAMERA_MOVEMENT_PER_TICK +
-                          camera_spacing.y;
-
-  camera->setPosition(new_camera_position);
-  // Always look directly in front of the player.
+  // Always look directly at the player.
+  // Add FORWARD_CAMERA_SPACING to align camera
   camera->setLookAt(player_position + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0));
 
   if (ImGui::GetIO().KeysDown[GLFW_KEY_1]) {  // view 1

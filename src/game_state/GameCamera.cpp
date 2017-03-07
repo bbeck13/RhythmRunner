@@ -1,5 +1,4 @@
-// Braden Beck
-// Modified: Matthew Stewart - 1/28/17
+// Matthew Stewart
 
 #include "GameCamera.h"
 
@@ -54,6 +53,14 @@ glm::vec3 GameCamera::getPosition() {
   return eyePos;
 }
 
+void GameCamera::Reset() {
+   glm::vec3 previousLookAtPos = lookAtPos;
+   lookAtPos = Player::INITIAL_POSITION +
+               glm::vec3(FORWARD_CAMERA_SPACING, 0, 0);
+   eyePos = eyePos - glm::vec3(previousLookAtPos[0] - lookAtPos[0], 0, 0);
+   up = glm::vec3(0,1,0);
+}
+
 MatrixStack GameCamera::pivot(int width, int height, double xpos, double ypos) {
   double dX = (double)width / 2 - xpos;
   double dY = (double)height / 2 - ypos;
@@ -90,11 +97,8 @@ void GameCamera::SetCameraPlayerSpacing(glm::vec3 camera_player_spacing) {
 }
 
 void GameCamera::revolveAroundLookAt(float radiansVertical, float radiansHorizontal) {
-   printf("previous eye: %f %f %f \n", eyePos.x, eyePos.y, eyePos.z);
-   printf("previous look at: %f %f %f \n", lookAtPos.x, lookAtPos.y, lookAtPos.z);
    glm::vec3 eyePosRelativeToLookAt = eyePos - lookAtPos;
-   glm::vec3 eyeNormal = glm::cross(eyePosRelativeToLookAt, glm::vec3(1.0f, 0.0f, 1.0f));
-   printf("eye look at: %f %f %f \n", eyePosRelativeToLookAt.x, eyePosRelativeToLookAt.y, eyePosRelativeToLookAt.z);
+   glm::vec3 eyeNormal = glm::cross(eyePosRelativeToLookAt, glm::vec3(0.0f, 1.0f, 0.0f));
 
    auto eyeTranslateOffset = glm::translate(glm::mat4(), -eyePosRelativeToLookAt);
    auto eyeRotateHorizontal = glm::rotate(eyeTranslateOffset, radiansHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -103,5 +107,5 @@ void GameCamera::revolveAroundLookAt(float radiansVertical, float radiansHorizon
 
    eyePos = glm::vec3(eyeRotateVertical * eyeInverseTranslation * glm::vec4(eyePosRelativeToLookAt, 0.0f)) + lookAtPos;
 
-   printf("new: %f %f %f \n", eyePos.x, eyePos.y, eyePos.z);
+   Refresh();
 }
