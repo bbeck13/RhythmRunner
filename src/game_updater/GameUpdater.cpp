@@ -221,10 +221,12 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
       ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
     player->SetDucking(DuckDir::RIGHT);
-  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT]) {
+  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT] ||
+             ImGui::GetIO().KeysDown[GLFW_KEY_H]) {
     player->MoveDownZ();
     player->SetDucking(DuckDir::LEFT);
-  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT]) {
+  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT] ||
+             ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
     player->MoveUpZ();
     player->SetDucking(DuckDir::RIGHT);
   } else {
