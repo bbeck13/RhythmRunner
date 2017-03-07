@@ -24,7 +24,8 @@ Player::Player(glm::vec3 position,
       y_velocity(0),
       z_velocity(0),
       can_double_jump(false),
-      current_animation(Animation::JUMPING), wheel_rotation_speed(0) {
+      current_animation(Animation::JUMPING),
+      wheel_rotation_speed(0) {
   rear_wheel = std::make_shared<PhysicalObject>(
       WHEEL_MESH, glm::vec3(-1.2, -0.3, 0), glm::vec3(0, 0, -1), 0,
       glm::vec3(WHEEL_SCALE, WHEEL_SCALE, WHEEL_SCALE));

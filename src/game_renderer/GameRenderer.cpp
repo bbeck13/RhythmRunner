@@ -860,7 +860,6 @@ void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
         game_state->GetLevel()->AddItem(std::make_shared<gameobject::Monster>(
             pos, scale, rotation_axis, rotation_angle,
             glm::vec3(drop_vel, drop_vel, drop_vel), distanceX, distanceZ));
-
       default:
         break;
     }
