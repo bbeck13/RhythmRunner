@@ -28,6 +28,10 @@
 
 #define TEXT_FIELD_LENGTH 256
 #define SHOW_ME_THE_MENU_ITEMS 4
+#define ENDGAME_MENU_WAIT_SECONDS 0.5
+
+static const ImGuiWindowFlags static_window_flags =
+    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs;
 
 namespace {
 
@@ -176,18 +180,29 @@ std::unordered_set<std::shared_ptr<GameObject>>* GameRenderer::GetObjectsInView(
   return inView;
 }
 
-void GameRenderer::Render(GLFWwindow* window,
-                          std::shared_ptr<GameState> game_state) {
-  RenderIt(window, game_state, false);
-}
-void GameRenderer::RenderLevelEditor(GLFWwindow* window,
+MainProgramMode GameRenderer::Render(GLFWwindow* window,
                                      std::shared_ptr<GameState> game_state) {
-  RenderIt(window, game_state, true);
+  RenderObjects(window, game_state);
+  glClear(GL_DEPTH_BUFFER_BIT);
+  RenderMinimap(window, game_state);
+  MainProgramMode next_mode = ImGuiRenderGame(game_state);
+  RendererSetup::PostRender(window);
+  return next_mode;
 }
 
-void GameRenderer::RenderMiniMap(GLFWwindow* window,
-                std::shared_ptr<GameState> game_state,
-                bool render_level_editor) {
+LevelProgramMode GameRenderer::RenderLevelEditor(
+    GLFWwindow* window,
+    std::shared_ptr<GameState> game_state) {
+  RenderObjects(window, game_state);
+  glClear(GL_DEPTH_BUFFER_BIT);
+  RenderMinimap(window, game_state);
+  LevelProgramMode next_mode = ImGuiRenderEditor(game_state);
+  RendererSetup::PostRender(window);
+  return next_mode;
+}
+
+void GameRenderer::RenderMinimap(GLFWwindow* window,
+                                 std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
@@ -410,14 +425,10 @@ void GameRenderer::RenderMiniMap(GLFWwindow* window,
 
   P->popMatrix();
   V.popMatrix();
-
-  ImGuiRender(game_state, render_level_editor);
-
 }
 
-void GameRenderer::RenderNormalView(GLFWwindow* window,
-                            std::shared_ptr<GameState> game_state,
-                            bool render_level_editor) {
+void GameRenderer::RenderObjects(GLFWwindow* window,
+                                 std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Level> level = game_state->GetLevel();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
@@ -637,35 +648,14 @@ void GameRenderer::RenderNormalView(GLFWwindow* window,
 
   P->popMatrix();
   V.popMatrix();
-
-  ImGuiRender(game_state, render_level_editor);
-
 }
 
-void GameRenderer::RenderIt(GLFWwindow* window,
-                            std::shared_ptr<GameState> game_state,
-                            bool render_level_editor) {
-   RendererSetup::PreRender(window);
-   GameRenderer::RenderNormalView(window, game_state, render_level_editor);
-   glClear(GL_DEPTH_BUFFER_BIT);
-   GameRenderer::RenderMiniMap(window, game_state, render_level_editor);
-   RendererSetup::PostRender(window);
-}
-
-void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state,
-                               bool level_editor) {
-  static const ImGuiWindowFlags static_window_flags =
-      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs;
-
+void GameRenderer::ImGuiRenderBegin() {
   ImGui_ImplGlfwGL3_NewFrame();
 
-  ImGui::Begin("Stats", NULL, static_window_flags);
-
-  std::string score_string =
-      "Score: " + std::to_string(game_state->GetPlayer()->GetScore());
-  ImGui::Text(score_string.c_str());
-
 #ifdef DEBUG
+  RendererSetup::ImGuiTopRightCornerWindow(0.2);
+  ImGui::Begin("Debug Info", NULL, static_window_flags);
   static double last_debug_time = glfwGetTime();
   static int frames_since_last_debug = 0;
   static std::string fps_string = "FPS: no data";
@@ -684,18 +674,96 @@ void GameRenderer::ImGuiRender(std::shared_ptr<GameState> game_state,
   frames_since_last_debug++;
 
   ImGui::Text(fps_string.c_str());
-#endif
-
   ImGui::End();
+#endif
+}
 
-  if (level_editor) {
-    LevelEditorRenderer(game_state);
-  }
-
+void GameRenderer::ImGuiRenderEnd() {
   ImGui::Render();
 }
 
-void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
+MainProgramMode GameRenderer::ImGuiRenderGame(
+    std::shared_ptr<GameState> game_state) {
+  MainProgramMode next_mode = MainProgramMode::GAME_SCREEN;
+
+  ImGuiRenderBegin();
+
+  RendererSetup::ImGuiTopLeftCornerWindow(0.2);
+  ImGui::Begin("Stats", NULL, static_window_flags);
+
+  std::string score_string =
+      "Score: " + std::to_string(game_state->GetPlayer()->GetScore());
+  ImGui::Text(score_string.c_str());
+
+  std::string progress_string =
+      std::string("Progress: ") +
+      std::to_string((int)(game_state->GetProgressRatio() * 100.0)) + "%%";
+  ImGui::Text(progress_string.c_str());
+
+  ImGui::End();
+
+  GameState::PlayingState playing_state = game_state->GetPlayingState();
+  switch (playing_state) {
+    case GameState::PlayingState::PLAYING:
+      break;
+    case GameState::PlayingState::PAUSED:
+      RendererSetup::ImGuiCenterWindow(0.5);
+      ImGui::Begin("PAUSED");
+      ImGui::Text("Paused");
+      if (ImGui::Button("Resume [ESCAPE]") ||
+          InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {
+        game_state->SetPlayingState(GameState::PlayingState::PLAYING);
+      }
+      if (ImGui::Button("Main Menu [ENTER]") ||
+          InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
+        next_mode = MainProgramMode::MENU_SCREEN;
+      }
+      if (ImGui::Button("Exit [Q]") ||
+          InputBindings::KeyNewlyPressed(GLFW_KEY_Q)) {
+        next_mode = MainProgramMode::EXIT;
+      }
+      ImGui::End();
+      break;
+    case GameState::PlayingState::FAILURE:
+    case GameState::PlayingState::SUCCESS: {
+      // TODO(jarhar): make screen green/red or something
+      // TODO(jarhar): insert particle effects here
+      // TODO(jarhar): rotate camera around player here
+      bool success = playing_state == GameState::PlayingState::SUCCESS;
+      if (glfwGetTime() >
+          game_state->GetEndingTime() + ENDGAME_MENU_WAIT_SECONDS) {
+        RendererSetup::ImGuiCenterWindow(0.5);
+        ImGui::Begin(success ? "SUCCESS" : "FAILURE");
+        ImGui::Text(success ? "YOU WIN!" : "YOU FAILED");
+        ImGui::Text(score_string.c_str());
+        ImGui::Text(progress_string.c_str());
+        if (ImGui::Button("Retry [SPACE]") ||
+            InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE)) {
+          next_mode = MainProgramMode::RESET_GAME;
+        }
+        if (ImGui::Button("Main Menu [ENTER]") ||
+            InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
+          next_mode = MainProgramMode::MENU_SCREEN;
+        }
+        if (ImGui::Button("Exit [ESCAPE]") ||
+            InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {
+          next_mode = MainProgramMode::EXIT;
+        }
+        ImGui::End();
+      }
+      break;
+    }
+  }
+
+  ImGuiRenderEnd();
+
+  return next_mode;
+}
+
+LevelProgramMode GameRenderer::ImGuiRenderEditor(
+    std::shared_ptr<GameState> game_state) {
+  ImGuiRenderBegin();
+
   std::shared_ptr<LevelEditorState> level_state =
       game_state->GetLevelEditorState();
   RendererSetup::ImGuiCenterWindow(0.3);
@@ -909,4 +977,8 @@ void GameRenderer::LevelEditorRenderer(std::shared_ptr<GameState> game_state) {
   ImGui::Text(camera_move_string.c_str());
   ImGui::Text(camera_move_yaw_string.c_str());
   ImGui::End();
+
+  ImGuiRenderEnd();
+
+  return LevelProgramMode::EDIT_LEVEL;  // TODO(jarhar): make use of this
 }

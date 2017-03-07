@@ -36,14 +36,6 @@ void InputBindings::KeyCallback(GLFWwindow* window,
                                 int scancode,
                                 int action,
                                 int mods) {
-  switch (key) {
-    case GLFW_KEY_ESCAPE:
-      // TODO(jarhar): consider using ImGuiIO to do this instead, and remove
-      // most callbacks in this file in favor of ImGui bindings
-      glfwSetWindowShouldClose(window, GL_TRUE);
-      break;
-  }
-
   ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
 }
 

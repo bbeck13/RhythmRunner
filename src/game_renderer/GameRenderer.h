@@ -12,6 +12,7 @@
 #include "GameState.h"
 #include "MatrixStack.h"
 #include "Program.h"
+#include "ProgramMode.h"
 
 #define PLATFORM_PROG "platform_prog"
 
@@ -26,9 +27,11 @@ class GameRenderer {
   ~GameRenderer();
 
   void Init(const std::string& resource_dir);
-  void Render(GLFWwindow* window, std::shared_ptr<GameState> game_state);
-  void RenderLevelEditor(GLFWwindow* window,
+  MainProgramMode Render(GLFWwindow* window,
                          std::shared_ptr<GameState> game_state);
+  LevelProgramMode RenderLevelEditor(GLFWwindow* window,
+                                     std::shared_ptr<GameState> game_state);
+
   static std::shared_ptr<Program> ProgramFromJSON(std::string filepath);
   static std::shared_ptr<Texture> TextureFromJSON(std::string filepath);
   static std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView(
@@ -36,17 +39,13 @@ class GameRenderer {
       std::shared_ptr<Octree> tree);
 
  private:
-  void RenderMiniMap(GLFWwindow* window,
-                std::shared_ptr<GameState> game_state,
-                bool render_level_editor);
-  void RenderNormalView(GLFWwindow* window,
-                std::shared_ptr<GameState> game_state,
-                bool render_level_editor);
-  void RenderIt(GLFWwindow* window,
-                std::shared_ptr<GameState> game_state,
-                bool render_level_editor);
-  void ImGuiRender(std::shared_ptr<GameState> game_state, bool level_editor);
-  void LevelEditorRenderer(std::shared_ptr<GameState> game_state);
+  void RenderObjects(GLFWwindow* window, std::shared_ptr<GameState> game_state);
+  void RenderMinimap(GLFWwindow* window, std::shared_ptr<GameState> game_state);
+  void ImGuiRenderBegin();
+  void ImGuiRenderEnd();
+  MainProgramMode ImGuiRenderGame(std::shared_ptr<GameState> game_state);
+  LevelProgramMode ImGuiRenderEditor(std::shared_ptr<GameState> game_state);
+
   std::unordered_map<std::string, std::shared_ptr<Program>> programs;
   std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
   std::vector<glm::vec3> color_vec;

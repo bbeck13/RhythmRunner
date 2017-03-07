@@ -60,15 +60,19 @@ void GameUpdater::Init(std::shared_ptr<GameState> game_state) {
 }
 
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
-  std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
+  if (game_state->ReachedEndOfLevel()) {
+    game_state->SetPlayingState(GameState::PlayingState::SUCCESS);
+    game_state->IncrementTicks();
+    return;
+  }
 
-  // check to see if the music ended, in which case the level is complete
-  if ((music->getStatus() == sf::Music::Status::Stopped) &&
-      (music->getPlayingOffset() != sf::Time::Zero)) {
-    StopGame(game_state);
+  if (InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {
+    game_state->SetPlayingState(GameState::PlayingState::PAUSED);
+    return;
   }
 
   // check to see if the music should start on this tick
+  std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
   if (game_state->GetMusicStartTick() == game_state->GetElapsedTicks()) {
     music->play();
     music->setLoop(false);
@@ -107,7 +111,7 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset the player
-  game_state->SetDone(false);
+  game_state->SetPlayingState(GameState::PlayingState::PLAYING);
   game_state->GetSky()->SetPosition(glm::vec3(0, 0, -10));
   game_state->GetVideoTextures()["sky"]->ResetFrameCount();
 
@@ -166,7 +170,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     if (previous_player_box.GetMin().x > ground_box.GetMax().x) {
       // Ground is no longer beneath player
       player->RemoveGround();
-      player->ChangeAnimation(Player::Animation::JUMPING, game_state->GetElapsedTicks());
+      player->ChangeAnimation(Player::Animation::JUMPING,
+                              game_state->GetElapsedTicks());
     }
   }
 
@@ -176,7 +181,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     player->Jump(game_state->GetElapsedTicks());
     player->SetDoubleJump(true);
     player->RemoveGround();
-    player->ChangeAnimation(Player::Animation::JUMPING, game_state->GetElapsedTicks());
+    player->ChangeAnimation(Player::Animation::JUMPING,
+                            game_state->GetElapsedTicks());
   } else if (player->GetGround()) {
     if (GameObject::Moves(player->GetGround()->GetSecondaryType())) {
       std::shared_ptr<MovingObject> moving =
@@ -294,7 +300,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
         }
       } else {
         // The collision was not from above, so reset the game
-        StopGame(game_state);
+        game_state->SetPlayingState(GameState::PlayingState::FAILURE);
         return;
       }
     }
@@ -303,7 +309,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   // Check to see if the player fell out of the world.
   if (previous_player_box.GetMin().y <
       game_state->GetLevel()->getTree()->GetKillZone()) {
-    StopGame(game_state);
+    game_state->SetPlayingState(GameState::PlayingState::FAILURE);
   }
 }
 
@@ -344,12 +350,38 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   }
 }
 
-void GameUpdater::StopGame(std::shared_ptr<GameState> game_state) {
-  std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
-  if (music->getStatus() == sf::SoundSource::Status::Playing) {
-    // stop the music
-    music->stop();
-    music->setPlayingOffset(sf::Time::Zero);
+uint64_t GameUpdater::CalculateTargetTicks(
+    std::shared_ptr<GameState> game_state) {
+  if (game_state->GetPlayingState() != GameState::PlayingState::PLAYING) {
+    // don't tick anymore if the game is over/paused
+    return game_state->GetElapsedTicks();
   }
-  game_state->SetDone(true);
+
+#ifdef DEBUG  // Step-by-step mode for debugging
+  static bool step_mode = false;
+  if (ImGui::GetIO().KeyShift && ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
+    step_mode = true;
+  }
+  if (step_mode) {
+    if (InputBindings::KeyNewlyPressed(GLFW_KEY_K)) {
+      return game_state->GetElapsedTicks() + 1;
+    } else {
+      InputBindings::StoreKeypresses();
+      return game_state->GetElapsedTicks();
+    }
+  }
+#endif
+
+  if (game_state->GetLevel()->getMusic()->getStatus() ==
+      sf::Music::Status::Playing) {
+    // get time elapsed in music
+    // then, calculate target ticks elapsed based on music time elapsed
+    int64_t music_offset_micros =
+        game_state->GetLevel()->getMusic()->getPlayingOffset().asMicroseconds();
+    return music_offset_micros * TICKS_PER_MICRO + game_state->GetStartTick() +
+           game_state->GetMusicStartTick();
+  } else {
+    double elapsed_seconds = glfwGetTime() - game_state->GetStartTime();
+    return elapsed_seconds * TICKS_PER_SECOND;
+  }
 }

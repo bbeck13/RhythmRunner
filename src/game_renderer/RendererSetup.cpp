@@ -7,8 +7,9 @@
 #include "GLSL.h"
 #include "ShapeManager.h"
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 480
+#define WINDOW_WIDTH 1600
+#define WINDOW_HEIGHT 900
+#define IMGUI_WINDOW_PADDING 10
 
 GLFWwindow* RendererSetup::InitOpenGL() {
   if (!glfwInit()) {
@@ -86,4 +87,26 @@ void RendererSetup::ImGuiCenterWindow(double ratio) {
       ImVec2(imgui_io.DisplaySize.x / 2 - window_width / 2,
              imgui_io.DisplaySize.y / 2 - window_height / 2),
       ImGuiSetCond_FirstUseEver);
+}
+
+void RendererSetup::ImGuiTopRightCornerWindow(double ratio) {
+  ImGuiIO& imgui_io = ImGui::GetIO();
+  int window_width = imgui_io.DisplaySize.x * ratio;
+  int window_height = imgui_io.DisplaySize.y * ratio;
+  ImGui::SetNextWindowSize(ImVec2(window_width, window_height),
+                           ImGuiSetCond_FirstUseEver);
+  ImGui::SetNextWindowPos(
+      ImVec2(imgui_io.DisplaySize.x - window_width - IMGUI_WINDOW_PADDING,
+             IMGUI_WINDOW_PADDING),
+      ImGuiSetCond_FirstUseEver);
+}
+
+void RendererSetup::ImGuiTopLeftCornerWindow(double ratio) {
+  ImGuiIO& imgui_io = ImGui::GetIO();
+  int window_width = imgui_io.DisplaySize.x * ratio;
+  int window_height = imgui_io.DisplaySize.y * ratio;
+  ImGui::SetNextWindowSize(ImVec2(window_width, window_height),
+                           ImGuiSetCond_FirstUseEver);
+  ImGui::SetNextWindowPos(ImVec2(IMGUI_WINDOW_PADDING, IMGUI_WINDOW_PADDING),
+                          ImGuiSetCond_FirstUseEver);
 }

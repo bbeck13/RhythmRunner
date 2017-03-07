@@ -14,7 +14,6 @@
 #include "LevelGenerator.h"
 #include "MenuRenderer.h"
 #include "TimingConstants.h"
-#include "EndRenderer.h"
 #include "Sky.h"
 #include "VideoTexture.h"
 #include "json.hpp"
@@ -55,7 +54,6 @@ int main(int argc, char** argv) {
 
   GameUpdater game_updater;
   MenuRenderer menu_renderer;
-  EndRenderer end_renderer;
   GameRenderer game_renderer;
   game_renderer.Init(ASSET_DIR);
 
@@ -73,40 +71,44 @@ int main(int argc, char** argv) {
     }
 
     switch (program_mode) {
-      case MainProgramMode::GAME_SCREEN: {
-        // Render first, then catch up in Update()s
-        // TODO(jarhar): Does this order make more sense than the opposite?
-        game_renderer.Render(window, game_state);
+      case MainProgramMode::CREATE_NEW_GAME: {
+        LevelGenerator* level_generator;
+        if (!menu_state->GetLevelPath().empty()) {
+          std::ifstream input(menu_state->GetLevelPath());
+          nlohmann::json leveljson;
+          input >> leveljson;
 
-        uint64_t target_tick_count;
-#ifdef DEBUG  // Step-by-step mode for debugging
-        static bool step_mode = false;
-        if (ImGui::GetIO().KeyShift && ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
-          step_mode = true;
-        }
-        if (step_mode) {
-          target_tick_count = game_state->GetElapsedTicks();
-          if (InputBindings::KeyNewlyPressed(GLFW_KEY_K)) {
-            target_tick_count++;
-          } else {
-            InputBindings::StoreKeypresses();
-          }
-        } else
-#endif
-            if (game_state->GetLevel()->getMusic()->getStatus() ==
-                sf::Music::Status::Playing) {
-          // get time elapsed in music
-          // then, calculate target ticks elapsed based on music time elapsed
-          int64_t music_offset_micros = game_state->GetLevel()
-                                            ->getMusic()
-                                            ->getPlayingOffset()
-                                            .asMicroseconds();
-          target_tick_count = music_offset_micros * TICKS_PER_MICRO +
-                              game_state->GetStartTick() +
-                              game_state->GetMusicStartTick();
+          std::vector<std::shared_ptr<GameObject>> level = leveljson;
+          std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> lvl =
+              std::make_shared<std::vector<std::shared_ptr<GameObject>>>(level);
+
+          level_generator = new LevelGenerator(menu_state->GetMusicPath(), lvl);
         } else {
-          double elapsed_seconds = glfwGetTime() - game_state->GetStartTime();
-          target_tick_count = elapsed_seconds * TICKS_PER_SECOND;
+          level_generator = new LevelGenerator(menu_state->GetMusicPath());
+        }
+        game_state = std::make_shared<GameState>(
+            level_generator->generateLevel(), std::make_shared<GameCamera>(),
+            std::make_shared<Player>(), std::make_shared<Sky>(), window);
+        // Only Video texture we have right now
+        std::shared_ptr<VideoTexture> vid = std::make_shared<VideoTexture>(
+            std::string(ASSET_DIR) + "/textures/sky");
+        game_state->AddVideoTexture("sky", vid);
+        game_updater.Init(game_state);
+        delete level_generator;
+
+        // continue to RESET_GAME
+      }
+      case MainProgramMode::RESET_GAME:
+        game_updater.Reset(game_state);
+
+      // continue to GAME_SCREEN
+      case MainProgramMode::GAME_SCREEN: {
+        uint64_t target_tick_count =
+            game_updater.CalculateTargetTicks(game_state);
+
+        if (game_state->GetElapsedTicks() >= target_tick_count) {
+          // fix for InputBindings::KeyNewlyPressed when game is paused
+          InputBindings::StoreKeypresses();
         }
 
         // Run enough ticks to catch up
@@ -119,50 +121,12 @@ int main(int argc, char** argv) {
           game_updater.Update(game_state);
         }
 
-        if (game_state->Done()) {
-          program_mode = MainProgramMode::END_SCREEN;
-        }
+        program_mode = game_renderer.Render(window, game_state);
         break;
       }
 
       case MainProgramMode::MENU_SCREEN:
         program_mode = menu_renderer.Render(window, menu_state);
-
-        if (program_mode == MainProgramMode::GAME_SCREEN) {
-          // If we are switching to game mode, then create a new game
-          LevelGenerator* level_generator;
-          if (!menu_state->GetLevelPath().empty()) {
-            std::ifstream input(menu_state->GetLevelPath());
-            nlohmann::json leveljson;
-            input >> leveljson;
-
-            std::vector<std::shared_ptr<GameObject>> level = leveljson;
-            std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> lvl =
-                std::make_shared<std::vector<std::shared_ptr<GameObject>>>(
-                    level);
-
-            level_generator =
-                new LevelGenerator(menu_state->GetMusicPath(), lvl);
-          } else {
-            level_generator = new LevelGenerator(menu_state->GetMusicPath());
-          }
-          game_state = std::make_shared<GameState>(
-              level_generator->generateLevel(), std::make_shared<GameCamera>(),
-              std::make_shared<Player>(), std::make_shared<Sky>(), window);
-          // Only Video texture we have right now
-          std::shared_ptr<VideoTexture> vid = std::make_shared<VideoTexture>(
-              std::string(ASSET_DIR) + "/textures/sky");
-          game_state->AddVideoTexture("sky", vid);
-          game_updater.Init(game_state);
-          delete level_generator;
-        }
-        break;
-
-      case MainProgramMode::END_SCREEN:
-        program_mode = end_renderer.Render(window, game_state);
-        if (program_mode == MainProgramMode::GAME_SCREEN) {
-          game_updater.Reset(game_state);
-        }
         break;
 
       case MainProgramMode::EXIT:

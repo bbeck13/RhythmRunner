@@ -18,6 +18,7 @@ class GameUpdater {
   void Update(std::shared_ptr<GameState> game_state);
   void Reset(std::shared_ptr<GameState> game_state);
   void Init(std::shared_ptr<GameState> game_state);
+  uint64_t CalculateTargetTicks(std::shared_ptr<GameState> game_state);
 
   static std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
   GetCollidingObjects(AxisAlignedBox primary_object,
@@ -27,7 +28,6 @@ class GameUpdater {
   void UpdateLevel(std::shared_ptr<GameState> game_state);
   void UpdatePlayer(std::shared_ptr<GameState> game_state);
   void UpdateCamera(std::shared_ptr<GameState> game_state);
-  void StopGame(std::shared_ptr<GameState> game_state);
 };
 
 #endif
