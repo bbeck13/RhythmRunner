@@ -20,7 +20,7 @@ Monster::Monster(glm::vec3 position,
     : MovingObject(Monster::default_path(position, disantceX, distanceZ),
                    position,
                    velocity),
-      Obstacle(MONSTER_MASH, position, scale, rotation_angle, rotation_axis) {}
+      Obstacle(MONSTER_MASH, position, rotation_axis, rotation_angle, scale) {}
 
 Monster::Monster(glm::vec3 position,
                  glm::vec3 scale,
@@ -29,7 +29,7 @@ Monster::Monster(glm::vec3 position,
                  glm::vec3 velocity,
                  std::vector<glm::vec3> path)
     : MovingObject(path, position, velocity),
-      Obstacle(MONSTER_MASH, position, scale, rotation_angle, rotation_axis) {}
+      Obstacle(MONSTER_MASH, position, rotation_axis, rotation_angle, scale) {}
 
 Monster::~Monster() {}
 

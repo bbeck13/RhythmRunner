@@ -10,7 +10,7 @@
 #include "Shape.h"
 #include "MovingObject.h"
 
-#define MONSTER_MASH "models/monster.obj"
+#define MONSTER_MASH "models/bunny.obj"
 
 namespace gameobject {
 class Monster : public MovingObject, public Obstacle {
