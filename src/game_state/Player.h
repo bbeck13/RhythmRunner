@@ -33,6 +33,7 @@ class Player : public GameObject {
   float GetYVelocity();
   float GetZVelocity();
   bool GetDoubleJump();
+  DuckDir GetDucking();
   std::shared_ptr<GameObject> GetGround();  // null if no ground
   int GetScore();
 

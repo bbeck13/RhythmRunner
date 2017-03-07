@@ -153,6 +153,7 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
+  std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Sky> sky = game_state->GetSky();
 
   // the max width to allow the player to be colliding with an object
@@ -217,21 +218,27 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     }
   }
 
+  glm::vec3 prevCameraPos = camera->getPosition();
   // always check for ducking (be ware of ducks)
   // let the player move up/down Z (sock it to me)
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
-      ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
-    player->SetDucking(DuckDir::RIGHT);
-  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT] ||
-             ImGui::GetIO().KeysDown[GLFW_KEY_H]) {
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT] ||
+      ImGui::GetIO().KeysDown[GLFW_KEY_H]) {
     player->MoveDownZ();
     player->SetDucking(DuckDir::LEFT);
+    camera->setPosition(prevCameraPos - glm::vec3(0,0,PLAYER_DELTA_Z_PER_TICK));
   } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT] ||
              ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
     player->MoveUpZ();
     player->SetDucking(DuckDir::RIGHT);
+    camera->setPosition(prevCameraPos + glm::vec3(0,0,PLAYER_DELTA_Z_PER_TICK));
   } else {
     player->SetDucking(DuckDir::NONE);
+  }
+  if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
+      ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
+    if (player->GetDucking() == DuckDir::NONE) {
+      player->SetDucking(DuckDir::RIGHT);
+    }
   }
 
   // Update player position based on new velocity.
@@ -356,10 +363,14 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   if (ImGui::GetIO().KeysDown[GLFW_KEY_1]) {  // view 1
     camera->SetCameraPlayerSpacing(
         glm::vec3(FORWARD_CAMERA_SPACING, CAMERA_Y_SPACING, CAMERA_Z_SPACING));
+    glm::vec3 camera_spacing = camera->GetCameraPlayerSpacing();
+    camera->setPosition(player_position + camera_spacing);
   } else if (ImGui::GetIO().KeysDown[GLFW_KEY_2]) {  // views from the 6
     // 2.5d my ass Zoe!
     camera->SetCameraPlayerSpacing(
         glm::vec3(CAMERA_VIEW_1_X, CAMERA_VIEW_1_Y, CAMERA_VIEW_1_Z));
+    glm::vec3 camera_spacing = camera->GetCameraPlayerSpacing();
+    camera->setPosition(player_position + camera_spacing);
   }
   glm::vec3 newCameraPos = camera->getPosition();
   if (newCameraPos[1] < minCameraYLimit) {

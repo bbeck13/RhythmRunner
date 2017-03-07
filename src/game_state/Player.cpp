@@ -88,6 +88,17 @@ void Player::SetDucking(DuckDir ducking) {
   }
 }
 
+DuckDir Player::GetDucking() {
+  if (this->rotation_angle < 0) {
+    return LEFT;
+  } else if (this->rotation_angle > 0) {
+    return RIGHT;
+  } else {
+    return NONE;
+  }
+  return NONE;
+}
+
 void Player::SetGround(std::shared_ptr<GameObject> ground) {
   this->ground = ground;
 }

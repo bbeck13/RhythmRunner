@@ -57,7 +57,8 @@ void GameCamera::Reset() {
    glm::vec3 previousLookAtPos = lookAtPos;
    lookAtPos = Player::INITIAL_POSITION +
                glm::vec3(FORWARD_CAMERA_SPACING, 0, 0);
-   eyePos = eyePos - glm::vec3(previousLookAtPos[0] - lookAtPos[0], 0, 0);
+   glm::vec3 lookAtPosDiff = previousLookAtPos - lookAtPos;
+   eyePos = eyePos - lookAtPosDiff;
    up = glm::vec3(0,1,0);
 }
 
