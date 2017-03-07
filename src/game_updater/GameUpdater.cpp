@@ -59,6 +59,11 @@ void GameUpdater::Init(std::shared_ptr<GameState> game_state) {
   Reset(game_state);
 }
 
+void GameUpdater::PostGameUpdate(std::shared_ptr<GameState> game_state) {
+  // animate the player after you win or lose
+  game_state->GetPlayer()->Animate(0); // TODO(jarhar): 0 is poop
+}
+
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   if (game_state->ReachedEndOfLevel()) {
     game_state->SetPlayingState(GameState::PlayingState::SUCCESS);
@@ -111,6 +116,7 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset the player
+  game_state->GetPlayer()->ChangeAnimation(Player::Animation::JUMPING, game_state->GetElapsedTicks());
   game_state->SetPlayingState(GameState::PlayingState::PLAYING);
   game_state->GetSky()->SetPosition(glm::vec3(0, 0, -10));
   game_state->GetVideoTextures()["sky"]->ResetFrameCount();

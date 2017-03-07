@@ -130,6 +130,11 @@ void Player::SetZVelocity(float z_velocity) {
 SecondaryType Player::GetSecondaryType() {
   return SecondaryType::BIKE;
 }
+
+Player::Animation Player::GetAnimation() {
+  return current_animation;
+}
+
 void Player::MoveDownZ() {
   SetPosition(GetPosition() - glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
 }
@@ -157,6 +162,16 @@ void Player::SnapToGround() {
 void Player::ChangeAnimation(Animation new_animation, uint64_t current_tick) {
   animation_start_tick = current_tick - 1;  // TODO(jarhar): this is hacky
   current_animation = new_animation;
+  
+  if (current_animation == Animation::FAILURE) {
+    rear_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
+    front_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
+    SetRotationAxis(glm::vec3(0, 1, 0));
+  } else {
+    rear_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
+    front_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
+    SetRotationAxis(glm::vec3(1, 0, 0));
+  }
 }
 
 void Player::Animate(uint64_t current_tick) {
@@ -165,11 +180,22 @@ void Player::Animate(uint64_t current_tick) {
     wheel_rotation_speed = WHEEL_ROTATION_PER_TICK;
   } else if (current_animation == Animation::JUMPING) {
     wheel_rotation_speed *= 0.98;
+  } else {
+    wheel_rotation_speed = 0;
   }
   rear_wheel->SetRotationAngle(rear_wheel->GetRotationAngle() +
                                wheel_rotation_speed);
   front_wheel->SetRotationAngle(front_wheel->GetRotationAngle() +
                                 wheel_rotation_speed);
+
+  if (current_animation == Animation::FAILURE) {
+    // go crazy
+    static const float death_wheel_rotation = 2.0f;
+    static const float death_rotation = 0.5f;
+    rear_wheel->SetRotationAngle(rear_wheel->GetRotationAngle() + death_wheel_rotation);
+    front_wheel->SetRotationAngle(front_wheel->GetRotationAngle() + death_wheel_rotation);
+    SetRotationAngle(GetRotationAngle() + death_rotation);
+  }
 
   // TODO(jarhar): set player rotation based on y velocity
 }

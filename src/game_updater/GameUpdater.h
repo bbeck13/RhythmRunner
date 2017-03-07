@@ -13,9 +13,10 @@
 class GameUpdater {
  public:
   GameUpdater();
-  ~GameUpdater();
+  virtual ~GameUpdater();
 
   void Update(std::shared_ptr<GameState> game_state);
+  void PostGameUpdate(std::shared_ptr<GameState> game_state);
   void Reset(std::shared_ptr<GameState> game_state);
   void Init(std::shared_ptr<GameState> game_state);
   uint64_t CalculateTargetTicks(std::shared_ptr<GameState> game_state);
