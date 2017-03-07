@@ -14,12 +14,14 @@ class Note : public Collectible {
  public:
   Note(glm::vec3 position = glm::vec3(),
        glm::vec3 scale = glm::vec3(0.5, 0.5, 0.5),
-       glm::vec3 rotation_axis = glm::vec3(1, 0, 0),
+       glm::vec3 rotation_axis = glm::vec3(0, 1, 0),
        float rotation_angle = 0,
        bool collected = false);
   virtual ~Note();
 
   SecondaryType GetSecondaryType() override;
+
+  void Animate();
 };
 }
 #endif

@@ -100,10 +100,7 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
     } else if (obj->GetSecondaryType() == SecondaryType::NOTE) {
       std::shared_ptr<gameobject::Note> note =
           std::dynamic_pointer_cast<gameobject::Note>(obj);
-      // spin to win
-      note->SetRotationAxis(glm::vec3(0, 1, 0));
-      note->SetRotationAngle(
-          note->GetRotationAngle() > 6 ? 0 : note->GetRotationAngle() + 0.05f);
+      note->Animate();
     }
   }
 }
@@ -153,11 +150,12 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
   std::shared_ptr<Sky> sky = game_state->GetSky();
 
+  // the max width to allow the player to be colliding with an object
+  float collision_width = COLLISION_WIDTH;
+
   // Store player state before moving
   AxisAlignedBox previous_player_box = player->GetBoundingBox();
   float previous_player_velocity = player->GetYVelocity();
-  // the max width to allow the player to be colliding with an object
-  float collision_width = COLLISION_WIDTH;
 
   // Check to see if the ground is no longer beneath the player,
   // in which case they should fall down
@@ -168,16 +166,17 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     if (previous_player_box.GetMin().x > ground_box.GetMax().x) {
       // Ground is no longer beneath player
       player->RemoveGround();
+      player->ChangeAnimation(Player::Animation::JUMPING, game_state->GetElapsedTicks());
     }
   }
 
-  // determine new velocity, then position, then collision box
+  // Jump if the user inputs a jump, or apply gravity.
+  // Calculate velocity for moving ground objects.
   if (player->GetGround() && ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) {
-    // player should jump now
-    player->SetYVelocity(PLAYER_JUMP_VELOCITY);
-    player->SetZVelocity(0);
+    player->Jump(game_state->GetElapsedTicks());
     player->SetDoubleJump(true);
     player->RemoveGround();
+    player->ChangeAnimation(Player::Animation::JUMPING, game_state->GetElapsedTicks());
   } else if (player->GetGround()) {
     if (GameObject::Moves(player->GetGround()->GetSecondaryType())) {
       std::shared_ptr<MovingObject> moving =
@@ -206,8 +205,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     if (player->GetDoubleJump() &&
         InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE)) {
       // Double jump
-      player->SetYVelocity(PLAYER_JUMP_VELOCITY);
-      player->SetZVelocity(0);
+      player->Jump(game_state->GetElapsedTicks());
       player->SetDoubleJump(false);
     }
   }
@@ -227,39 +225,45 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
     player->SetDucking(DuckDir::NONE);
   }
 
-  // finally update the players position
+  // Update player position based on new velocity.
   player->SetPosition(player->GetPosition() +
                       glm::vec3(DELTA_X_PER_TICK, player->GetYVelocity(),
                                 player->GetZVelocity()));
+  player->Animate(game_state->GetElapsedTicks());
+  player->SnapToGround();  // aligns player with ground if grounded
   sky->SetPosition(sky->GetPosition() + glm::vec3(DELTA_X_PER_TICK, 0, 0));
 
-  // collide!
+  // Determine colliding objects.
   std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
       collidingObjects = GetCollidingObjects(player->GetBoundingBox(),
                                              game_state->GetLevel()->getTree());
-  std::vector<std::shared_ptr<GameObject>> colliding_platforms;
-  for (std::shared_ptr<GameObject> g : *collidingObjects) {
-    // collect the collectibles we are colliding with
-    if (g->GetType() == ObjectType::COLLECTIBLE) {
-      if (std::shared_ptr<Collectible> c =
-              std::static_pointer_cast<Collectible>(g)) {
-        if (!c->GetCollected()) {
-          c->SetCollected();
-          game_state->GetPlayer()->SetScore(
-              game_state->GetPlayer()->GetScore() + 1);
-        }
-      }
-      // add the platform to the list of colliding platforms
-    } else if (g->GetType() == ObjectType::OBSTACLE) {
-      colliding_platforms.push_back(g);
+  std::vector<std::shared_ptr<Obstacle>> colliding_obstacles;
+  std::vector<std::shared_ptr<Collectible>> colliding_collectibles;
+  for (std::shared_ptr<GameObject> game_object : *collidingObjects) {
+    if (game_object->GetType() == ObjectType::COLLECTIBLE) {
+      colliding_collectibles.push_back(
+          std::static_pointer_cast<Collectible>(game_object));
+    } else if (game_object->GetType() == ObjectType::OBSTACLE) {
+      colliding_obstacles.push_back(
+          std::static_pointer_cast<Obstacle>(game_object));
     }
   }
 
-  if (!colliding_platforms.empty()) {
+  // Collect the collectibles we are colliding with.
+  for (std::shared_ptr<Collectible> collectible : colliding_collectibles) {
+    if (!collectible->GetCollected()) {
+      collectible->SetCollected();
+      game_state->GetPlayer()->SetScore(game_state->GetPlayer()->GetScore() +
+                                        1);
+    }
+  }
+
+  // Apply collision logic for obstacles.
+  if (!colliding_obstacles.empty()) {
     AxisAlignedBox player_box = player->GetBoundingBox();
     float player_min_y = previous_player_box.GetMin().y;
     // Handle the collisions
-    for (std::shared_ptr<GameObject> colliding_object : colliding_platforms) {
+    for (std::shared_ptr<GameObject> colliding_object : colliding_obstacles) {
       // Are we in the air, and is the object we are colliding with below us?
       // If so, then set it as our current ground
       AxisAlignedBox colliding_box = colliding_object->GetBoundingBox();
@@ -276,12 +280,9 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
         player->SetGround(colliding_object);
         player->SetYVelocity(0);
         player->SetZVelocity(0);
-        player->SetPosition(
-            glm::vec3(player->GetPosition().x,
-                      colliding_max_y + Player::PLATFORM_SPACING +
-                          (player_box.GetMax().y - player_box.GetMin().y) / 2 +
-                          (player->GetPosition().y - player_box.GetCenter().y),
-                      player->GetPosition().z));
+        player->SnapToGround();
+        player->ChangeAnimation(Player::Animation::GROUNDED,
+                                game_state->GetElapsedTicks());
         player_min_y = player->GetBoundingBox().GetMin().y;
         // If the ground is now a dropping platform drop it
         if (player->GetGround()->GetSecondaryType() ==
@@ -298,6 +299,8 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
       }
     }
   }
+
+  // Check to see if the player fell out of the world.
   if (previous_player_box.GetMin().y <
       game_state->GetLevel()->getTree()->GetKillZone()) {
     StopGame(game_state);
