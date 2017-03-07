@@ -321,6 +321,8 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
 
   glm::vec3 player_position = game_state->GetPlayer()->GetPosition();
   glm::vec3 camera_spacing = camera->GetCameraPlayerSpacing();
+  float minCameraYLimit = player_position[1] + 1.5;
+  float maxCameraYLimit = player_position[1] + 3.5;
 
   if (ImGui::GetIO().KeysDown[GLFW_KEY_D]) {
     camera->revolveAroundLookAt(0.0f, CAMERA_YAW_MOVE/1000.0f);
@@ -328,11 +330,21 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   if (ImGui::GetIO().KeysDown[GLFW_KEY_A]) {
     camera->revolveAroundLookAt(0.0f, -1*CAMERA_YAW_MOVE/1000.0f);
   }
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_W]) {
-    camera->revolveAroundLookAt(CAMERA_YAW_MOVE/1000.0f, 0.0f);
-  }
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_S]) {
-    camera->revolveAroundLookAt(-1*CAMERA_YAW_MOVE/1000.0f, 0.0f);
+  if (game_state->GetPlayer()->GetGround()) {
+    if (ImGui::GetIO().KeysDown[GLFW_KEY_W]) {
+      glm::vec3 prevCameraPos = camera->getPosition();
+      camera->revolveAroundLookAt(CAMERA_YAW_MOVE/1000.0f, 0.0f);
+      if (camera->getPosition()[1] > maxCameraYLimit) {
+        camera->setPosition(prevCameraPos);
+      }
+    }
+    if (ImGui::GetIO().KeysDown[GLFW_KEY_S]) {
+      glm::vec3 prevCameraPos = camera->getPosition();
+      camera->revolveAroundLookAt(-1*CAMERA_YAW_MOVE/1000.0f, 0.0f);
+      if (camera->getPosition()[1] < minCameraYLimit) {
+        camera->setPosition(prevCameraPos);
+      }
+    }
   }
 
   camera->setPosition(camera->getPosition() + glm::vec3(DELTA_X_PER_TICK, 0, 0));
@@ -348,6 +360,16 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
     // 2.5d my ass Zoe!
     camera->SetCameraPlayerSpacing(
         glm::vec3(CAMERA_VIEW_1_X, CAMERA_VIEW_1_Y, CAMERA_VIEW_1_Z));
+  }
+  glm::vec3 newCameraPos = camera->getPosition();
+  if (newCameraPos[1] < minCameraYLimit) {
+    camera->setPosition(glm::vec3(newCameraPos[0],
+                                  minCameraYLimit,
+                                  newCameraPos[2]));
+  } else if (newCameraPos[1] > maxCameraYLimit) {
+    camera->setPosition(glm::vec3(newCameraPos[0],
+                                  maxCameraYLimit,
+                                  newCameraPos[2]));
   }
 }
 
