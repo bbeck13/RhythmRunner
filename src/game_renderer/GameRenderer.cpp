@@ -632,7 +632,10 @@ void GameRenderer::ImGuiRenderBegin(std::shared_ptr<GameState> game_state) {
   }
   frames_since_last_debug++;
   ImGui::Text(fps_string.c_str());
-  ImGui::Text((std::string("Player Animation: ") + std::to_string(game_state->GetPlayer()->GetAnimation())).c_str());
+  ImGui::Text(
+      (std::string("anim: ") +
+       Player::AnimationToString(game_state->GetPlayer()->GetAnimation()))
+          .c_str());
 
   ImGui::End();
 #endif

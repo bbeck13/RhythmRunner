@@ -2,6 +2,8 @@
 
 #include "Player.h"
 
+#include <cmath>
+
 #include "TimingConstants.h"
 
 #define WHEEL_SCALE 0.4
@@ -162,23 +164,24 @@ void Player::SnapToGround() {
 void Player::ChangeAnimation(Animation new_animation, uint64_t current_tick) {
   animation_start_tick = current_tick - 1;  // TODO(jarhar): this is hacky
   current_animation = new_animation;
-  
-  if (current_animation == Animation::FAILURE) {
-    rear_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
-    front_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
-    SetRotationAxis(glm::vec3(0, 1, 0));
-  } else {
-    rear_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
-    front_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
+
+  rear_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
+  front_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
+
+  if (current_animation & ANIMATION_ENDGAME_BIT) {
+    // do fun spins after the game ends
     SetRotationAxis(glm::vec3(1, 0, 0));
+  } else {
+    // rock fowards/backwards for jumping
+    SetRotationAxis(glm::vec3(0, 0, 1));
   }
 }
 
 void Player::Animate(uint64_t current_tick) {
   // Rotate the wheels
-  if (current_animation == Animation::GROUNDED) {
+  if (current_animation & ANIMATION_WHEELSPIN_BIT) {
     wheel_rotation_speed = WHEEL_ROTATION_PER_TICK;
-  } else if (current_animation == Animation::JUMPING) {
+  } else if (current_animation & ANIMATION_WHEELSPIN_SLOW_BIT) {
     wheel_rotation_speed *= 0.98;
   } else {
     wheel_rotation_speed = 0;
@@ -188,7 +191,7 @@ void Player::Animate(uint64_t current_tick) {
   front_wheel->SetRotationAngle(front_wheel->GetRotationAngle() +
                                 wheel_rotation_speed);
 
-  if (current_animation == Animation::FAILURE) {
+  if (current_animation == FAILURE) {
     // go crazy
     static const float death_wheel_rotation = 2.0f;
     static const float death_rotation = 0.5f;
@@ -197,13 +200,29 @@ void Player::Animate(uint64_t current_tick) {
     SetRotationAngle(GetRotationAngle() + death_rotation);
   }
 
-  // TODO(jarhar): set player rotation based on y velocity
+  // set player rotation based on y velocity
+  if (current_animation & ANIMATION_AERIAL_BIT) {
+    SetRotationAngle(std::atan(y_velocity * 3));
+  }
 }
 
 void Player::Jump(uint64_t current_tick) {
+  // TODO(jarhar): what if this is called during JUMPSQUAT?
   // TODO(jarhar): create a particle effect here?
-  ChangeAnimation(Animation::JUMPING, current_tick);
+
+  if (current_animation & ANIMATION_AERIAL_BIT) {
+    // if we are already in the air, then don't go into jumpsquat
+    ChangeAnimation(Animation::JUMPING, current_tick);
+  } else {
+    ChangeAnimation(Animation::JUMPSQUAT, current_tick);
+  }
+
   SetYVelocity(PLAYER_JUMP_VELOCITY);
   SetZVelocity(0);
-  RemoveGround();
+  //RemoveGround();
+}
+
+void Player::Land(std::shared_ptr<GameObject> ground, uint64_t current_tick) {
+  SetGround(ground);
+  ChangeAnimation(Animation::LANDING, current_tick);
 }
