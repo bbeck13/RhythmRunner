@@ -56,3 +56,10 @@ To mark a pull as QA'd comment `QA :emoji:`.
 Playing
 -------
 Coming soon!
+
+Cover
+-----
+
+For your rhythm running pleasure
+
+![Image](./assets/cover/cover.jpg?raw=true)
