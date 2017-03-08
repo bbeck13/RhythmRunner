@@ -25,6 +25,7 @@
 #include "Monster.h"
 #include "LevelJson.h"
 #include "GameUpdater.h"
+#include "CollisionCalculator.h"
 
 #define TEXT_FIELD_LENGTH 256
 #define SHOW_ME_THE_MENU_ITEMS 4
@@ -897,7 +898,7 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
   }
   if (ImGui::Button("Remove")) {
     std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
-        colliding_objs = GameUpdater::GetCollidingObjects(
+        colliding_objs = CollisionCalculator::GetCollidingObjects(
             game_state->GetPlayer()->GetBoundingBox(),
             game_state->GetLevel()->getTree());
 

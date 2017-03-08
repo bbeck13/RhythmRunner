@@ -32,6 +32,7 @@ class AxisAlignedBox {
   glm::vec3 GetMin();
   glm::vec3 GetMax();
   glm::vec3 GetCenter();
+  float GetLargestDimension();
   std::string ToString();
 
  private:
