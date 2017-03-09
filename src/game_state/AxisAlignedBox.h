@@ -20,7 +20,7 @@ class AxisAlignedBox {
                                 glm::vec3 axis);
 
   AxisAlignedBox(std::shared_ptr<Shape> model, glm::mat4 transform);
-  AxisAlignedBox(glm::vec3 min, glm::vec3 max);
+  AxisAlignedBox(glm::vec3 min = glm::vec3(-1, -1, -1), glm::vec3 max = glm::vec3(1, 1, 1));
   AxisAlignedBox(std::shared_ptr<Shape> model,
                  glm::vec3 scale,
                  glm::vec3 position,

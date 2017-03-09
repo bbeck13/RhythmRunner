@@ -32,6 +32,10 @@ float PhysicalObject::GetRotationAngle() const {
   return rotation_angle;
 }
 
+glm::mat4 PhysicalObject::GetRotationMatrix() const {
+  return glm::rotate(glm::mat4(1.0), rotation_angle, rotation_axis);
+}
+
 glm::vec3 PhysicalObject::GetScale() const {
   return scale;
 }
@@ -45,8 +49,9 @@ std::shared_ptr<Shape> PhysicalObject::GetModel() const {
 }
 
 glm::mat4 PhysicalObject::GetTransform() const {
-  glm::mat4 this_transform = AxisAlignedBox::GetTransform(
-      position, scale, rotation_angle, rotation_axis);
+  glm::mat4 this_transform =
+      glm::mat4(1.0) * glm::translate(glm::mat4(1.0), position) *
+      GetRotationMatrix() * glm::scale(glm::mat4(1.0), scale);
 
   // If this object is part of a hierarchy, apply the parent's transform
   if (parent_object) {

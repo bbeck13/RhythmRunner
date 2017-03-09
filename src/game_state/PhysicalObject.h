@@ -19,6 +19,7 @@ class PhysicalObject {
   glm::vec3 GetPosition() const;
   glm::vec3 GetRotationAxis() const;
   float GetRotationAngle() const;
+  virtual glm::mat4 GetRotationMatrix() const; // for objects with complex rotations
   glm::vec3 GetScale() const;
   std::shared_ptr<Texture> GetTexture() const;  // Is null/empty if no texture
   std::shared_ptr<Shape> GetModel() const;

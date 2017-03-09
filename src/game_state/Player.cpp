@@ -2,11 +2,12 @@
 
 #include "Player.h"
 
+#include <cmath>
+#include <iostream>
+
 #include "TimingConstants.h"
 
-#define WHEEL_SCALE 0.4
-#define WHEEL_ROTATION_PER_SECOND 12.0
-#define WHEEL_ROTATION_PER_TICK (WHEEL_ROTATION_PER_SECOND * SECONDS_PER_TICK)
+#define MAX_DUCK_ANGLE 1.05f
 
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
@@ -24,7 +25,7 @@ Player::Player(glm::vec3 position,
       y_velocity(0),
       z_velocity(0),
       can_double_jump(false),
-      current_animation(Animation::JUMPING),
+      animation(Animation::JUMPING),
       wheel_rotation_speed(0) {
   rear_wheel = std::make_shared<PhysicalObject>(
       WHEEL_MESH, glm::vec3(-1.2, -0.3, 0), glm::vec3(0, 0, -1), 0,
@@ -71,32 +72,12 @@ void Player::SetDoubleJump(bool can_double_jump) {
   this->can_double_jump = can_double_jump;
 }
 
-void Player::SetDucking(DuckDir ducking) {
-  switch (ducking) {
-    case NONE:
-      SetRotationAngle(0.0f);
-      break;
-    case LEFT:
-      SetRotationAngle(-1.05f);
-      break;
-    case RIGHT:
-      SetRotationAngle(1.05f);
-      break;
-    default:
-      SetRotationAngle(0.0f);
-      break;
-  }
+void Player::SetDucking(DuckDir duck_dir) {
+  this->duck_dir = duck_dir;
 }
 
 DuckDir Player::GetDucking() {
-  if (this->rotation_angle < 0) {
-    return LEFT;
-  } else if (this->rotation_angle > 0) {
-    return RIGHT;
-  } else {
-    return NONE;
-  }
-  return NONE;
+  return duck_dir;
 }
 
 void Player::SetGround(std::shared_ptr<GameObject> ground) {
@@ -109,6 +90,14 @@ void Player::RemoveGround() {
 
 void Player::SetScore(int score) {
   this->score = score;
+}
+
+void Player::SetAnimation(Animation animation) {
+  this->animation = animation;
+}
+
+void Player::SetAnimationStartTick(uint64_t animation_start_tick) {
+  this->animation_start_tick = animation_start_tick;
 }
 
 int Player::GetScore() {
@@ -132,7 +121,15 @@ SecondaryType Player::GetSecondaryType() {
 }
 
 Player::Animation Player::GetAnimation() {
-  return current_animation;
+  return animation;
+}
+
+std::shared_ptr<PhysicalObject> Player::GetRearWheel() {
+  return rear_wheel;
+}
+
+std::shared_ptr<PhysicalObject> Player::GetFrontWheel() {
+  return front_wheel;
 }
 
 void Player::MoveDownZ() {
@@ -143,67 +140,28 @@ void Player::MoveUpZ() {
   SetPosition(GetPosition() + glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
 }
 
-void Player::SnapToGround() {
-  if (!GetGround()) {
-    return;
-  }
-
-  AxisAlignedBox bounding_box = GetBoundingBox();
-  AxisAlignedBox ground_box = GetGround()->GetBoundingBox();
-
-  SetPosition(
-      glm::vec3(GetPosition().x,
-                ground_box.GetMax().y + Player::PLATFORM_SPACING +
-                    (bounding_box.GetMax().y - bounding_box.GetMin().y) / 2 +
-                    (GetPosition().y - bounding_box.GetCenter().y),
-                GetPosition().z));
+float Player::GetWheelRotationSpeed() {
+  return wheel_rotation_speed;
 }
 
-void Player::ChangeAnimation(Animation new_animation, uint64_t current_tick) {
-  animation_start_tick = current_tick - 1;  // TODO(jarhar): this is hacky
-  current_animation = new_animation;
-  
-  if (current_animation == Animation::FAILURE) {
-    rear_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
-    front_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
-    SetRotationAxis(glm::vec3(0, 1, 0));
-  } else {
-    rear_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
-    front_wheel->SetRotationAxis(glm::vec3(0, 0, -1));
-    SetRotationAxis(glm::vec3(1, 0, 0));
-  }
+void Player::SetWheelRotationSpeed(float wheel_rotation_speed) {
+  this->wheel_rotation_speed = wheel_rotation_speed;
 }
 
-void Player::Animate(uint64_t current_tick) {
-  // Rotate the wheels
-  if (current_animation == Animation::GROUNDED) {
-    wheel_rotation_speed = WHEEL_ROTATION_PER_TICK;
-  } else if (current_animation == Animation::JUMPING) {
-    wheel_rotation_speed *= 0.98;
-  } else {
-    wheel_rotation_speed = 0;
-  }
-  rear_wheel->SetRotationAngle(rear_wheel->GetRotationAngle() +
-                               wheel_rotation_speed);
-  front_wheel->SetRotationAngle(front_wheel->GetRotationAngle() +
-                                wheel_rotation_speed);
-
-  if (current_animation == Animation::FAILURE) {
-    // go crazy
-    static const float death_wheel_rotation = 2.0f;
-    static const float death_rotation = 0.5f;
-    rear_wheel->SetRotationAngle(rear_wheel->GetRotationAngle() + death_wheel_rotation);
-    front_wheel->SetRotationAngle(front_wheel->GetRotationAngle() + death_wheel_rotation);
-    SetRotationAngle(GetRotationAngle() + death_rotation);
+glm::mat4 Player::GetRotationMatrix() const {
+  float duck_rotation;
+  switch (duck_dir) {
+    case DuckDir::LEFT:
+      duck_rotation = -MAX_DUCK_ANGLE;
+      break;
+    case DuckDir::RIGHT:
+      duck_rotation = MAX_DUCK_ANGLE;
+      break;
+    case DuckDir::NONE:
+      duck_rotation = 0.0f;
+      break;
   }
 
-  // TODO(jarhar): set player rotation based on y velocity
-}
-
-void Player::Jump(uint64_t current_tick) {
-  // TODO(jarhar): create a particle effect here?
-  ChangeAnimation(Animation::JUMPING, current_tick);
-  SetYVelocity(PLAYER_JUMP_VELOCITY);
-  SetZVelocity(0);
-  RemoveGround();
+  // rotate first for aerial rocking, then for ducking
+  return glm::rotate(glm::mat4(1.0), rotation_angle, rotation_axis) * glm::rotate(glm::mat4(1.0), duck_rotation, glm::vec3(1, 0, 0));
 }

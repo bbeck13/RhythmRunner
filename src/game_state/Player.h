@@ -9,18 +9,47 @@
 #define PLAYER_MESH "models/body_of_bike.obj"
 #define WHEEL_MESH "models/note.obj"
 
+#define WHEEL_SCALE 0.4
+#define WHEEL_ROTATION_PER_SECOND 12.0
+#define WHEEL_ROTATION_PER_TICK (WHEEL_ROTATION_PER_SECOND * SECONDS_PER_TICK)
+
+// TODO(jarhar): convert this to an animation
 enum DuckDir { NONE, LEFT, RIGHT };
 
 class Player : public GameObject {
  public:
-  enum Animation { GROUNDED = 0, JUMPING = 1, SUCCESS = 2, FAILURE = 3 };
+  // Player animation stuff
+  static const int ANIMATION_ENDGAME_BIT = 1 << 5;
+  static const int ANIMATION_WHEELSPIN_BIT = 1 << 6;
+  static const int ANIMATION_WHEELSPIN_SLOW_BIT = 1 << 7;
+  enum Animation {
+    GROUNDED = 1 | ANIMATION_WHEELSPIN_BIT,
+    JUMPING = 2 | ANIMATION_WHEELSPIN_SLOW_BIT,
+    SUCCESS = 3 | ANIMATION_ENDGAME_BIT,
+    FAILURE = 4 | ANIMATION_ENDGAME_BIT | ANIMATION_WHEELSPIN_BIT,
+  };
+  static std::string AnimationToString(Animation animation) {
+    switch (animation) {
+      case GROUNDED:
+        return "GROUNDED";
+      case JUMPING:
+        return "JUMPING";
+      case SUCCESS:
+        return "SUCCESS";
+      case FAILURE:
+        return "FAILURE";
+      default:
+        return "unknown animation";
+    }
+  }
+
   // Represents size of gap between grounded platform
   static const float PLATFORM_SPACING;
   // TODO(jarhar): consider removing initial position
   static const glm::vec3 INITIAL_POSITION;
 
   Player(glm::vec3 position = INITIAL_POSITION,
-         glm::vec3 rotation_axis = glm::vec3(1, 0, 0),
+         glm::vec3 rotation_axis = glm::vec3(0, 0, 1),
          float rotation_angle = 0,
          glm::vec3 scale = glm::vec3(0.8, 0.8, 0.8));
   virtual ~Player();
@@ -37,6 +66,10 @@ class Player : public GameObject {
   std::shared_ptr<GameObject> GetGround();  // null if no ground
   int GetScore();
   Animation GetAnimation();
+  std::shared_ptr<PhysicalObject> GetRearWheel();
+  std::shared_ptr<PhysicalObject> GetFrontWheel();
+  float GetWheelRotationSpeed();
+  glm::mat4 GetRotationMatrix() const override;
 
   void SetYVelocity(float y_velocity);
   void MoveDownZ();
@@ -47,11 +80,9 @@ class Player : public GameObject {
   void SetGround(std::shared_ptr<GameObject> ground);
   void RemoveGround();
   void SetScore(int score);
-
-  void SnapToGround();
-  void ChangeAnimation(Animation new_animation, uint64_t current_tick);
-  void Animate(uint64_t current_tick);
-  void Jump(uint64_t current_tick);
+  void SetAnimation(Animation animation);
+  void SetAnimationStartTick(uint64_t animation_start_tick);
+  void SetWheelRotationSpeed(float wheel_rotation_speed);
 
  private:
   std::shared_ptr<GameObject> ground;
@@ -60,11 +91,12 @@ class Player : public GameObject {
   float z_velocity;
   int score;
 
-  Animation current_animation;
+  Animation animation;
   uint64_t animation_start_tick;
   float wheel_rotation_speed;
   std::shared_ptr<PhysicalObject> rear_wheel;
   std::shared_ptr<PhysicalObject> front_wheel;
+  DuckDir duck_dir;
 };
 
 #endif
