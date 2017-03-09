@@ -24,11 +24,11 @@ class Player : public GameObject {
   static const int ANIMATION_WHEELSPIN_SLOW_BIT = 1 << 7;
   enum Animation {
     GROUNDED = 1 | ANIMATION_WHEELSPIN_BIT,
-    JUMPSQUAT = 2 | ANIMATION_WHEELSPIN_SLOW_BIT,
+    JUMPSQUAT = 2 | ANIMATION_WHEELSPIN_BIT,
     JUMPING = 3 | ANIMATION_WHEELSPIN_SLOW_BIT,
     SUCCESS = 4 | ANIMATION_ENDGAME_BIT,
     FAILURE = 5 | ANIMATION_ENDGAME_BIT | ANIMATION_WHEELSPIN_BIT,
-    LANDING = 6 | ANIMATION_WHEELSPIN_SLOW_BIT
+    LANDING = 6 | ANIMATION_WHEELSPIN_BIT
   };
   static std::string AnimationToString(Animation animation) {
     switch (animation) {
@@ -74,6 +74,7 @@ class Player : public GameObject {
   Animation GetAnimation();
   std::shared_ptr<PhysicalObject> GetRearWheel();
   std::shared_ptr<PhysicalObject> GetFrontWheel();
+  float GetWheelRotationSpeed();
 
   void SetYVelocity(float y_velocity);
   void MoveDownZ();
@@ -86,6 +87,7 @@ class Player : public GameObject {
   void SetScore(int score);
   void SetAnimation(Animation animation);
   void SetAnimationStartTick(uint64_t animation_start_tick);
+  void SetWheelRotationSpeed(float wheel_rotation_speed);
 
  private:
   std::shared_ptr<GameObject> ground;

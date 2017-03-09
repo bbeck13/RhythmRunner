@@ -74,10 +74,6 @@ glm::vec3 AxisAlignedBox::GetCenter() {
                    min.z + (max.z - min.z) / 2);
 }
 
-float AxisAlignedBox::GetLargestDimension() {
-  return std::max(std::max(max.x - min.x, max.y - min.y), max.z - min.z);
-}
-
 std::string AxisAlignedBox::ToString() {
   return "min: " + glm::to_string(GetMin()) + ", max: " +
          glm::to_string(GetMax());

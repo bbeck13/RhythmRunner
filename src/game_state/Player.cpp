@@ -157,3 +157,11 @@ void Player::MoveDownZ() {
 void Player::MoveUpZ() {
   SetPosition(GetPosition() + glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
 }
+
+float Player::GetWheelRotationSpeed() {
+  return wheel_rotation_speed;
+}
+
+void Player::SetWheelRotationSpeed(float wheel_rotation_speed) {
+  this->wheel_rotation_speed = wheel_rotation_speed;
+}

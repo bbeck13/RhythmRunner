@@ -20,34 +20,39 @@ PlayerUpdater::PlayerUpdater() {}
 
 PlayerUpdater::~PlayerUpdater() {}
 
-AxisAlignedBox PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
+void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
-  std::shared_ptr<Sky> sky = game_state->GetSky();
 
   // the max width to allow the player to be colliding with an object
-  float collision_width = COLLISION_WIDTH;
+  collision_width = COLLISION_WIDTH;
 
   // Store player state before moving
-  AxisAlignedBox previous_player_box = player->GetBoundingBox();
-  float previous_player_velocity = player->GetYVelocity();
+  previous_player_box = player->GetBoundingBox();
 
   // Check to see if the ground is no longer beneath the player,
   // in which case they should fall down
   if (player->GetGround()) {
     AxisAlignedBox ground_box = player->GetGround()->GetBoundingBox();
-    // This will only consider when the player moves to the right of the
-    // platform
-    if (previous_player_box.GetMin().x > ground_box.GetMax().x) {
+    if (previous_player_box.GetMin().x > ground_box.GetMax().x ||
+        previous_player_box.GetMin().z > ground_box.GetMax().z ||
+        previous_player_box.GetMax().z < ground_box.GetMin().z) {
       // Ground is no longer beneath player
-      player->RemoveGround();
-      ChangeAnimation(game_state, Player::Animation::JUMPING);
+      FallOffGround(game_state);
     }
+  }
+
+  // Jump if the user inputs a jump.
+  // use basic key detection when on the ground, newly pressed for doublejump
+  if ((player->GetGround() && ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) ||
+      (!player->GetGround() &&
+       InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE))) {
+    Jump(game_state);
   }
 
   // Jump if the user inputs a jump, or apply gravity.
   // Calculate velocity for moving ground objects.
-  if (player->GetGround() && ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) {
+  /*if (player->GetGround() && ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) {
     Jump(game_state);
   } else if (player->GetGround()) {
     if (GameObject::Moves(player->GetGround()->GetSecondaryType())) {
@@ -55,8 +60,8 @@ AxisAlignedBox PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) 
           std::dynamic_pointer_cast<MovingObject>(player->GetGround());
       // Move player with moving object
       glm::vec3 movementVector = moving->GetMovementVector();
-      /*player->SetYVelocity(movementVector.y * moving->GetVelocity().y);
-      player->SetZVelocity(movementVector.z * moving->GetVelocity().z);*/
+      //player->SetYVelocity(movementVector.y * moving->GetVelocity().y);
+      //player->SetZVelocity(movementVector.z * moving->GetVelocity().z);
       SnapToGround(game_state);
       // add to the allowed collision width
       collision_width += movementVector.y * moving->GetVelocity().y;
@@ -66,21 +71,24 @@ AxisAlignedBox PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) 
           std::static_pointer_cast<gameobject::DroppingPlatform>(
               player->GetGround());
       // move the player with the dropping platform
-      //player->SetYVelocity(dropping->GetYVelocity());
-      player->Fall(game_state);
+      // player->SetYVelocity(dropping->GetYVelocity());
+      Fall(game_state);
     } else {
-      // player is stuck to ground, make sure velocity is neutralized
-      /*player->SetYVelocity(0.0f);
-      player->SetZVelocity(0.0f);*/
+      // player is still on ground, do nothing
     }
   } else {
     // player is in the air, apply gravity
-    player->SetYVelocity(previous_player_velocity - PLAYER_GRAVITY);
+    player->SetYVelocity(player->GetYVelocity() - PLAYER_GRAVITY);
     if (player->GetDoubleJump() &&
         InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE)) {
       // Double jump
       Jump(game_state);
     }
+  }*/
+
+  // apply gravity
+  if (!player->GetGround()) {
+    player->SetYVelocity(player->GetYVelocity() - PLAYER_GRAVITY);
   }
 
   glm::vec3 prevCameraPos = camera->getPosition();
@@ -112,34 +120,26 @@ AxisAlignedBox PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) 
   player->SetPosition(player->GetPosition() +
                       glm::vec3(DELTA_X_PER_TICK, player->GetYVelocity(),
                                 player->GetZVelocity()));
-  // AnimatePlayer(game_state);
-  // SnapToGround();  // aligns player with ground if grounded TODO(jarhar):
-  // move this to always run after the animate phase? or during it on the
-  // grounded animations!
-  // TODO(jarhar): move sky somewhere else
-  sky->SetPosition(sky->GetPosition() + glm::vec3(DELTA_X_PER_TICK, 0, 0));
-
-  return previous_player_box;
 }
 
 void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
   std::shared_ptr<PhysicalObject> rear_wheel = player->GetRearWheel();
   std::shared_ptr<PhysicalObject> front_wheel = player->GetFrontWheel();
-  uint64_t current_tick = game_state->GetElapsedTicks();
   Player::Animation current_animation = player->GetAnimation();
 
   // Rotate the wheels
-  float wheel_rotation_speed = 0;
   if (current_animation & Player::ANIMATION_WHEELSPIN_BIT) {
-    wheel_rotation_speed = WHEEL_ROTATION_PER_TICK;
+    player->SetWheelRotationSpeed(WHEEL_ROTATION_PER_TICK);
   } else if (current_animation & Player::ANIMATION_WHEELSPIN_SLOW_BIT) {
-    wheel_rotation_speed *= 0.98;
+    player->SetWheelRotationSpeed(player->GetWheelRotationSpeed() * 0.98);
+  } else {
+    player->SetWheelRotationSpeed(0);
   }
   player->GetRearWheel()->SetRotationAngle(rear_wheel->GetRotationAngle() +
-                                           wheel_rotation_speed);
+                                           player->GetWheelRotationSpeed());
   player->GetFrontWheel()->SetRotationAngle(front_wheel->GetRotationAngle() +
-                                            wheel_rotation_speed);
+      player->GetWheelRotationSpeed());
 
   if (current_animation == Player::Animation::FAILURE) {
     // go crazy
@@ -150,18 +150,18 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
     player->GetRearWheel()->SetRotationAngle(front_wheel->GetRotationAngle() +
                                              death_wheel_rotation);
     player->SetRotationAngle(player->GetRotationAngle() + death_rotation);
+    // TODO(jarhar): player->SetRotationAxis(glm::vec3(1, 0, 0));
   }
 
   // set player rotation based on y velocity
-  float aerial_rotation_angle = std::atan(player->GetYVelocity() * 3);
+  float aerial_rotation_angle = std::atan(player->GetYVelocity() * 4);
   if (!player->GetGround()) {
     player->SetRotationAngle(aerial_rotation_angle);
   } else if (current_animation == Player::Animation::JUMPSQUAT) {
     // raise up front of bike until we are in the air, then go into JUMPING
     // +1 is rotated backwards, -1 is rotated forwards, 0 is normal
 
-    AxisAlignedBox wheel_bounding_box =
-        player->GetRearWheel()->GetIndividualBoundingBox();
+    AxisAlignedBox wheel_bounding_box = rear_wheel->GetIndividualBoundingBox();
     float wheel_radius =
         (wheel_bounding_box.GetMax().y - wheel_bounding_box.GetMin().y) / 2.0f;
 
@@ -173,32 +173,53 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
               player->GetGround()->GetBoundingBox().GetMax().y - wheel_radius -
               Player::PLATFORM_SPACING;
 
-    if (y > relative_distance_to_wheel) {
-      // RemoveGround();
-      // ChangeAnimation();
-    }
+    float target_angle = std::asin(y / relative_distance_to_wheel);
 
-    float target_angle = std::asin(relative_distance_to_wheel / y);
-
-    if (target_angle > aerial_rotation_angle) {
-      // RemoveGround();
-      // ChangeAnimation();
+    if (y > relative_distance_to_wheel ||
+        target_angle > aerial_rotation_angle) {
+      player->RemoveGround();
+      ChangeAnimation(game_state, Player::Animation::JUMPING);
+      target_angle = aerial_rotation_angle;
     }
 
     player->SetRotationAngle(target_angle);
-    std::cout << "target_angle: " << target_angle << std::endl;
+  } else if (current_animation == Player::Animation::LANDING) {
+    AxisAlignedBox wheel_bounding_box =
+    front_wheel->GetIndividualBoundingBox();
+    float wheel_radius =
+        (wheel_bounding_box.GetMax().y - wheel_bounding_box.GetMin().y) / 2.0f;
+
+    float relative_distance_to_wheel =
+        glm::distance(glm::vec3(0, 0, 0), front_wheel->GetPosition());
+
+    float y = player->GetPosition().y -
+              player->GetGround()->GetBoundingBox().GetMax().y - wheel_radius -
+              Player::PLATFORM_SPACING;
+
+    float target_angle = std::asin(y / relative_distance_to_wheel);
+
+    if (y > relative_distance_to_wheel ||
+        target_angle > aerial_rotation_angle) {
+      ChangeAnimation(game_state, Player::Animation::GROUNDED);
+      target_angle = 0;
+    }
+
+    player->SetRotationAngle(-target_angle);
   }
 
-    SnapToGround(game_state);
+  // some animations may have misaligned the player with the ground,
+  // make sure the player is on the ground if grounded.
+  // this is also important for staying attached to moving platforms
+  SnapToGround(game_state);
 }
 
-void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state, AxisAlignedBox previous_player_box) {
+void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
   // Determine colliding objects.
   std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
-      collidingObjects = CollisionCalculator::GetCollidingObjects(player->GetBoundingBox(),
-                                             game_state->GetLevel()->getTree());
+      collidingObjects = CollisionCalculator::GetCollidingObjects(
+          player->GetBoundingBox(), game_state->GetLevel()->getTree());
   std::vector<std::shared_ptr<Obstacle>> colliding_obstacles;
   std::vector<std::shared_ptr<Collectible>> colliding_collectibles;
   for (std::shared_ptr<GameObject> game_object : *collidingObjects) {
@@ -230,26 +251,21 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state, AxisAl
       // If so, then set it as our current ground
       AxisAlignedBox colliding_box = colliding_object->GetBoundingBox();
       float colliding_max_y = colliding_object->GetBoundingBox().GetMax().y;
+      float y_velocity_tolerance = player->GetYVelocity();
 
-      // If the player's bounding box was "above" (within 1 velocity unit +
-      // allowed COLLISION_WIDTH error) the platform's box before
-      // collision,
-      // then we consider the collision "landing" on the platform
+      // If the player's bounding box was "above" the platform's box before
+      // collision, then we consider the collision "landing" on the platform.
+      // collision_width + y_velocity are acceptable error.
       if (std::abs(player_min_y - colliding_max_y) <
-          (std::abs(player->GetYVelocity()) + COLLISION_WIDTH)) {
+          collision_width + y_velocity_tolerance) {
         // above colliding box, we are grounded on this platform
-        // now attach player to the ground
-        player->SetGround(colliding_object);
-        player->SetYVelocity(0);
-        player->SetZVelocity(0);
-        SnapToGround(game_state);
-        ChangeAnimation(game_state, Player::Animation::GROUNDED);
+        Land(game_state, colliding_object);
         player_min_y = player->GetBoundingBox().GetMin().y;
         // If the ground is now a dropping platform drop it
         if (player->GetGround()->GetSecondaryType() ==
             SecondaryType::DROPPING_PLATFORM) {
           std::shared_ptr<gameobject::DroppingPlatform> dropping =
-              std::dynamic_pointer_cast<gameobject::DroppingPlatform>(
+              std::static_pointer_cast<gameobject::DroppingPlatform>(
                   player->GetGround());
           dropping->SetDropping();
         }
@@ -270,7 +286,6 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state, AxisAl
 
 void PlayerUpdater::Jump(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
-  uint64_t current_tick = game_state->GetElapsedTicks();
 
   // TODO(jarhar): create a particle effect here?
 
@@ -280,25 +295,29 @@ void PlayerUpdater::Jump(std::shared_ptr<GameState> game_state) {
   }
 
   if (!player->GetGround()) {
-    // if we are already in the air, then don't go into jumpsquat
-    ChangeAnimation(game_state, Player::Animation::JUMPING);
-    player->SetDoubleJump(false);
-  } else if (player->GetAnimation() != Player::Animation::JUMPSQUAT) {
+    // if we are already in the air, then don't go into jumpsquat.
+    // Use doublejump if we have it
+    if (player->GetDoubleJump()) {
+      ChangeAnimation(game_state, Player::Animation::JUMPING);
+      player->SetDoubleJump(false);
+    }
+  } else {
+    // on the ground, start jumping
     ChangeAnimation(game_state, Player::Animation::JUMPSQUAT);
     player->SetDoubleJump(true);
   }
 
   player->SetYVelocity(PLAYER_JUMP_VELOCITY);
   player->SetZVelocity(0);
-  // RemoveGround();
 }
 
 void PlayerUpdater::Land(std::shared_ptr<GameState> game_state,
                          std::shared_ptr<GameObject> ground) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
-  // TODO(jarhar): implement landing animation
   player->SetGround(ground);
+  // player->SetYVelocity(0);
+  player->SetZVelocity(0);
   ChangeAnimation(game_state, Player::Animation::LANDING);
 }
 
@@ -331,6 +350,9 @@ void PlayerUpdater::SnapToGround(std::shared_ptr<GameState> game_state) {
     return;
   }
 
+  // After this, player's min y should be Player::PLATFORM_SPACING above
+  // ground's max y
+
   AxisAlignedBox bounding_box = player->GetBoundingBox();
   AxisAlignedBox ground_box = player->GetGround()->GetBoundingBox();
   glm::vec3 player_position = player->GetPosition();
@@ -348,4 +370,20 @@ void PlayerUpdater::Death(std::shared_ptr<GameState> game_state) {
 
   game_state->SetPlayingState(GameState::PlayingState::FAILURE);
   ChangeAnimation(game_state, Player::Animation::FAILURE);
+}
+
+void PlayerUpdater::FallOffGround(std::shared_ptr<GameState> game_state) {
+  std::shared_ptr<Player> player = game_state->GetPlayer();
+
+  std::shared_ptr<gameobject::DroppingPlatform> dropping_platform =
+      std::dynamic_pointer_cast<gameobject::DroppingPlatform>(
+          player->GetGround());
+  if (dropping_platform) {
+    player->SetYVelocity(dropping_platform->GetYVelocity());
+  } else {
+    player->SetYVelocity(0);
+  }
+
+  player->RemoveGround();
+  ChangeAnimation(game_state, Player::Animation::JUMPING);
 }

@@ -13,9 +13,9 @@ class PlayerUpdater {
   PlayerUpdater();
   virtual ~PlayerUpdater();
 
-  AxisAlignedBox MovePlayer(std::shared_ptr<GameState> game_state);
+  void MovePlayer(std::shared_ptr<GameState> game_state);
   void AnimatePlayer(std::shared_ptr<GameState> game_state);
-  void CollisionCheck(std::shared_ptr<GameState> game_state, AxisAlignedBox previous_player_box);
+  void CollisionCheck(std::shared_ptr<GameState> game_state);
   void ChangeAnimation(std::shared_ptr<GameState> game_state,
                        Player::Animation new_animation);
 
@@ -25,6 +25,11 @@ class PlayerUpdater {
             std::shared_ptr<GameObject> ground);
   void SnapToGround(std::shared_ptr<GameState> game_state);
   void Death(std::shared_ptr<GameState> game_state);
+  void FallOffGround(std::shared_ptr<GameState> game_state);
+
+  // used to store state between MovePlayer() and CollisionCheck()
+  AxisAlignedBox previous_player_box;
+  float collision_width;
 };
 
 #endif  // PLAYER_UPDATER_H_

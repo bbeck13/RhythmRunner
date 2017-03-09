@@ -28,8 +28,8 @@ void GameUpdater::Init(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::PostGameUpdate(std::shared_ptr<GameState> game_state) {
   // animate the player after you win or lose
-  //game_state->GetPlayer()->Animate(0);  // TODO(jarhar): 0 is poop
   player_updater.AnimatePlayer(game_state);
+  // TODO(jarhar): game_state->IncrementTicks();
 }
 
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
@@ -52,9 +52,13 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   }
 
   UpdateLevel(game_state);
-  AxisAlignedBox previous_player_box = player_updater.MovePlayer(game_state);
+  std::cout << "before updating player min y: " << game_state->GetPlayer()->GetBoundingBox().GetMin().y << std::endl;
+  player_updater.MovePlayer(game_state);
+  std::cout << "   after moving player min y: " << game_state->GetPlayer()->GetBoundingBox().GetMin().y << std::endl;
   player_updater.AnimatePlayer(game_state);
-  player_updater.CollisionCheck(game_state, previous_player_box);
+  std::cout << "after animating player min y: " << game_state->GetPlayer()->GetBoundingBox().GetMin().y << std::endl;
+  player_updater.CollisionCheck(game_state);
+  std::cout << "after collision 4 player min y: " << game_state->GetPlayer()->GetBoundingBox().GetMin().y << std::endl;
   UpdateCamera(game_state);
 
   game_state->IncrementTicks();
@@ -82,12 +86,14 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
       note->Animate();
     }
   }
+
+  game_state->GetSky()->SetPosition(game_state->GetSky()->GetPosition() +
+                                    glm::vec3(DELTA_X_PER_TICK, 0, 0));
 }
 
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // reset the player
-  player_updater.ChangeAnimation(game_state,
-    Player::Animation::JUMPING);
+  player_updater.ChangeAnimation(game_state, Player::Animation::JUMPING);
   game_state->SetPlayingState(GameState::PlayingState::PLAYING);
   game_state->GetSky()->SetPosition(glm::vec3(0, 0, -10));
   game_state->GetVideoTextures()["sky"]->ResetFrameCount();
