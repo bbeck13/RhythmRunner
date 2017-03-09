@@ -107,6 +107,7 @@ void GameState::SetCamera(std::shared_ptr<GameCamera> camera) {
 
 void GameState::IncrementTicks() {
   elapsed_ticks++;
+  player->SetCurrentTick(elapsed_ticks);
 }
 
 void GameState::SetStartTime() {

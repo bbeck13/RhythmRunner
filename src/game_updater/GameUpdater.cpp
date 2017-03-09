@@ -29,7 +29,7 @@ void GameUpdater::Init(std::shared_ptr<GameState> game_state) {
 void GameUpdater::PostGameUpdate(std::shared_ptr<GameState> game_state) {
   // animate the player after you win or lose
   player_updater.AnimatePlayer(game_state);
-  game_state->IncrementTicks(); // increment ticks just for animations
+  game_state->IncrementTicks();  // increment ticks just for animations
 }
 
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
