@@ -4,12 +4,15 @@
 
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 #include "TimingConstants.h"
 #include "DroppingPlatform.h"
 #include "MovingObject.h"
 
 #define MAX_DUCK_ANGLE 1.05f
+#define DUCK_FINISH_SECONDS 1.0
+#define DUCK_FINISH_TICKS (DUCK_FINISH_SECONDS * TICKS_PER_SECOND)
 
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
@@ -76,9 +79,10 @@ void Player::SetDoubleJump(bool can_double_jump) {
 
 void Player::SetDucking(DuckDir duck_dir) {
   this->duck_dir = duck_dir;
+  duck_start_tick = current_tick;
 }
 
-DuckDir Player::GetDucking() {
+Player::DuckDir Player::GetDucking() {
   return duck_dir;
 }
 
@@ -152,12 +156,14 @@ void Player::SetWheelRotationSpeed(float wheel_rotation_speed) {
 
 glm::mat4 Player::GetRotationMatrix() const {
   float duck_rotation;
+  float duck_ratio = std::min(
+      (current_tick - duck_start_tick) / (float)DUCK_FINISH_TICKS, 1.0f);
   switch (duck_dir) {
     case DuckDir::LEFT:
-      duck_rotation = -MAX_DUCK_ANGLE;
+      duck_rotation = duck_ratio * -MAX_DUCK_ANGLE;
       break;
     case DuckDir::RIGHT:
-      duck_rotation = MAX_DUCK_ANGLE;
+      duck_rotation = duck_ratio * MAX_DUCK_ANGLE;
       break;
     case DuckDir::NONE:
       duck_rotation = 0.0f;
@@ -176,11 +182,19 @@ float Player::GetGroundYVelocity() {
 
   std::shared_ptr<gameobject::DroppingPlatform> dropping_platform;
   std::shared_ptr<MovingObject> moving_object;
-  if (dropping_platform = std::dynamic_pointer_cast<gameobject::DroppingPlatform>(GetGround())) {
+  if (dropping_platform =
+          std::dynamic_pointer_cast<gameobject::DroppingPlatform>(
+              GetGround())) {
     return dropping_platform->GetYVelocity();
-  } else if (moving_object = std::dynamic_pointer_cast<MovingObject>(GetGround())) {
-    return moving_object->GetMovementVector().y * moving_object->GetVelocity().y;
+  } else if (moving_object =
+                 std::dynamic_pointer_cast<MovingObject>(GetGround())) {
+    return moving_object->GetMovementVector().y *
+           moving_object->GetVelocity().y;
   }
 
   return 0;
+}
+
+void Player::SetCurrentTick(uint64_t current_tick) {
+  this->current_tick = current_tick;
 }

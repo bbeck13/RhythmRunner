@@ -58,28 +58,33 @@ void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
   }
 
   glm::vec3 prevCameraPos = camera->getPosition();
+  Player::DuckDir target_duck;
   // always check for ducking (be ware of ducks)
   // let the player move up/down Z (sock it to me)
   if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT] ||
       ImGui::GetIO().KeysDown[GLFW_KEY_H]) {
+    target_duck = Player::DuckDir::LEFT;
     player->MoveDownZ();
-    player->SetDucking(DuckDir::LEFT);
     camera->setPosition(prevCameraPos -
                         glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
   } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT] ||
              ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
+    target_duck = Player::DuckDir::RIGHT;
     player->MoveUpZ();
-    player->SetDucking(DuckDir::RIGHT);
     camera->setPosition(prevCameraPos +
                         glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
   } else {
-    player->SetDucking(DuckDir::NONE);
+    target_duck = Player::DuckDir::NONE;
   }
   if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
       ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
-    if (player->GetDucking() == DuckDir::NONE) {
-      player->SetDucking(DuckDir::RIGHT);
+    if (player->GetDucking() == Player::DuckDir::NONE) {
+      target_duck = Player::DuckDir::RIGHT;
     }
+  }
+
+  if (target_duck != player->GetDucking()) {
+    player->SetDucking(target_duck);
   }
 
   // Update player position based on new velocity.
@@ -202,8 +207,8 @@ void PlayerUpdater::Jump(std::shared_ptr<GameState> game_state) {
     player->SetDoubleJump(player->GetGround() ? true : false);
     ChangeAnimation(game_state, Player::Animation::JUMPING);
     // if we are on a moving platform, then add its velocity to the jump
-    player->SetYVelocity(
-        PLAYER_JUMP_VELOCITY + std::max(player->GetGroundYVelocity(), 0.0f));
+    player->SetYVelocity(PLAYER_JUMP_VELOCITY +
+                         std::max(player->GetGroundYVelocity(), 0.0f));
     player->SetZVelocity(0);
     player->RemoveGround();
 
