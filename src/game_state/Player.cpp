@@ -7,6 +7,8 @@
 
 #include "TimingConstants.h"
 
+#define MAX_DUCK_ANGLE 1.05f
+
 // static
 const float Player::PLATFORM_SPACING = 0.01f;
 const glm::vec3 Player::INITIAL_POSITION(-2 - (DELTA_X_PER_SECOND *
@@ -70,32 +72,12 @@ void Player::SetDoubleJump(bool can_double_jump) {
   this->can_double_jump = can_double_jump;
 }
 
-void Player::SetDucking(DuckDir ducking) {
-  switch (ducking) {
-    case NONE:
-      SetRotationAngle(0.0f);
-      break;
-    case LEFT:
-      SetRotationAngle(-1.05f);
-      break;
-    case RIGHT:
-      SetRotationAngle(1.05f);
-      break;
-    default:
-      SetRotationAngle(0.0f);
-      break;
-  }
+void Player::SetDucking(DuckDir duck_dir) {
+  this->duck_dir = duck_dir;
 }
 
 DuckDir Player::GetDucking() {
-  if (this->rotation_angle < 0) {
-    return LEFT;
-  } else if (this->rotation_angle > 0) {
-    return RIGHT;
-  } else {
-    return NONE;
-  }
-  return NONE;
+  return duck_dir;
 }
 
 void Player::SetGround(std::shared_ptr<GameObject> ground) {
@@ -164,4 +146,22 @@ float Player::GetWheelRotationSpeed() {
 
 void Player::SetWheelRotationSpeed(float wheel_rotation_speed) {
   this->wheel_rotation_speed = wheel_rotation_speed;
+}
+
+glm::mat4 Player::GetRotationMatrix() const {
+  float duck_rotation;
+  switch (duck_dir) {
+    case DuckDir::LEFT:
+      duck_rotation = -MAX_DUCK_ANGLE;
+      break;
+    case DuckDir::RIGHT:
+      duck_rotation = MAX_DUCK_ANGLE;
+      break;
+    case DuckDir::NONE:
+      duck_rotation = 0.0f;
+      break;
+  }
+
+  // rotate first for aerial rocking, then for ducking
+  return glm::rotate(glm::mat4(1.0), rotation_angle, rotation_axis) * glm::rotate(glm::mat4(1.0), duck_rotation, glm::vec3(1, 0, 0));
 }

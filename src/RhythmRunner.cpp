@@ -65,10 +65,7 @@ int main(int argc, char** argv) {
   program_mode = MainProgramMode::MENU_SCREEN;
 
   while (!glfwWindowShouldClose(window)) {
-    // TODO(jarhar): this is kinda hacky
-    if (program_mode != MainProgramMode::GAME_SCREEN) {
-      InputBindings::StoreKeypresses();
-    }
+    bool keypress_override = false;
 
     switch (program_mode) {
       case MainProgramMode::CREATE_NEW_GAME: {
@@ -107,8 +104,8 @@ int main(int argc, char** argv) {
           case GameState::PlayingState::FAILURE:
           case GameState::PlayingState::SUCCESS:
             game_updater.PostGameUpdate(game_state);
+            break;
           case GameState::PlayingState::PAUSED:
-            InputBindings::StoreKeypresses();
             break;
           case GameState::PlayingState::PLAYING: {
             uint64_t target_tick_count =
@@ -119,6 +116,7 @@ int main(int argc, char** argv) {
             // Update().
             //  What if the music starts/stops during one of multiple Update()s?
             while (game_state->GetElapsedTicks() < target_tick_count) {
+              keypress_override = true;
               InputBindings::StoreKeypresses();
               game_updater.Update(game_state);
             }
@@ -140,6 +138,11 @@ int main(int argc, char** argv) {
     }
 
     PrintStatus();
+
+    if (!keypress_override) {
+      InputBindings::StoreKeypresses();
+    }
+    keypress_override = false;
   }
 
   RendererSetup::Close(window);

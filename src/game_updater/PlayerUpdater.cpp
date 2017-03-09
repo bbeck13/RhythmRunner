@@ -139,7 +139,7 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
   player->GetRearWheel()->SetRotationAngle(rear_wheel->GetRotationAngle() +
                                            player->GetWheelRotationSpeed());
   player->GetFrontWheel()->SetRotationAngle(front_wheel->GetRotationAngle() +
-      player->GetWheelRotationSpeed());
+                                            player->GetWheelRotationSpeed());
 
   if (current_animation == Player::Animation::FAILURE) {
     // go crazy
@@ -157,55 +157,7 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
   float aerial_rotation_angle = std::atan(player->GetYVelocity() * 4);
   if (!player->GetGround()) {
     player->SetRotationAngle(aerial_rotation_angle);
-  } else if (current_animation == Player::Animation::JUMPSQUAT) {
-    // raise up front of bike until we are in the air, then go into JUMPING
-    // +1 is rotated backwards, -1 is rotated forwards, 0 is normal
-
-    AxisAlignedBox wheel_bounding_box = rear_wheel->GetIndividualBoundingBox();
-    float wheel_radius =
-        (wheel_bounding_box.GetMax().y - wheel_bounding_box.GetMin().y) / 2.0f;
-
-    // this always stays constant, since rear_wheel->GetPosition() is constant
-    float relative_distance_to_wheel =
-        glm::distance(glm::vec3(0, 0, 0), rear_wheel->GetPosition());
-
-    float y = player->GetPosition().y -
-              player->GetGround()->GetBoundingBox().GetMax().y - wheel_radius -
-              Player::PLATFORM_SPACING;
-
-    float target_angle = std::asin(y / relative_distance_to_wheel);
-
-    if (y > relative_distance_to_wheel ||
-        target_angle > aerial_rotation_angle) {
-      player->RemoveGround();
-      ChangeAnimation(game_state, Player::Animation::JUMPING);
-      target_angle = aerial_rotation_angle;
-    }
-
-    player->SetRotationAngle(target_angle);
-  } else if (current_animation == Player::Animation::LANDING) {
-    AxisAlignedBox wheel_bounding_box =
-    front_wheel->GetIndividualBoundingBox();
-    float wheel_radius =
-        (wheel_bounding_box.GetMax().y - wheel_bounding_box.GetMin().y) / 2.0f;
-
-    float relative_distance_to_wheel =
-        glm::distance(glm::vec3(0, 0, 0), front_wheel->GetPosition());
-
-    float y = player->GetPosition().y -
-              player->GetGround()->GetBoundingBox().GetMax().y - wheel_radius -
-              Player::PLATFORM_SPACING;
-
-    float target_angle = std::asin(y / relative_distance_to_wheel);
-
-    if (y > relative_distance_to_wheel ||
-        target_angle > aerial_rotation_angle) {
-      ChangeAnimation(game_state, Player::Animation::GROUNDED);
-      target_angle = 0;
-    }
-
-    player->SetRotationAngle(-target_angle);
-  }
+  } 
 
   // some animations may have misaligned the player with the ground,
   // make sure the player is on the ground if grounded.
@@ -289,26 +241,22 @@ void PlayerUpdater::Jump(std::shared_ptr<GameState> game_state) {
 
   // TODO(jarhar): create a particle effect here?
 
-  if (player->GetAnimation() == Player::Animation::JUMPSQUAT) {
-    // if we are already in jumpsquat, do nothing
-    return;
-  }
+  bool jump = false;
 
-  if (!player->GetGround()) {
-    // if we are already in the air, then don't go into jumpsquat.
-    // Use doublejump if we have it
-    if (player->GetDoubleJump()) {
-      ChangeAnimation(game_state, Player::Animation::JUMPING);
-      player->SetDoubleJump(false);
-    }
-  } else {
-    // on the ground, start jumping
-    ChangeAnimation(game_state, Player::Animation::JUMPSQUAT);
+  if (player->GetGround()) {
     player->SetDoubleJump(true);
+    jump = true;
+  } else if (player->GetDoubleJump()) {
+    player->SetDoubleJump(false);
+    jump = true;
   }
 
-  player->SetYVelocity(PLAYER_JUMP_VELOCITY);
-  player->SetZVelocity(0);
+  if (jump) {
+    player->RemoveGround();
+    ChangeAnimation(game_state, Player::Animation::JUMPING);
+    player->SetYVelocity(PLAYER_JUMP_VELOCITY);
+    player->SetZVelocity(0);
+  }
 }
 
 void PlayerUpdater::Land(std::shared_ptr<GameState> game_state,
@@ -316,9 +264,10 @@ void PlayerUpdater::Land(std::shared_ptr<GameState> game_state,
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
   player->SetGround(ground);
-  // player->SetYVelocity(0);
+  player->SetYVelocity(0);
   player->SetZVelocity(0);
-  ChangeAnimation(game_state, Player::Animation::LANDING);
+  player->SetRotationAngle(0);
+  ChangeAnimation(game_state, Player::Animation::GROUNDED);
 }
 
 void PlayerUpdater::ChangeAnimation(std::shared_ptr<GameState> game_state,

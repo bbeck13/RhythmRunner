@@ -52,13 +52,9 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   }
 
   UpdateLevel(game_state);
-  std::cout << "before updating player min y: " << game_state->GetPlayer()->GetBoundingBox().GetMin().y << std::endl;
   player_updater.MovePlayer(game_state);
-  std::cout << "   after moving player min y: " << game_state->GetPlayer()->GetBoundingBox().GetMin().y << std::endl;
   player_updater.AnimatePlayer(game_state);
-  std::cout << "after animating player min y: " << game_state->GetPlayer()->GetBoundingBox().GetMin().y << std::endl;
   player_updater.CollisionCheck(game_state);
-  std::cout << "after collision 4 player min y: " << game_state->GetPlayer()->GetBoundingBox().GetMin().y << std::endl;
   UpdateCamera(game_state);
 
   game_state->IncrementTicks();
