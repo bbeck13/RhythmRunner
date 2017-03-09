@@ -159,7 +159,6 @@ void GameState::SetPlayingState(PlayingState playing_state) {
       // stop the music
       if (music->getStatus() == sf::SoundSource::Status::Playing) {
         music->stop();
-        music->setPlayingOffset(sf::Time::Zero);
       }
       break;
   }

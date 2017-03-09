@@ -146,7 +146,6 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   // stop the music if it is playing
   std::shared_ptr<sf::Music> music = game_state->GetLevel()->getMusic();
   if (music->getStatus() != sf::SoundSource::Status::Stopped) {
-    music->setPlayingOffset(sf::Time::Zero);
     music->stop();
   }
 }
