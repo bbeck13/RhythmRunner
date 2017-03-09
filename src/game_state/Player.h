@@ -13,9 +13,6 @@
 #define WHEEL_ROTATION_PER_SECOND 12.0
 #define WHEEL_ROTATION_PER_TICK (WHEEL_ROTATION_PER_SECOND * SECONDS_PER_TICK)
 
-// TODO(jarhar): convert this to an animation
-enum DuckDir { NONE, LEFT, RIGHT };
-
 class Player : public GameObject {
  public:
   // Player animation stuff
@@ -43,6 +40,8 @@ class Player : public GameObject {
         return "unknown animation";
     }
   }
+
+  enum DuckDir { NONE, LEFT, RIGHT };
 
   // Represents size of gap between grounded platform
   static const float PLATFORM_SPACING;
@@ -85,6 +84,7 @@ class Player : public GameObject {
   void SetAnimation(Animation animation);
   void SetAnimationStartTick(uint64_t animation_start_tick);
   void SetWheelRotationSpeed(float wheel_rotation_speed);
+  void SetCurrentTick(uint64_t current_tick);
 
  private:
   std::shared_ptr<GameObject> ground;
@@ -94,7 +94,9 @@ class Player : public GameObject {
   int score;
 
   Animation animation;
+  uint64_t current_tick;
   uint64_t animation_start_tick;
+  uint64_t duck_start_tick;
   float wheel_rotation_speed;
   std::shared_ptr<PhysicalObject> rear_wheel;
   std::shared_ptr<PhysicalObject> front_wheel;
