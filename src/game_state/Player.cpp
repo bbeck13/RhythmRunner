@@ -163,5 +163,6 @@ glm::mat4 Player::GetRotationMatrix() const {
   }
 
   // rotate first for aerial rocking, then for ducking
-  return glm::rotate(glm::mat4(1.0), rotation_angle, rotation_axis) * glm::rotate(glm::mat4(1.0), duck_rotation, glm::vec3(1, 0, 0));
+  return glm::rotate(glm::mat4(1.0), rotation_angle, rotation_axis) *
+         glm::rotate(glm::mat4(1.0), duck_rotation, glm::vec3(1, 0, 0));
 }

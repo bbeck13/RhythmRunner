@@ -15,4 +15,4 @@ GetCollidingObjects(AxisAlignedBox primary_object,
                     std::shared_ptr<Octree> tree);
 }
 
-#endif // COLLISION_CALCULATOR_H_
+#endif  // COLLISION_CALCULATOR_H_

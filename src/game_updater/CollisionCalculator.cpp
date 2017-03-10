@@ -6,7 +6,7 @@
 
 std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>>
 CollisionCalculator::GetCollidingObjects(AxisAlignedBox primary_object,
-                    std::shared_ptr<Octree> tree) {
+                                         std::shared_ptr<Octree> tree) {
   std::shared_ptr<std::unordered_set<std::shared_ptr<GameObject>>> collisions =
       std::make_shared<std::unordered_set<std::shared_ptr<GameObject>>>();
   std::queue<Node*> toVisit;
