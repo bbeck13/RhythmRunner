@@ -22,11 +22,12 @@ class Player : public GameObject {
   static const int ANIMATION_ENDGAME_BIT = 1 << 5;
   static const int ANIMATION_WHEELSPIN_BIT = 1 << 6;
   static const int ANIMATION_WHEELSPIN_SLOW_BIT = 1 << 7;
+  static const int ANIMATION_AERIAL_TILT_BIT = 1 << 8;
   enum Animation {
     GROUNDED = 1 | ANIMATION_WHEELSPIN_BIT,
-    JUMPING = 2 | ANIMATION_WHEELSPIN_SLOW_BIT,
-    SUCCESS = 3 | ANIMATION_ENDGAME_BIT,
-    FAILURE = 4 | ANIMATION_ENDGAME_BIT | ANIMATION_WHEELSPIN_BIT,
+    JUMPING = 2 | ANIMATION_WHEELSPIN_SLOW_BIT | ANIMATION_AERIAL_TILT_BIT,
+    SUCCESS = 3 | ANIMATION_ENDGAME_BIT | ANIMATION_WHEELSPIN_SLOW_BIT,
+    FAILURE = 4 | ANIMATION_ENDGAME_BIT | ANIMATION_WHEELSPIN_SLOW_BIT,
   };
   static std::string AnimationToString(Animation animation) {
     switch (animation) {

@@ -107,19 +107,12 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
 
   if (current_animation == Player::Animation::FAILURE) {
     // go crazy
-    static const float death_wheel_rotation = 2.0f;
-    static const float death_rotation = 0.5f;
-    player->GetFrontWheel()->SetRotationAngle(rear_wheel->GetRotationAngle() +
-                                              death_wheel_rotation);
-    player->GetRearWheel()->SetRotationAngle(front_wheel->GetRotationAngle() +
-                                             death_wheel_rotation);
-    player->SetRotationAngle(player->GetRotationAngle() + death_rotation);
+    player->SetRotationAngle(player->GetRotationAngle() + 0.3f);
   }
 
-  // set player rotation based on y velocity
-  float aerial_rotation_angle = std::atan(player->GetYVelocity() * 4);
-  if (!player->GetGround()) {
-    player->SetRotationAngle(aerial_rotation_angle);
+  if (current_animation & Player::ANIMATION_AERIAL_TILT_BIT) {
+    // set player rotation based on y velocity
+    player->SetRotationAngle(std::atan(player->GetYVelocity() * 4));
   }
 
   // some animations may have misaligned the player with the ground,
@@ -249,6 +242,7 @@ void PlayerUpdater::ChangeAnimation(std::shared_ptr<GameState> game_state,
 
   if (animation & Player::ANIMATION_ENDGAME_BIT) {
     // do fun spins after the game ends
+    // TODO(jarhar): add particle/sound effects here?
     player->SetRotationAxis(glm::vec3(1, 0, 0));
   } else {
     // rock fowards/backwards for jumping
