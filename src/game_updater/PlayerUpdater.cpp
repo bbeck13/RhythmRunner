@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <glm/glm.hpp>
 #include <queue>
+#include <algorithm>
 
 #include "MovingObject.h"
 #include "DroppingPlatform.h"
@@ -13,6 +14,7 @@
 #include "Octree.h"
 #include "Player.h"
 #include "CollisionCalculator.h"
+#include "DroppingPlatform.h"
 
 #define COLLISION_WIDTH 0.420f
 
@@ -196,23 +198,16 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
 void PlayerUpdater::Jump(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
-  // TODO(jarhar): create a particle effect here?
-
-  bool jump = false;
-
-  if (player->GetGround()) {
-    player->SetDoubleJump(true);
-    jump = true;
-  } else if (player->GetDoubleJump()) {
-    player->SetDoubleJump(false);
-    jump = true;
-  }
-
-  if (jump) {
-    player->RemoveGround();
+  if (player->GetGround() || player->GetDoubleJump()) {
+    player->SetDoubleJump(player->GetGround() ? true : false);
     ChangeAnimation(game_state, Player::Animation::JUMPING);
-    player->SetYVelocity(PLAYER_JUMP_VELOCITY);
+    // if we are on a moving platform, then add its velocity to the jump
+    player->SetYVelocity(
+        PLAYER_JUMP_VELOCITY + std::max(player->GetGroundYVelocity(), 0.0f));
     player->SetZVelocity(0);
+    player->RemoveGround();
+
+    // TODO(jarhar): create a particle effect here?
   }
 }
 
@@ -284,15 +279,7 @@ void PlayerUpdater::Death(std::shared_ptr<GameState> game_state) {
 void PlayerUpdater::FallOffGround(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
 
-  std::shared_ptr<gameobject::DroppingPlatform> dropping_platform =
-      std::dynamic_pointer_cast<gameobject::DroppingPlatform>(
-          player->GetGround());
-  if (dropping_platform) {
-    player->SetYVelocity(dropping_platform->GetYVelocity());
-  } else {
-    player->SetYVelocity(0);
-  }
-
+  player->SetYVelocity(std::max(player->GetGroundYVelocity(), 0.0f));
   player->RemoveGround();
   ChangeAnimation(game_state, Player::Animation::JUMPING);
 }
