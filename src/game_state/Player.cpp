@@ -6,6 +6,8 @@
 #include <iostream>
 
 #include "TimingConstants.h"
+#include "DroppingPlatform.h"
+#include "MovingObject.h"
 
 #define MAX_DUCK_ANGLE 1.05f
 
@@ -165,4 +167,20 @@ glm::mat4 Player::GetRotationMatrix() const {
   // rotate first for aerial rocking, then for ducking
   return glm::rotate(glm::mat4(1.0), rotation_angle, rotation_axis) *
          glm::rotate(glm::mat4(1.0), duck_rotation, glm::vec3(1, 0, 0));
+}
+
+float Player::GetGroundYVelocity() {
+  if (!GetGround()) {
+    return 0;
+  }
+
+  std::shared_ptr<gameobject::DroppingPlatform> dropping_platform;
+  std::shared_ptr<MovingObject> moving_object;
+  if (dropping_platform = std::dynamic_pointer_cast<gameobject::DroppingPlatform>(GetGround())) {
+    return dropping_platform->GetYVelocity();
+  } else if (moving_object = std::dynamic_pointer_cast<MovingObject>(GetGround())) {
+    return moving_object->GetMovementVector().y * moving_object->GetVelocity().y;
+  }
+
+  return 0;
 }

@@ -71,6 +71,7 @@ class Player : public GameObject {
   std::shared_ptr<PhysicalObject> GetFrontWheel();
   float GetWheelRotationSpeed();
   glm::mat4 GetRotationMatrix() const override;
+  float GetGroundYVelocity();
 
   void SetYVelocity(float y_velocity);
   void MoveDownZ();
