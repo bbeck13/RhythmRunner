@@ -15,6 +15,7 @@
 #include "CollisionCalculator.h"
 
 #define COLLISION_WIDTH 0.420f
+#define MAX_AERIAL_ROTATION_ANGLE 0.67f
 
 PlayerUpdater::PlayerUpdater() {}
 
@@ -112,7 +113,12 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
 
   if (current_animation & Player::ANIMATION_AERIAL_TILT_BIT) {
     // set player rotation based on y velocity
-    player->SetRotationAngle(std::atan(player->GetYVelocity() * 4));
+    float rotation_angle = std::atan(player->GetYVelocity() * 4);
+    if (rotation_angle > 0) {
+      player->SetRotationAngle(std::min(MAX_AERIAL_ROTATION_ANGLE, rotation_angle));
+    } else {
+      player->SetRotationAngle(std::max(-MAX_AERIAL_ROTATION_ANGLE, rotation_angle));
+    }
   }
 
   // some animations may have misaligned the player with the ground,
