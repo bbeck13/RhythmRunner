@@ -77,11 +77,10 @@ void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
   } else {
     target_duck = Player::DuckDir::NONE;
   }
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
-      ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) {
-    if (player->GetDucking() == Player::DuckDir::NONE) {
-      target_duck = Player::DuckDir::RIGHT;
-    }
+  if ((ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
+       ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) &&
+      target_duck == Player::DuckDir::NONE) {
+    target_duck = Player::DuckDir::RIGHT;
   }
 
   if (target_duck != player->GetDucking()) {
@@ -122,9 +121,11 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
     // set player rotation based on y velocity
     float rotation_angle = std::atan(player->GetYVelocity() * 4);
     if (rotation_angle > 0) {
-      player->SetRotationAngle(std::min(MAX_AERIAL_ROTATION_ANGLE, rotation_angle));
+      player->SetRotationAngle(
+          std::min(MAX_AERIAL_ROTATION_ANGLE, rotation_angle));
     } else {
-      player->SetRotationAngle(std::max(-MAX_AERIAL_ROTATION_ANGLE, rotation_angle));
+      player->SetRotationAngle(
+          std::max(-MAX_AERIAL_ROTATION_ANGLE, rotation_angle));
     }
   }
 
