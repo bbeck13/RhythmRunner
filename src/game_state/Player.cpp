@@ -11,7 +11,7 @@
 #include "MovingObject.h"
 
 #define MAX_DUCK_ANGLE 1.05f
-#define DUCK_FINISH_SECONDS 1.0
+#define DUCK_FINISH_SECONDS 0.2
 #define DUCK_FINISH_TICKS (DUCK_FINISH_SECONDS * TICKS_PER_SECOND)
 
 // static
