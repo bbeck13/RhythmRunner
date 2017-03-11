@@ -33,7 +33,7 @@ GLFWwindow* RendererSetup::InitOpenGL() {
   window = glfwCreateWindow(mode->width, mode->height, TITLE, monitor, NULL);
 #endif
   glfwMakeContextCurrent(window);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   glewExperimental = true;
   if (glewInit() != GLEW_OK) {
     std::cerr << "Failed to initialize GLEW" << std::endl;
@@ -77,36 +77,53 @@ void RendererSetup::Close(GLFWwindow* window) {
   glfwTerminate();
 }
 
-void RendererSetup::ImGuiCenterWindow(double ratio) {
+void RendererSetup::ImGuiCenterWindow(double ratio, bool dynamic) {
   ImGuiIO& imgui_io = ImGui::GetIO();
   int window_width = imgui_io.DisplaySize.x * ratio;
   int window_height = imgui_io.DisplaySize.y * ratio;
-  ImGui::SetNextWindowSize(ImVec2(window_width, window_height),
-                           ImGuiSetCond_FirstUseEver);
+  ImGui::SetNextWindowSize(
+      ImVec2(window_width, window_height),
+      dynamic ? ImGuiSetCond_FirstUseEver : ImGuiSetCond_Always);
   ImGui::SetNextWindowPos(
       ImVec2(imgui_io.DisplaySize.x / 2 - window_width / 2,
              imgui_io.DisplaySize.y / 2 - window_height / 2),
-      ImGuiSetCond_FirstUseEver);
+      dynamic ? ImGuiSetCond_FirstUseEver : ImGuiSetCond_Always);
 }
 
-void RendererSetup::ImGuiTopRightCornerWindow(double ratio) {
+void RendererSetup::ImGuiTopRightCornerWindow(double ratio, bool dynamic) {
   ImGuiIO& imgui_io = ImGui::GetIO();
   int window_width = imgui_io.DisplaySize.x * ratio;
   int window_height = imgui_io.DisplaySize.y * ratio;
-  ImGui::SetNextWindowSize(ImVec2(window_width, window_height),
-                           ImGuiSetCond_FirstUseEver);
+  ImGui::SetNextWindowSize(
+      ImVec2(window_width, window_height),
+      dynamic ? ImGuiSetCond_FirstUseEver : ImGuiSetCond_Always);
   ImGui::SetNextWindowPos(
       ImVec2(imgui_io.DisplaySize.x - window_width - IMGUI_WINDOW_PADDING,
              IMGUI_WINDOW_PADDING),
-      ImGuiSetCond_FirstUseEver);
+      dynamic ? ImGuiSetCond_FirstUseEver : ImGuiSetCond_Always);
 }
 
-void RendererSetup::ImGuiTopLeftCornerWindow(double ratio) {
+void RendererSetup::ImGuiTopLeftCornerWindow(double ratio, bool dynamic) {
   ImGuiIO& imgui_io = ImGui::GetIO();
   int window_width = imgui_io.DisplaySize.x * ratio;
   int window_height = imgui_io.DisplaySize.y * ratio;
-  ImGui::SetNextWindowSize(ImVec2(window_width, window_height),
-                           ImGuiSetCond_FirstUseEver);
-  ImGui::SetNextWindowPos(ImVec2(IMGUI_WINDOW_PADDING, IMGUI_WINDOW_PADDING),
-                          ImGuiSetCond_FirstUseEver);
+  ImGui::SetNextWindowSize(
+      ImVec2(window_width, window_height),
+      dynamic ? ImGuiSetCond_FirstUseEver : ImGuiSetCond_Always);
+  ImGui::SetNextWindowPos(
+      ImVec2(IMGUI_WINDOW_PADDING, IMGUI_WINDOW_PADDING),
+      dynamic ? ImGuiSetCond_FirstUseEver : ImGuiSetCond_Always);
+}
+
+void RendererSetup::ImGuiBottomRightCornerWindow(double ratio, bool dynamic) {
+  ImGuiIO& imgui_io = ImGui::GetIO();
+  int window_width = imgui_io.DisplaySize.x * ratio;
+  int window_height = imgui_io.DisplaySize.y * ratio;
+  ImGui::SetNextWindowSize(
+      ImVec2(window_width, window_height),
+      dynamic ? ImGuiSetCond_FirstUseEver : ImGuiSetCond_Always);
+  ImGui::SetNextWindowPos(
+      ImVec2(imgui_io.DisplaySize.x - window_width - IMGUI_WINDOW_PADDING,
+             imgui_io.DisplaySize.y - window_height - IMGUI_WINDOW_PADDING),
+      dynamic ? ImGuiSetCond_FirstUseEver : ImGuiSetCond_Always);
 }

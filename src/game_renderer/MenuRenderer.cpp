@@ -21,8 +21,8 @@ MainProgramMode MenuRenderer::Render(GLFWwindow* window,
   ImGui_ImplGlfwGL3_NewFrame();
 
   // Create a centered window that takes up 50% of the screen
-  RendererSetup::ImGuiCenterWindow(0.5);
-  ImGui::Begin("Rhythm Runner", NULL, RendererSetup::TITLE_WINDOW_FLAGS);
+  RendererSetup::ImGuiCenterWindow(0.5, RendererSetup::DYNAMIC);
+  ImGui::Begin("Rhythm Runner", NULL, RendererSetup::DYNAMIC_WINDOW_FLAGS);
 
   static char music_path_buffer[TEXT_FIELD_LENGTH];
   static char level_path_buffer[TEXT_FIELD_LENGTH];
@@ -45,14 +45,14 @@ MainProgramMode MenuRenderer::Render(GLFWwindow* window,
   }
 
   if (ImGui::Button("Start [ENTER]") ||
-      InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
+      InputBindings::KeyPressed(GLFW_KEY_ENTER)) {
     // TODO(jarhar): validate music filepath here
     program_mode = MainProgramMode::CREATE_NEW_GAME;
   }
 
   if (ImGui::Button("Exit [ESCAPE][Q]") ||
-      InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE) ||
-      InputBindings::KeyNewlyPressed(GLFW_KEY_Q)) {
+      InputBindings::KeyPressed(GLFW_KEY_ESCAPE) ||
+      InputBindings::KeyPressed(GLFW_KEY_Q)) {
     program_mode = MainProgramMode::EXIT;
   }
 

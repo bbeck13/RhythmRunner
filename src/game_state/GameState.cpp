@@ -3,6 +3,7 @@
 #include "GameState.h"
 
 #include "TimingConstants.h"
+#include "InputBindings.h"
 
 GameState::GameState(std::shared_ptr<Level> level,
                      std::shared_ptr<GameCamera> camera,
@@ -161,6 +162,18 @@ void GameState::SetPlayingState(PlayingState playing_state) {
       if (music->getStatus() == sf::SoundSource::Status::Playing) {
         music->stop();
       }
+      break;
+  }
+
+  // unlock cursor when paused or game over
+  switch (playing_state) {
+    case PlayingState::PLAYING:
+      InputBindings::SetCursorMode(InputBindings::CursorMode::LOCKED);
+      break;
+    case PlayingState::PAUSED:
+    case PlayingState::FAILURE:
+    case PlayingState::SUCCESS:
+      InputBindings::SetCursorMode(InputBindings::CursorMode::FREE);
       break;
   }
 }

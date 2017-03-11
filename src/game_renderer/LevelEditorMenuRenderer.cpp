@@ -20,9 +20,9 @@ LevelProgramMode LevelEditorMenuRenderer::Render(
   ImGui_ImplGlfwGL3_NewFrame();
 
   // Create a centered window that takes up 50% of the screen
-  RendererSetup::ImGuiCenterWindow(0.5);
+  RendererSetup::ImGuiCenterWindow(0.5, RendererSetup::DYNAMIC);
   ImGui::Begin("Rhythm Runner Level Editor", NULL,
-               RendererSetup::TITLE_WINDOW_FLAGS);
+               RendererSetup::DYNAMIC_WINDOW_FLAGS);
 
   static char music_path_buffer[TEXT_FIELD_LENGTH];
   static char level_path_buffer[TEXT_FIELD_LENGTH];
@@ -43,15 +43,15 @@ LevelProgramMode LevelEditorMenuRenderer::Render(
   }
 
   if (ImGui::Button("Generate Level From Music [ENTER]") ||
-      InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
+      InputBindings::KeyPressed(GLFW_KEY_ENTER)) {
     program_mode = LevelProgramMode::GENERATE_LEVEL;
   }
   if (ImGui::Button("Level Editor [TAB]") ||
-      InputBindings::KeyNewlyPressed(GLFW_KEY_TAB)) {
+      InputBindings::KeyPressed(GLFW_KEY_TAB)) {
     program_mode = LevelProgramMode::START_EDIT_LEVEL;
   }
   if (ImGui::Button("Exit [ESCAPE]") ||
-      InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {
+      InputBindings::KeyPressed(GLFW_KEY_ESCAPE)) {
     program_mode = LevelProgramMode::EXIT;
   }
 

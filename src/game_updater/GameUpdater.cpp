@@ -2,8 +2,6 @@
 
 #include "GameUpdater.h"
 
-// imgui and glfw are needed for keyboard input
-#include <imgui.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/ext.hpp>
@@ -39,7 +37,7 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
     return;
   }
 
-  if (InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {
+  if (InputBindings::KeyPressed(GLFW_KEY_ESCAPE)) {
     game_state->SetPlayingState(GameState::PlayingState::PAUSED);
     return;
   }
@@ -137,21 +135,30 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   float minCameraYLimit = player_position[1] + 1.5;
   float maxCameraYLimit = player_position[1] + 3.5;
 
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_D]) {
+  // update camera with cursor
+  std::pair<double, double> cursor_diff = InputBindings::GetCursorDiff();
+  camera->revolveAroundLookAt(0.0f, -cursor_diff.first * CAMERA_YAW_MOVE / 4000.0f);
+
+  // update camera with keys
+  if (InputBindings::KeyDown(GLFW_KEY_L) ||
+      InputBindings::KeyDown(GLFW_KEY_RIGHT)) {
     camera->revolveAroundLookAt(0.0f, CAMERA_YAW_MOVE / 1000.0f);
   }
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_A]) {
+  if (InputBindings::KeyDown(GLFW_KEY_H) ||
+      InputBindings::KeyDown(GLFW_KEY_LEFT)) {
     camera->revolveAroundLookAt(0.0f, -1 * CAMERA_YAW_MOVE / 1000.0f);
   }
   if (game_state->GetPlayer()->GetGround()) {
-    if (ImGui::GetIO().KeysDown[GLFW_KEY_W]) {
+    if (InputBindings::KeyDown(GLFW_KEY_K) ||
+        InputBindings::KeyDown(GLFW_KEY_UP)) {
       glm::vec3 prevCameraPos = camera->getPosition();
       camera->revolveAroundLookAt(CAMERA_YAW_MOVE / 1000.0f, 0.0f);
       if (camera->getPosition()[1] > maxCameraYLimit) {
         camera->setPosition(prevCameraPos);
       }
     }
-    if (ImGui::GetIO().KeysDown[GLFW_KEY_S]) {
+    if (InputBindings::KeyDown(GLFW_KEY_L) ||
+        InputBindings::KeyDown(GLFW_KEY_DOWN)) {
       glm::vec3 prevCameraPos = camera->getPosition();
       camera->revolveAroundLookAt(-1 * CAMERA_YAW_MOVE / 1000.0f, 0.0f);
       if (camera->getPosition()[1] < minCameraYLimit) {
@@ -167,12 +174,12 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   // Add FORWARD_CAMERA_SPACING to align camera
   camera->setLookAt(player_position + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0));
 
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_1]) {  // view 1
+  if (InputBindings::KeyDown(GLFW_KEY_1)) {  // view 1
     camera->SetCameraPlayerSpacing(
         glm::vec3(FORWARD_CAMERA_SPACING, CAMERA_Y_SPACING, CAMERA_Z_SPACING));
     glm::vec3 camera_spacing = camera->GetCameraPlayerSpacing();
     camera->setPosition(player_position + camera_spacing);
-  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_2]) {  // views from the 6
+  } else if (InputBindings::KeyDown(GLFW_KEY_2)) {  // views from the 6
     // 2.5d my ass Zoe!
     camera->SetCameraPlayerSpacing(
         glm::vec3(CAMERA_VIEW_1_X, CAMERA_VIEW_1_Y, CAMERA_VIEW_1_Z));
@@ -198,14 +205,13 @@ uint64_t GameUpdater::CalculateTargetTicks(
 
 #ifdef DEBUG  // Step-by-step mode for debugging
   static bool step_mode = false;
-  if (ImGui::GetIO().KeyShift && ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
+  if (ImGui::GetIO().KeyCtrl && InputBindings::KeyDown(GLFW_KEY_K)) {
     step_mode = true;
   }
   if (step_mode) {
-    if (InputBindings::KeyNewlyPressed(GLFW_KEY_K)) {
+    if (InputBindings::KeyPressed(GLFW_KEY_K)) {
       return game_state->GetElapsedTicks() + 1;
     } else {
-      InputBindings::StoreKeypresses();
       return game_state->GetElapsedTicks();
     }
   }

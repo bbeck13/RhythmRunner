@@ -31,9 +31,6 @@
 #define SHOW_ME_THE_MENU_ITEMS 4
 #define ENDGAME_MENU_WAIT_SECONDS 0.5
 
-static const ImGuiWindowFlags static_window_flags =
-    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs;
-
 namespace {
 
 void DrawPhysicalObjectTree(std::shared_ptr<Program> program,
@@ -614,8 +611,8 @@ void GameRenderer::ImGuiRenderBegin(std::shared_ptr<GameState> game_state) {
   ImGui_ImplGlfwGL3_NewFrame();
 
 #ifdef DEBUG
-  RendererSetup::ImGuiTopRightCornerWindow(0.2);
-  ImGui::Begin("Debug Info", NULL, static_window_flags);
+  RendererSetup::ImGuiTopRightCornerWindow(0.2, RendererSetup::STATIC);
+  ImGui::Begin("Debug Info", NULL, RendererSetup::STATIC_WINDOW_FLAGS);
 
   static double last_debug_time = glfwGetTime();
   static int frames_since_last_debug = 0;
@@ -652,8 +649,8 @@ MainProgramMode GameRenderer::ImGuiRenderGame(
 
   ImGuiRenderBegin(game_state);
 
-  RendererSetup::ImGuiTopLeftCornerWindow(0.2);
-  ImGui::Begin("Stats", NULL, static_window_flags);
+  RendererSetup::ImGuiTopLeftCornerWindow(0.2, RendererSetup::STATIC);
+  ImGui::Begin("Stats", NULL, RendererSetup::STATIC_WINDOW_FLAGS);
 
   std::string score_string =
       "Score: " + std::to_string(game_state->GetPlayer()->GetScore());
@@ -671,19 +668,18 @@ MainProgramMode GameRenderer::ImGuiRenderGame(
     case GameState::PlayingState::PLAYING:
       break;
     case GameState::PlayingState::PAUSED:
-      RendererSetup::ImGuiCenterWindow(0.5);
-      ImGui::Begin("PAUSED");
+      RendererSetup::ImGuiCenterWindow(0.5, RendererSetup::DYNAMIC);
+      ImGui::Begin("PAUSED", NULL, RendererSetup::DYNAMIC_WINDOW_FLAGS);
       ImGui::Text("Paused");
       if (ImGui::Button("Resume [ESCAPE]") ||
-          InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {
+          InputBindings::KeyPressed(GLFW_KEY_ESCAPE)) {
         game_state->SetPlayingState(GameState::PlayingState::PLAYING);
       }
       if (ImGui::Button("Main Menu [ENTER]") ||
-          InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
+          InputBindings::KeyPressed(GLFW_KEY_ENTER)) {
         next_mode = MainProgramMode::MENU_SCREEN;
       }
-      if (ImGui::Button("Exit [Q]") ||
-          InputBindings::KeyNewlyPressed(GLFW_KEY_Q)) {
+      if (ImGui::Button("Exit [Q]") || InputBindings::KeyPressed(GLFW_KEY_Q)) {
         next_mode = MainProgramMode::EXIT;
       }
       ImGui::End();
@@ -691,36 +687,39 @@ MainProgramMode GameRenderer::ImGuiRenderGame(
     case GameState::PlayingState::FAILURE:
     case GameState::PlayingState::SUCCESS: {
       // TODO(jarhar): make screen green/red or something
-      // TODO(jarhar): insert particle effects here
+      // TODO(jarhar): insert particle/sound effects here
       // TODO(jarhar): rotate camera around player here
       bool success = playing_state == GameState::PlayingState::SUCCESS;
       if (glfwGetTime() >
           game_state->GetEndingTime() + ENDGAME_MENU_WAIT_SECONDS) {
-        RendererSetup::ImGuiCenterWindow(0.5);
-        ImGui::Begin(success ? "SUCCESS" : "FAILURE");
+        RendererSetup::ImGuiCenterWindow(0.5, RendererSetup::DYNAMIC);
+        ImGui::Begin(success ? "SUCCESS" : "FAILURE", NULL, RendererSetup::DYNAMIC_WINDOW_FLAGS);
         ImGui::Text(success ? "YOU WIN!" : "YOU FAILED");
         ImGui::Text(score_string.c_str());
         ImGui::Text(progress_string.c_str());
         if (ImGui::Button("Retry [SPACE]") ||
-            InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE)) {
+            InputBindings::KeyPressed(GLFW_KEY_SPACE)) {
           next_mode = MainProgramMode::RESET_GAME;
         }
         if (ImGui::Button("Main Menu [ENTER]") ||
-            InputBindings::KeyNewlyPressed(GLFW_KEY_ENTER)) {
+            InputBindings::KeyPressed(GLFW_KEY_ENTER)) {
           next_mode = MainProgramMode::MENU_SCREEN;
         }
         if (ImGui::Button("Exit [ESCAPE]") ||
-            InputBindings::KeyNewlyPressed(GLFW_KEY_ESCAPE)) {
+            InputBindings::KeyPressed(GLFW_KEY_ESCAPE)) {
           next_mode = MainProgramMode::EXIT;
         }
         ImGui::End();
+      } else {
+        // This makes sure that when the end ui shows up,
+        // buffered keypresses are not used
+        InputBindings::ClearKeyPresses();
       }
       break;
     }
   }
 
   ImGuiRenderEnd();
-
   return next_mode;
 }
 
@@ -730,8 +729,8 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
 
   std::shared_ptr<LevelEditorState> level_state =
       game_state->GetLevelEditorState();
-  RendererSetup::ImGuiCenterWindow(0.3);
-  ImGui::Begin("Level Editor");
+  RendererSetup::ImGuiCenterWindow(0.3, RendererSetup::DYNAMIC);
+  ImGui::Begin("Level Editor", NULL, RendererSetup::DYNAMIC_WINDOW_FLAGS);
   glm::vec3 pos = game_state->GetPlayer()->GetPosition();
   std::string look_at = "Position:{" + std::to_string(pos.x) + ", " +
                         std::to_string(pos.y) + ", " + std::to_string(pos.z) +
@@ -909,7 +908,7 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
 
   ImGui::End();
 
-  ImGui::Begin("Export Level");
+  ImGui::Begin("Export Level", NULL, RendererSetup::DYNAMIC_WINDOW_FLAGS);
   static char level_path_buffer[TEXT_FIELD_LENGTH];
 
   strncpy(level_path_buffer, level_state->GetLevelPath().c_str(),
@@ -931,7 +930,7 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
         std::make_shared<Octree>(game_state->GetLevel()->getObjects()));
   }
   ImGui::End();
-  ImGui::Begin("Camera Sensitivity");
+  ImGui::Begin("Camera Sensitivity", NULL, RendererSetup::DYNAMIC_WINDOW_FLAGS);
   std::string camera_move_string =
       "Movement: " +
       std::to_string(game_state->GetLevelEditorState()->GetCameraMove());
@@ -940,6 +939,12 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
       std::to_string(game_state->GetLevelEditorState()->GetCameraYawMove());
   ImGui::Text(camera_move_string.c_str());
   ImGui::Text(camera_move_yaw_string.c_str());
+  ImGui::End();
+
+  RendererSetup::ImGuiBottomRightCornerWindow(0.15, RendererSetup::STATIC);
+  ImGui::Begin("Help", NULL, RendererSetup::STATIC_WINDOW_FLAGS);
+  ImGui::Text("To toggle cursor");
+  ImGui::Text("press [ESCAPE]");
   ImGui::End();
 
   ImGuiRenderEnd();

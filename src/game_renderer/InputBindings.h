@@ -11,10 +11,14 @@ class InputBindings {
  public:
   static void Bind(GLFWwindow* window);
 
-  // These are used to tell if the player "pressed" a button based on whether or
-  // not they were already pressing it during the last frame
-  static void StoreKeypresses();
-  static bool KeyNewlyPressed(int key);
+  static bool KeyDown(int key);
+  static bool KeyPressed(int key);
+  static void ClearKeyPresses();
+
+  enum CursorMode { FREE = 1, LOCKED = 2 };
+  static void SetCursorMode(CursorMode cursor_mode);
+  static CursorMode GetCursorMode();
+  static std::pair<float, float> GetCursorDiff();
 
  private:
   InputBindings();

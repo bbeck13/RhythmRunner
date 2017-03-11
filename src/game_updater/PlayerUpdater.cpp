@@ -2,7 +2,6 @@
 
 #include "PlayerUpdater.h"
 
-#include <imgui.h>
 #include <glm/glm.hpp>
 #include <queue>
 #include <algorithm>
@@ -47,9 +46,9 @@ void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
 
   // Jump if the user inputs a jump.
   // use basic key detection when on the ground, newly pressed for doublejump
-  if ((player->GetGround() && ImGui::GetIO().KeysDown[GLFW_KEY_SPACE]) ||
-      (!player->GetGround() &&
-       InputBindings::KeyNewlyPressed(GLFW_KEY_SPACE))) {
+  if (!player->GetGround() && InputBindings::KeyPressed(GLFW_KEY_SPACE)) {
+    Jump(game_state);
+  } else if (player->GetGround() && InputBindings::KeyDown(GLFW_KEY_SPACE)) {
     Jump(game_state);
   }
 
@@ -62,14 +61,12 @@ void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
   Player::DuckDir target_duck;
   // always check for ducking (be ware of ducks)
   // let the player move up/down Z (sock it to me)
-  if (ImGui::GetIO().KeysDown[GLFW_KEY_LEFT] ||
-      ImGui::GetIO().KeysDown[GLFW_KEY_H]) {
+  if (InputBindings::KeyDown(GLFW_KEY_A)) {
     target_duck = Player::DuckDir::LEFT;
     player->MoveDownZ();
     camera->setPosition(prevCameraPos -
                         glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
-  } else if (ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT] ||
-             ImGui::GetIO().KeysDown[GLFW_KEY_L]) {
+  } else if (InputBindings::KeyDown(GLFW_KEY_D)) {
     target_duck = Player::DuckDir::RIGHT;
     player->MoveUpZ();
     camera->setPosition(prevCameraPos +
@@ -77,8 +74,8 @@ void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
   } else {
     target_duck = Player::DuckDir::NONE;
   }
-  if ((ImGui::GetIO().KeysDown[GLFW_KEY_LEFT_SHIFT] ||
-       ImGui::GetIO().KeysDown[GLFW_KEY_RIGHT_SHIFT]) &&
+  if ((InputBindings::KeyDown(GLFW_KEY_LEFT_SHIFT) ||
+       InputBindings::KeyDown(GLFW_KEY_RIGHT_SHIFT)) &&
       target_duck == Player::DuckDir::NONE) {
     target_duck = Player::DuckDir::RIGHT;
   }

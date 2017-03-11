@@ -10,18 +10,29 @@
 
 #define TITLE "Rhythm Runner"
 
-namespace RendererSetup {
+class RendererSetup {
+ public:
+  static GLFWwindow* InitOpenGL();
+  static void Close(GLFWwindow* window);
+  static void PreRender(GLFWwindow* window);
+  static void PostRender(GLFWwindow* window);
 
-GLFWwindow* InitOpenGL();
-void Close(GLFWwindow* window);
-void PreRender(GLFWwindow* window);
-void PostRender(GLFWwindow* window);
+  static void ImGuiCenterWindow(double ratio, bool dynamic);
+  static void ImGuiTopRightCornerWindow(double ratio, bool dynamic);
+  static void ImGuiTopLeftCornerWindow(double ratio, bool dynamic);
+  static void ImGuiBottomRightCornerWindow(double ratio, bool dynamic);
+  static void ImGuiBottomLeftCornerWindow(double ratio, bool dynamic);
 
-void ImGuiCenterWindow(double ratio);
-void ImGuiTopRightCornerWindow(double ratio);
-void ImGuiTopLeftCornerWindow(double ratio);
+  static const ImGuiWindowFlags STATIC_WINDOW_FLAGS =
+      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs;
+  static const ImGuiWindowFlags DYNAMIC_WINDOW_FLAGS = 0;
 
-const ImGuiWindowFlags TITLE_WINDOW_FLAGS = ImGuiWindowFlags_NoCollapse;
-}
+  static const bool STATIC = false;
+  static const bool DYNAMIC = true;
+
+ private:
+  RendererSetup();
+  virtual ~RendererSetup();
+};
 
 #endif

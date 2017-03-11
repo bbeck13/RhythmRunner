@@ -19,8 +19,6 @@
 #include "Platform.h"
 #include "LevelEditorUpdater.h"
 #include "LevelEditorState.h"
-//#include "AllTheThings.h"
-//#include "*.h"
 
 #define MUSIC "music/2.wav"
 
@@ -40,7 +38,6 @@ int main(int argc, char** argv) {
   while (!glfwWindowShouldClose(window)) {
     switch (program_mode) {
       case LevelProgramMode::MENU_SCREEN: {
-        InputBindings::StoreKeypresses();
         program_mode = menu_renderer.Render(window, menu_state);
         break;
       }
@@ -113,6 +110,7 @@ int main(int argc, char** argv) {
         game_state->SetLevelEditorState(std::make_shared<LevelEditorState>());
         game_state->GetLevelEditorState()->SetLevelPath(
             menu_state->GetLevelPath());
+        game_state->SetPlayingState(GameState::PlayingState::PAUSED);
 
         program_mode = LevelProgramMode::EDIT_LEVEL;
         break;

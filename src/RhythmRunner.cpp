@@ -65,8 +65,6 @@ int main(int argc, char** argv) {
   program_mode = MainProgramMode::MENU_SCREEN;
 
   while (!glfwWindowShouldClose(window)) {
-    bool keypress_override = false;
-
     switch (program_mode) {
       case MainProgramMode::CREATE_NEW_GAME: {
         LevelGenerator* level_generator;
@@ -97,8 +95,9 @@ int main(int argc, char** argv) {
       }
       case MainProgramMode::RESET_GAME:
         game_updater.Reset(game_state);
-
-      // continue to GAME_SCREEN
+        // lock cursor when starting game
+        InputBindings::SetCursorMode(InputBindings::CursorMode::LOCKED);
+        // continue to GAME_SCREEN
       case MainProgramMode::GAME_SCREEN: {
         switch (game_state->GetPlayingState()) {
           case GameState::PlayingState::FAILURE:
@@ -116,8 +115,6 @@ int main(int argc, char** argv) {
             // Update().
             //  What if the music starts/stops during one of multiple Update()s?
             while (game_state->GetElapsedTicks() < target_tick_count) {
-              keypress_override = true;
-              InputBindings::StoreKeypresses();
               game_updater.Update(game_state);
             }
             break;
@@ -138,11 +135,6 @@ int main(int argc, char** argv) {
     }
 
     PrintStatus();
-
-    if (!keypress_override) {
-      InputBindings::StoreKeypresses();
-    }
-    keypress_override = false;
   }
 
   RendererSetup::Close(window);
