@@ -20,6 +20,7 @@
 #include "LevelJson.h"
 #include "Sky.h"
 #include "VideoTexture.h"
+#include "FileSystemUtils.h"
 
 #define MUSIC "music/3.wav"
 #define LEVEL "levels/demo_level"
@@ -68,7 +69,7 @@ int main(int argc, char** argv) {
     switch (program_mode) {
       case MainProgramMode::CREATE_NEW_GAME: {
         LevelGenerator* level_generator;
-        if (!menu_state->GetLevelPath().empty()) {
+        if (FileSystemUtils::FileExists(menu_state->GetLevelPath())) {
           std::ifstream input(menu_state->GetLevelPath());
           nlohmann::json leveljson;
           input >> leveljson;

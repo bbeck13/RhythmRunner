@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "InputBindings.h"
+#include "FileSystemUtils.h"
 
 #define TEXT_FIELD_LENGTH 256
 
@@ -34,26 +35,40 @@ MainProgramMode MenuRenderer::Render(GLFWwindow* window,
 
   if (ImGui::InputText("Music Filepath", music_path_buffer,
                        TEXT_FIELD_LENGTH)) {
-    // TODO(jarhar): validate music filepath here
     menu_state->SetMusicPath(std::string(music_path_buffer, TEXT_FIELD_LENGTH));
+  }
+  if (!FileSystemUtils::FileExists(menu_state->GetMusicPath())) {
+    ImGui::TextColored(ImColor(255, 0, 0), "Music file not found");
+  } else {
+    ImGui::TextColored(ImColor(0, 255, 0), "Music file found");
   }
 
   if (ImGui::InputText("Level Filepath", level_path_buffer,
                        TEXT_FIELD_LENGTH)) {
-    // TODO(jarhar): validate music filepath here
     menu_state->SetLevelPath(std::string(level_path_buffer, TEXT_FIELD_LENGTH));
+  }
+  if (!FileSystemUtils::FileExists(menu_state->GetLevelPath())) {
+    ImGui::TextColored(ImColor(255, 0, 0),
+                       "Level file not found (will generate)");
+  } else {
+    ImGui::TextColored(ImColor(0, 255, 0), "Level file found");
   }
 
   if (ImGui::Button("Start [ENTER]") ||
       InputBindings::KeyPressed(GLFW_KEY_ENTER)) {
-    // TODO(jarhar): validate music filepath here
-    program_mode = MainProgramMode::CREATE_NEW_GAME;
+    if (FileSystemUtils::FileExists(menu_state->GetMusicPath())) {
+      program_mode = MainProgramMode::CREATE_NEW_GAME;
+    }
   }
 
   if (ImGui::Button("Exit [ESCAPE][Q]") ||
       InputBindings::KeyPressed(GLFW_KEY_ESCAPE) ||
       InputBindings::KeyPressed(GLFW_KEY_Q)) {
     program_mode = MainProgramMode::EXIT;
+  }
+
+  if (program_mode != MainProgramMode::MENU_SCREEN) {
+    ImGui::TextColored(ImColor(0, 255, 0), "Loading...");
   }
 
   ImGui::End();

@@ -1,8 +1,9 @@
 // Alex Ottoboni
 
-#include <FileSystemUtils.h>
+#include "FileSystemUtils.h"
 
 #include <iostream>
+#include <fstream>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -37,5 +38,9 @@ std::vector<std::string> ListFiles(const std::string& path,
   globfree(&glob_result);
 #endif
   return files;
+}
+
+bool FileExists(const std::string& path) {
+  return std::ifstream(path).good();
 }
 }

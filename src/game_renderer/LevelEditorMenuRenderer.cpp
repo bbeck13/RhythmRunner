@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "InputBindings.h"
+#include "FileSystemUtils.h"
 
 #define TEXT_FIELD_LENGTH 256
 
@@ -36,23 +37,43 @@ LevelProgramMode LevelEditorMenuRenderer::Render(
                        TEXT_FIELD_LENGTH)) {
     menu_state->SetMusicPath(std::string(music_path_buffer, TEXT_FIELD_LENGTH));
   }
+  if (!FileSystemUtils::FileExists(menu_state->GetMusicPath())) {
+    ImGui::TextColored(ImColor(255, 0, 0), "Music file not found");
+  } else {
+    ImGui::TextColored(ImColor(0, 255, 0), "Music file found");
+  }
 
   if (ImGui::InputText("Level Filepath", level_path_buffer,
                        TEXT_FIELD_LENGTH)) {
     menu_state->SetLevelPath(std::string(level_path_buffer, TEXT_FIELD_LENGTH));
   }
+  if (!FileSystemUtils::FileExists(menu_state->GetLevelPath())) {
+    ImGui::TextColored(ImColor(255, 0, 0),
+                       "Level file not found (need to generate)");
+  } else {
+    ImGui::TextColored(ImColor(0, 255, 0), "Level file found");
+  }
 
-  if (ImGui::Button("Generate Level From Music [ENTER]") ||
+  if (ImGui::Button("Generate Level File From Music [ENTER]") ||
       InputBindings::KeyPressed(GLFW_KEY_ENTER)) {
-    program_mode = LevelProgramMode::GENERATE_LEVEL;
+    if (FileSystemUtils::FileExists(menu_state->GetMusicPath())) {
+      program_mode = LevelProgramMode::GENERATE_LEVEL;
+    }
   }
   if (ImGui::Button("Level Editor [TAB]") ||
       InputBindings::KeyPressed(GLFW_KEY_TAB)) {
-    program_mode = LevelProgramMode::START_EDIT_LEVEL;
+    if (FileSystemUtils::FileExists(menu_state->GetLevelPath())) {
+      program_mode = LevelProgramMode::START_EDIT_LEVEL;
+    }
   }
-  if (ImGui::Button("Exit [ESCAPE]") ||
-      InputBindings::KeyPressed(GLFW_KEY_ESCAPE)) {
+  if (ImGui::Button("Exit [ESCAPE][Q]") ||
+      InputBindings::KeyPressed(GLFW_KEY_ESCAPE) ||
+      InputBindings::KeyPressed(GLFW_KEY_Q)) {
     program_mode = LevelProgramMode::EXIT;
+  }
+
+  if (program_mode != LevelProgramMode::MENU_SCREEN) {
+    ImGui::TextColored(ImColor(0, 255, 0), "Loading...");
   }
 
   ImGui::End();
