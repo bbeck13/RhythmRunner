@@ -6,6 +6,7 @@
 #include <glm/ext.hpp>
 
 #include "Collectible.h"
+#include "Program.h"
 
 #define NOTE_MESH "models/note.obj"
 
@@ -22,6 +23,8 @@ class Note : public Collectible {
   SecondaryType GetSecondaryType() override;
 
   void Animate();
+ private:
+  static std::shared_ptr<Program> note_prog;
 };
 }
 #endif

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <queue>
+#include <algorithm>  // std::copy_if, std::distance
 
 #include "FileSystemUtils.h"
 #include "InputBindings.h"
@@ -215,16 +216,16 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
   GameCamera mini_cam = GameCamera(glm::vec3(camera->getPosition().x, 5, 100),
                                    camera->getLookAt(), camera->getUp());
   mini_cam.Refresh();
-  auto V = mini_cam.getView();
-  MatrixStack MV;
+  auto V = std::make_shared<MatrixStack>(mini_cam.getView());
+  auto MV = std::make_shared<MatrixStack>();
 
   P->pushMatrix();
   // small far for aggressive culling
   P->perspective(45.0f, aspect, 0.01f, 200.0f);
-  V.pushMatrix();
+  V->pushMatrix();
 
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
-      ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
+      ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V->topMatrix());
 
   game_state->SetItemsInView(
       GameRenderer::GetObjectsInView(vfplane, level->getTree()));
@@ -234,169 +235,161 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
   P->pushMatrix();
   P->perspective(20.0f, aspect, 0.01f, 1000.0f);
 
-  // Ground
-  std::shared_ptr<Program> current_program;
-  std::shared_ptr<Texture> current_texture;
+  player->SetScale(glm::vec3(10, 10, 10));
+  RenderSingleObject(player, P, V);
+  player->SetScale(glm::vec3(1, 1, 1));
+
   if (player->GetGround()) {
-    current_program = programs["player_prog"];
-    current_texture = textures["rainbowass"];
-    current_program->bind();
-    current_texture->bind(current_program->getUniform("Texture0"));
-    glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
+    RenderSingleObject(player->GetGround(), programs["player_prog"],
+                       textures["rainbowass"], P, V);
+  }
+  RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::PLATFORM,
+                     textures["nightsky"], P, V);
+  RenderLevelObjects(game_state->GetObjectsInView(),
+                     SecondaryType::MOVING_PLATFORM, textures["nightsky"], P,
+                     V);
+  RenderLevelObjects(game_state->GetObjectsInView(),
+                     SecondaryType::DROPPING_PLATFORM_UP, textures["nightsky"],
+                     P, V);
+  RenderLevelObjects(game_state->GetObjectsInView(),
+                     SecondaryType::DROPPING_PLATFORM_DOWN,
+                     textures["nightsky"], P, V);
+  RenderLevelCollectibles(game_state->GetObjectsInView(), SecondaryType::NOTE,
+                          P, V);
+  RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::MONSTER, P,
+                     V);
+  RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::MOONROCK, P,
+                     V);
+  RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::PLAINROCK,
+                     P, V);
+  P->popMatrix();
+  V->popMatrix();
+}
+void GameRenderer::RenderSingleObject(std::shared_ptr<GameObject> object,
+                                      std::shared_ptr<Program> program,
+                                      std::shared_ptr<Texture> texture,
+                                      std::shared_ptr<MatrixStack> P,
+                                      std::shared_ptr<MatrixStack> V) {
+  program->bind();
+  texture->bind(program->getUniform("Texture0"));
+  DrawPhysicalObjectTree(program, *P, *V,
+                         std::static_pointer_cast<PhysicalObject>(object));
+  program->unbind();
+}
+
+void GameRenderer::RenderSingleObject(std::shared_ptr<GameObject> object,
+                                      std::shared_ptr<MatrixStack> P,
+                                      std::shared_ptr<MatrixStack> V) {
+  object->GetProgram()->bind();
+  object->GetTexture()->bind(object->GetProgram()->getUniform("Texture0"));
+  DrawPhysicalObjectTree(object->GetProgram(), *P, *V,
+                         std::static_pointer_cast<PhysicalObject>(object));
+  object->GetProgram()->unbind();
+}
+
+std::shared_ptr<std::vector<std::shared_ptr<GameObject>>>
+GameRenderer::GetObjectsOfType(
+    std::unordered_set<std::shared_ptr<GameObject>>* objects,
+    SecondaryType type_to_get) {
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects_to_render =
+      std::make_shared<std::vector<std::shared_ptr<GameObject>>>(
+          objects->size());
+  auto it =
+      std::copy_if(objects->begin(), objects->end(), objects_to_render->begin(),
+                   [&](std::shared_ptr<GameObject> obj) {
+                     return obj->GetSecondaryType() == type_to_get;
+                   });
+  objects_to_render->resize(std::distance(objects_to_render->begin(), it));
+  return objects_to_render;
+}
+
+void GameRenderer::RenderLevelObjects(
+    std::unordered_set<std::shared_ptr<GameObject>>* objects,
+    SecondaryType type_to_render,
+    std::shared_ptr<MatrixStack> P,
+    std::shared_ptr<MatrixStack> V) {
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects_to_render =
+      GetObjectsOfType(objects, type_to_render);
+  if (!objects_to_render->empty()) {
+    std::shared_ptr<Program> program = objects_to_render->front()->GetProgram();
+    std::shared_ptr<Texture> texture = objects_to_render->front()->GetTexture();
+    program->bind();
+    texture->bind(program->getUniform("Texture0"));
+
+    glUniformMatrix4fv(program->getUniform("P"), 1, GL_FALSE,
                        glm::value_ptr(P->topMatrix()));
-    glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                       glm::value_ptr(V.topMatrix()));
-    glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                       glm::value_ptr(player->GetGround()->GetTransform()));
-    player->GetGround()->GetModel()->draw(current_program);
-    current_program->unbind();
-  }
-
-  // Platforms
-  current_program = programs["platform_prog"];
-  current_texture = textures["lunarrock"];
-  current_program->bind();
-  current_texture->bind(current_program->getUniform("Texture0"));
-  textures["nightsky"]->bind(current_program->getUniform("SkyTexture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::PLATFORM) {
-      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+    glUniformMatrix4fv(program->getUniform("V"), 1, GL_FALSE,
+                       glm::value_ptr(V->topMatrix()));
+    for (std::shared_ptr<GameObject> obj : *objects_to_render) {
+      glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
                          glm::value_ptr(obj->GetTransform()));
-      obj->GetModel()->draw(current_program);
+      obj->GetModel()->draw(program);
     }
+    program->unbind();
   }
-  current_program->unbind();
+}
+void GameRenderer::RenderLevelObjects(
+    std::unordered_set<std::shared_ptr<GameObject>>* objects,
+    SecondaryType type_to_render,
+    std::shared_ptr<Texture> video_texture,
+    std::shared_ptr<MatrixStack> P,
+    std::shared_ptr<MatrixStack> V) {
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects_to_render =
+      GetObjectsOfType(objects, type_to_render);
+  if (!objects_to_render->empty()) {
+    std::shared_ptr<Program> program = objects_to_render->front()->GetProgram();
+    std::shared_ptr<Texture> texture = objects_to_render->front()->GetTexture();
+    program->bind();
+    texture->bind(program->getUniform("Texture0"));
+    video_texture->bind(program->getUniform("SkyTexture0"));
 
-  // moving platforms
-  current_program = programs["moving_platform_prog"];
-  current_texture = textures["lunarrock"];
-  current_program->bind();
-  current_texture->bind(current_program->getUniform("Texture0"));
-  textures["nightsky"]->bind(current_program->getUniform("SkyTexture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::MOVING_PLATFORM ||
-        obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
-      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
+    glUniformMatrix4fv(program->getUniform("P"), 1, GL_FALSE,
+                       glm::value_ptr(P->topMatrix()));
+    glUniformMatrix4fv(program->getUniform("V"), 1, GL_FALSE,
+                       glm::value_ptr(V->topMatrix()));
+    for (std::shared_ptr<GameObject> obj : *objects_to_render) {
+      glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
                          glm::value_ptr(obj->GetTransform()));
-      obj->GetModel()->draw(current_program);
+      obj->GetModel()->draw(program);
     }
+    program->unbind();
   }
-  current_program->unbind();
+}
 
-  // Collectible Notes
-  current_program = programs["note_prog"];
-  current_program->bind();
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-
-  int color_count = 0;
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::NOTE) {
-      if (std::shared_ptr<gameobject::Note> note =
-              std::static_pointer_cast<gameobject::Note>(obj)) {
-        if (!note->GetCollected()) {
-          glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                             glm::value_ptr(note->GetTransform()));
+void GameRenderer::RenderLevelCollectibles(
+    std::unordered_set<std::shared_ptr<GameObject>>* objects,
+    SecondaryType type_to_render,
+    std::shared_ptr<MatrixStack> P,
+    std::shared_ptr<MatrixStack> V) {
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects_to_render =
+      GetObjectsOfType(objects, type_to_render);
+  if (!objects_to_render->empty()) {
+    std::shared_ptr<Program> program = objects_to_render->front()->GetProgram();
+    program->bind();
+    glUniformMatrix4fv(program->getUniform("P"), 1, GL_FALSE,
+                       glm::value_ptr(P->topMatrix()));
+    glUniformMatrix4fv(program->getUniform("V"), 1, GL_FALSE,
+                       glm::value_ptr(V->topMatrix()));
+    int color_count = 0;
+    for (std::shared_ptr<GameObject> obj : *objects_to_render) {
+      if (std::shared_ptr<Collectible> collectible =
+              std::static_pointer_cast<Collectible>(obj)) {
+        if (!collectible->GetCollected()) {
+          glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
+                             glm::value_ptr(collectible->GetTransform()));
           glm::vec3 cur_color = color_vec.at(color_count);
           color_count++;
           if (color_count == 5) {
             color_count = 0;
           }
-          glUniform3f(current_program->getUniform("in_obj_color"), cur_color.x,
+          glUniform3f(program->getUniform("in_obj_color"), cur_color.x,
                       cur_color.y, cur_color.z);
-          note->GetModel()->draw(current_program);
+          collectible->GetModel()->draw(program);
         }
       }
     }
+    program->unbind();
   }
-  current_program->unbind();
-
-  // Monsters
-  current_program = programs["monster_prog"];
-  current_texture = textures["rainbowass"];
-  current_program->bind();
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::MONSTER) {
-      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(obj->GetTransform()));
-      obj->GetModel()->draw(current_program);
-    }
-  }
-  current_program->unbind();
-
-  // Player
-  current_program = programs["player_prog"];
-  current_texture = textures["rainbowglass"];
-  current_program->bind();
-  current_texture->bind(current_program->getUniform("Texture0"));
-  player->SetScale(glm::vec3(10, 10, 10));
-  DrawPhysicalObjectTree(current_program, *P, V,
-                         std::static_pointer_cast<PhysicalObject>(player));
-  current_program->unbind();
-  player->SetScale(glm::vec3(1, 1, 1));
-
-  // Moon Rocks
-  current_program = programs["rock_prog"];
-  current_program->bind();
-  current_texture = textures["rock"];
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::MOONROCK) {
-      if (std::shared_ptr<gameobject::MoonRock> rock =
-              std::static_pointer_cast<gameobject::MoonRock>(obj)) {
-        if (obj != player->GetGround()) {
-          glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                             glm::value_ptr(rock->GetTransform()));
-          rock->GetModel()->draw(current_program);
-        }
-      }
-    }
-  }
-  current_program->unbind();
-
-  // Plain Rocks
-  current_program = programs["rock_prog"];
-  current_program->bind();
-  current_texture = textures["rock"];
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::PLAINROCK) {
-      if (std::shared_ptr<gameobject::PlainRock> rock =
-              std::static_pointer_cast<gameobject::PlainRock>(obj)) {
-        glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                           glm::value_ptr(rock->GetTransform()));
-        rock->GetModel()->draw(current_program);
-      }
-    }
-  }
-  current_program->unbind();
-
-  P->popMatrix();
-  V.popMatrix();
 }
 
 void GameRenderer::RenderObjects(GLFWwindow* window,
@@ -412,16 +405,16 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   float aspect = width / (float)height;
 
   auto P = std::make_shared<MatrixStack>();
-  auto V = camera->getView();
-  MatrixStack MV;
+  auto V = std::make_shared<MatrixStack>(camera->getView());
+  auto MV = std::make_shared<MatrixStack>();
 
   P->pushMatrix();
   // small far for aggressive culling
   P->perspective(45.0f, aspect, 0.01f, 150.0f);
-  V.pushMatrix();
+  V->pushMatrix();
 
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
-      ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V.topMatrix());
+      ViewFrustumCulling::GetViewFrustumPlanes(P->topMatrix(), V->topMatrix());
 
   game_state->SetItemsInView(
       GameRenderer::GetObjectsInView(vfplane, level->getTree()));
@@ -431,180 +424,34 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   P->pushMatrix();
   P->perspective(45.0f, aspect, 0.01f, 1000.0f);
 
-  // Ground
-  std::shared_ptr<Program> current_program;
-  std::shared_ptr<Texture> current_texture;
+  RenderSingleObject(player, P, V);
   if (player->GetGround()) {
-    current_program = programs["player_prog"];
-    current_texture = textures["rainbowass"];
-    current_program->bind();
-    current_texture->bind(current_program->getUniform("Texture0"));
-    glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                       glm::value_ptr(P->topMatrix()));
-    glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                       glm::value_ptr(V.topMatrix()));
-    glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                       glm::value_ptr(player->GetGround()->GetTransform()));
-    player->GetGround()->GetModel()->draw(current_program);
-    current_program->unbind();
+    RenderSingleObject(player->GetGround(), programs["player_prog"],
+                       textures["rainbowass"], P, V);
   }
 
-  // Platforms
-  current_program = programs["platform_prog"];
-  current_texture = textures["lunarrock"];
-  current_program->bind();
-  current_texture->bind(current_program->getUniform("Texture0"));
-  textures["nightsky"]->bind(current_program->getUniform("SkyTexture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::PLATFORM) {
-      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(obj->GetTransform()));
-      obj->GetModel()->draw(current_program);
-    }
-  }
-  current_program->unbind();
-
-  // moving platforms
-  current_program = programs["moving_platform_prog"];
-  current_texture = textures["lunarrock"];
-  current_program->bind();
-  current_texture->bind(current_program->getUniform("Texture0"));
-  textures["nightsky"]->bind(current_program->getUniform("SkyTexture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::MOVING_PLATFORM ||
-        obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
-      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(obj->GetTransform()));
-      obj->GetModel()->draw(current_program);
-    }
-  }
-  current_program->unbind();
-
-  // Collectible Notes
-  current_program = programs["note_prog"];
-  current_program->bind();
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-
-  int color_count = 0;
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::NOTE) {
-      if (std::shared_ptr<gameobject::Note> note =
-              std::static_pointer_cast<gameobject::Note>(obj)) {
-        if (!note->GetCollected()) {
-          glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                             glm::value_ptr(note->GetTransform()));
-          glm::vec3 cur_color = color_vec.at(color_count);
-          color_count++;
-          if (color_count == 5) {
-            color_count = 0;
-          }
-          glUniform3f(current_program->getUniform("in_obj_color"), cur_color.x,
-                      cur_color.y, cur_color.z);
-          note->GetModel()->draw(current_program);
-        }
-      }
-    }
-  }
-  current_program->unbind();
-
-  // Monsters
-  current_program = programs["monster_prog"];
-  current_texture = textures["rainbowass"];
-  current_program->bind();
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::MONSTER) {
-      glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                         glm::value_ptr(obj->GetTransform()));
-      obj->GetModel()->draw(current_program);
-    }
-  }
-  current_program->unbind();
-
-  // Player
-  current_program = programs["player_prog"];
-  current_texture = textures["rainbowglass"];
-  current_program->bind();
-  current_texture->bind(current_program->getUniform("Texture0"));
-  DrawPhysicalObjectTree(current_program, *P, V,
-                         std::static_pointer_cast<PhysicalObject>(player));
-  current_program->unbind();
-
-  // Moon Rocks
-  current_program = programs["rock_prog"];
-  current_program->bind();
-  current_texture = textures["rock"];
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::MOONROCK) {
-      if (std::shared_ptr<gameobject::MoonRock> rock =
-              std::static_pointer_cast<gameobject::MoonRock>(obj)) {
-        if (obj != player->GetGround()) {
-          glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                             glm::value_ptr(rock->GetTransform()));
-          rock->GetModel()->draw(current_program);
-        }
-      }
-    }
-  }
-  current_program->unbind();
-
-  // Plain Rocks
-  current_program = programs["rock_prog"];
-  current_program->bind();
-  current_texture = textures["rock"];
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
-    if (obj->GetSecondaryType() == SecondaryType::PLAINROCK) {
-      if (std::shared_ptr<gameobject::PlainRock> rock =
-              std::static_pointer_cast<gameobject::PlainRock>(obj)) {
-        glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                           glm::value_ptr(rock->GetTransform()));
-        rock->GetModel()->draw(current_program);
-      }
-    }
-  }
-  current_program->unbind();
-
-  // Sky
-  current_program = programs["sky_prog"];
-  current_program->bind();
-  current_texture = textures["nightsky"];
-  current_texture->bind(current_program->getUniform("Texture0"));
-  glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
-                     glm::value_ptr(P->topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
-                     glm::value_ptr(V.topMatrix()));
-  glUniformMatrix4fv(current_program->getUniform("MV"), 1, GL_FALSE,
-                     glm::value_ptr(sky->GetTransform()));
-  sky->GetModel()->draw(current_program);
-
+  RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::PLATFORM,
+                     textures["nightsky"], P, V);
+  RenderLevelObjects(game_state->GetObjectsInView(),
+                     SecondaryType::MOVING_PLATFORM, textures["nightsky"], P,
+                     V);
+  RenderLevelObjects(game_state->GetObjectsInView(),
+                     SecondaryType::DROPPING_PLATFORM_UP, textures["nightsky"],
+                     P, V);
+  RenderLevelObjects(game_state->GetObjectsInView(),
+                     SecondaryType::DROPPING_PLATFORM_DOWN,
+                     textures["nightsky"], P, V);
+  RenderLevelCollectibles(game_state->GetObjectsInView(), SecondaryType::NOTE,
+                          P, V);
+  RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::MONSTER, P,
+                     V);
+  RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::MOONROCK, P,
+                     V);
+  RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::PLAINROCK,
+                     P, V);
+  RenderSingleObject(sky, P, V);
   P->popMatrix();
-  V.popMatrix();
+  V->popMatrix();
 }
 
 void GameRenderer::ImGuiRenderBegin(std::shared_ptr<GameState> game_state) {

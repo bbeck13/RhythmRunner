@@ -3,8 +3,12 @@
 #ifndef PLAYER_H_
 #define PLAYER_H_
 
+#include <unordered_map>
+
 #include "GameObject.h"
 #include "PhysicalObject.h"
+#include "MatrixStack.h"
+#include "Program.h"
 
 #define PLAYER_MESH "models/body_of_bike.obj"
 #define WHEEL_MESH "models/note.obj"
@@ -12,6 +16,9 @@
 #define WHEEL_SCALE 0.4
 #define WHEEL_ROTATION_PER_SECOND 12.0
 #define WHEEL_ROTATION_PER_TICK (WHEEL_ROTATION_PER_SECOND * SECONDS_PER_TICK)
+
+#define SHADER_PROGRAM "player_prog"
+#define TEXTURE "rainbowglass"
 
 class Player : public GameObject {
  public:

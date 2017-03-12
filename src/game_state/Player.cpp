@@ -9,6 +9,7 @@
 #include "TimingConstants.h"
 #include "DroppingPlatform.h"
 #include "MovingObject.h"
+#include "GameRenderer.h"
 
 #define MAX_DUCK_ANGLE 1.05f
 #define DUCK_FINISH_SECONDS 0.2
@@ -38,6 +39,10 @@ Player::Player(glm::vec3 position,
   front_wheel = std::make_shared<PhysicalObject>(
       WHEEL_MESH, glm::vec3(0.9, -0.3, 0), glm::vec3(0, 0, -1), 0,
       glm::vec3(WHEEL_SCALE, WHEEL_SCALE, WHEEL_SCALE));
+
+  program = GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/player.json");
+  texture =
+      GameRenderer::TextureFromJSON(ASSET_DIR "/textures/rainbowglass.json");
 
   AddSubObject(rear_wheel);
   AddSubObject(front_wheel);
@@ -182,12 +187,12 @@ float Player::GetGroundYVelocity() {
 
   std::shared_ptr<gameobject::DroppingPlatform> dropping_platform;
   std::shared_ptr<MovingObject> moving_object;
-  if (dropping_platform =
-          std::dynamic_pointer_cast<gameobject::DroppingPlatform>(
-              GetGround())) {
+  if ((dropping_platform =
+           std::dynamic_pointer_cast<gameobject::DroppingPlatform>(
+               GetGround()))) {
     return dropping_platform->GetYVelocity();
-  } else if (moving_object =
-                 std::dynamic_pointer_cast<MovingObject>(GetGround())) {
+  } else if ((moving_object =
+                  std::dynamic_pointer_cast<MovingObject>(GetGround()))) {
     return moving_object->GetMovementVector().y *
            moving_object->GetVelocity().y;
   }

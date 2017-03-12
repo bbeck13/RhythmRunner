@@ -29,6 +29,10 @@ class DroppingPlatform : public Obstacle {
   float dropVel;
   bool dropping;
   glm::vec3 originalPosition;
+
+  static std::shared_ptr<Program> platform_program_down;
+  static std::shared_ptr<Program> platform_program_up;
+  static std::shared_ptr<Texture> platform_texture;
 };
 }
 

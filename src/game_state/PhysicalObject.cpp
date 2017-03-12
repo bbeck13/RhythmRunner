@@ -44,6 +44,10 @@ std::shared_ptr<Texture> PhysicalObject::GetTexture() const {
   return texture;
 }
 
+std::shared_ptr<Program> PhysicalObject::GetProgram() const {
+  return program;
+}
+
 std::shared_ptr<Shape> PhysicalObject::GetModel() const {
   return shape;
 }

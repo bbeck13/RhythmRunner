@@ -24,6 +24,7 @@ class PhysicalObject {
   glm::vec3 GetScale() const;
   std::shared_ptr<Texture> GetTexture() const;  // Is null/empty if no texture
   std::shared_ptr<Shape> GetModel() const;
+  std::shared_ptr<Program> GetProgram() const;
   glm::mat4 GetTransform() const;  // This accounts for the object hierarchy
   AxisAlignedBox
   GetIndividualBoundingBox();       // AABB of this mesh with transform
@@ -45,6 +46,7 @@ class PhysicalObject {
   glm::vec3 scale;
   std::shared_ptr<Shape> shape;
   std::shared_ptr<Texture> texture;
+  std::shared_ptr<Program> program;
 
   // cached data
   AxisAlignedBox bounding_box;

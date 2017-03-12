@@ -67,7 +67,9 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
       obj->SetPosition(movingObj->updatePosition(obj->GetPosition()));
 
       // Drop the dropping Platforms
-    } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
+    } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM_UP ||
+               obj->GetSecondaryType() ==
+                   SecondaryType::DROPPING_PLATFORM_DOWN) {
       std::shared_ptr<gameobject::DroppingPlatform> dropper =
           std::dynamic_pointer_cast<gameobject::DroppingPlatform>(obj);
       if (dropper->IsDropping()) {
@@ -108,7 +110,9 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
       movingObj->Reset();
       obj->SetPosition(movingObj->GetOriginalPosition());
       // reset the dropping platforms
-    } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM) {
+    } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM_UP ||
+               obj->GetSecondaryType() ==
+                   SecondaryType::DROPPING_PLATFORM_DOWN) {
       std::shared_ptr<gameobject::DroppingPlatform> dropping =
           std::dynamic_pointer_cast<gameobject::DroppingPlatform>(obj);
       dropping->Reset();

@@ -1,14 +1,40 @@
 #include "Monster.h"
 
+#include "GameRenderer.h"
 namespace gameobject {
+
+std::shared_ptr<Program> Monster::monster_program;
+std::shared_ptr<Texture> Monster::monster_texture;
 
 Monster::Monster()
     : MovingObject(std::vector<glm::vec3>(), glm::vec3(0, 0, 0), 0.0f),
-      Obstacle(MONSTER_MASH) {}
+      Obstacle(MONSTER_MASH) {
+  if (!monster_program) {
+    monster_program =
+        GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/monster.json");
+  }
+  if (!monster_texture) {
+    monster_texture =
+        GameRenderer::TextureFromJSON(ASSET_DIR "/textures/rainbowass.json");
+  }
+  program = monster_program;
+  texture = monster_texture;
+}
 
 Monster::Monster(glm::vec3 position, glm::vec3 scale)
     : MovingObject(Monster::default_path(position, 8, 3), position, 0.03f),
-      Obstacle(MONSTER_MASH, position, scale) {}
+      Obstacle(MONSTER_MASH, position, scale) {
+  if (!monster_program) {
+    monster_program =
+        GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/monster.json");
+  }
+  if (!monster_texture) {
+    monster_texture =
+        GameRenderer::TextureFromJSON(ASSET_DIR "/textures/rainbowass.json");
+  }
+  program = monster_program;
+  texture = monster_texture;
+}
 
 Monster::Monster(glm::vec3 position,
                  glm::vec3 scale,
@@ -20,7 +46,18 @@ Monster::Monster(glm::vec3 position,
     : MovingObject(Monster::default_path(position, disantceX, distanceZ),
                    position,
                    velocity),
-      Obstacle(MONSTER_MASH, position, rotation_axis, rotation_angle, scale) {}
+      Obstacle(MONSTER_MASH, position, rotation_axis, rotation_angle, scale) {
+  if (!monster_program) {
+    monster_program =
+        GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/monster.json");
+  }
+  if (!monster_texture) {
+    monster_texture =
+        GameRenderer::TextureFromJSON(ASSET_DIR "/textures/rainbowass.json");
+  }
+  program = monster_program;
+  texture = monster_texture;
+}
 
 Monster::Monster(glm::vec3 position,
                  glm::vec3 scale,
@@ -29,7 +66,18 @@ Monster::Monster(glm::vec3 position,
                  glm::vec3 velocity,
                  std::vector<glm::vec3> path)
     : MovingObject(path, position, velocity),
-      Obstacle(MONSTER_MASH, position, rotation_axis, rotation_angle, scale) {}
+      Obstacle(MONSTER_MASH, position, rotation_axis, rotation_angle, scale) {
+  if (!monster_program) {
+    monster_program =
+        GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/monster.json");
+  }
+  if (!monster_texture) {
+    monster_texture =
+        GameRenderer::TextureFromJSON(ASSET_DIR "/textures/rainbowass.json");
+  }
+  program = monster_program;
+  texture = monster_texture;
+}
 
 Monster::~Monster() {}
 
