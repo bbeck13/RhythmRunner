@@ -542,7 +542,11 @@ MainProgramMode GameRenderer::ImGuiRenderGame(
         RendererSetup::ImGuiCenterWindow(0.5, RendererSetup::DYNAMIC);
         ImGui::Begin(success ? "SUCCESS" : "FAILURE", NULL,
                      RendererSetup::DYNAMIC_WINDOW_FLAGS);
-        ImGui::Text(success ? "YOU WIN!" : "YOU FAILED");
+        if (success) {
+          ImGui::TextColored(ImColor(0, 255, 0), "YOU WIN!");
+        } else {
+          ImGui::TextColored(ImColor(255, 0, 0), "YOU FAILED");
+        }
         ImGui::Text(score_string.c_str());
         ImGui::Text(progress_string.c_str());
         if (ImGui::Button("Retry [SPACE]") ||
@@ -793,6 +797,11 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
   ImGui::Begin("Help", NULL, RendererSetup::STATIC_WINDOW_FLAGS);
   ImGui::Text("To toggle cursor");
   ImGui::Text("press [ESCAPE]");
+  if (InputBindings::GetCursorMode() == InputBindings::CursorMode::LOCKED) {
+    ImGui::TextColored(ImColor(255, 0, 0), " -- CURSOR LOCKED --");
+  } else {
+    ImGui::TextColored(ImColor(0, 255, 0), " -- CURSOR FREE --");
+  }
   ImGui::End();
 
   ImGuiRenderEnd();
