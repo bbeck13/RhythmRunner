@@ -1,14 +1,27 @@
-// Alex Ottoboni
-#ifndef __FILE_SYS_UTILS__
-#define __FILE_SYS_UTILS__
+//	Alex	Ottoboni
 
-#include <vector>
-#include <string>
+#ifndef	__FILE_SYS_UTILS__
 
-namespace FileSystemUtils {
+#define	__FILE_SYS_UTILS__
 
-std::vector<std::string> ListFiles(const std::string& path,
-                                   const std::string& pattern);
+
+
+#include	<vector>
+
+#include	<string>
+
+
+
+namespace	FileSystemUtils	{
+
+
+
+std::vector<std::string>	ListFiles(const	std::string&	path,
+
+																																			const	std::string&	pattern);
+
 }
+
+
 
 #endif

@@ -1,20 +1,39 @@
-// Joseph Arhar
+//	Joseph	Arhar
 
-#ifndef MENU_RENDERER_H_
-#define MENU_RENDERER_H_
 
-#include <memory>
 
-#include "MenuState.h"
-#include "ProgramMode.h"
-#include "RendererSetup.h"
+#ifndef	MENU_RENDERER_H_
 
-class MenuRenderer {
- public:
-  MenuRenderer();
-  ~MenuRenderer();
+#define	MENU_RENDERER_H_
 
-  MainProgramMode Render(GLFWwindow* window, std::shared_ptr<MenuState> menu_state);
+
+
+#include	<memory>
+
+
+
+#include	"MenuState.h"
+
+#include	"ProgramMode.h"
+
+#include	"RendererSetup.h"
+
+
+
+class	MenuRenderer	{
+
+	public:
+
+		MenuRenderer();
+
+		~MenuRenderer();
+
+
+
+		MainProgramMode	Render(GLFWwindow*	window,	std::shared_ptr<MenuState>	menu_state);
+
 };
+
+
 
 #endif
