@@ -10,6 +10,7 @@
 #include "InputBindings.h"
 
 #define CURSOR_IN_FRONT 8
+#define MOUSE_MOVE_SENSITIVITY 0.01f
 
 LevelEditorUpdater::LevelEditorUpdater() {}
 
@@ -17,8 +18,11 @@ LevelEditorUpdater::~LevelEditorUpdater() {}
 
 LevelProgramMode LevelEditorUpdater::Update(
     std::shared_ptr<GameState> game_state) {
+  if (InputBindings::KeyPressed(GLFW_KEY_Q)) {
+    return LevelProgramMode::EXIT;
+  }
+
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
-  bool scrimshaw = false;  // Call me Ishmael
   float camera_move = game_state->GetLevelEditorState()->GetCameraMove();
   float camera_yaw_move = game_state->GetLevelEditorState()->GetCameraYawMove();
   int width, height;
@@ -30,17 +34,22 @@ LevelProgramMode LevelEditorUpdater::Update(
     InputBindings::SetCursorMode(cursor_locked
                                      ? InputBindings::CursorMode::FREE
                                      : InputBindings::CursorMode::LOCKED);
-  } else if (cursor_locked) {
-    // only update position and camera in cursor locked mode
+    cursor_locked =
+        InputBindings::GetCursorMode() == InputBindings::CursorMode::LOCKED;
+  }
 
-    if (InputBindings::KeyPressed(GLFW_KEY_Q)) {
-      return LevelProgramMode::EXIT;
-    }
+  if (cursor_locked) {
+    // only update position and camera in cursor locked mode
+    bool scrimshaw = false;  // Call me Ishmael
 
     // update camera with cursor
     std::pair<double, double> cursor_diff = InputBindings::GetCursorDiff();
-    camera->pivot(width, height, (width / 2.0f) - cursor_diff.first,
-                  (height / 2.0f) - cursor_diff.second);
+    if (std::abs(cursor_diff.first) > MOUSE_MOVE_SENSITIVITY ||
+        std::abs(cursor_diff.second) > MOUSE_MOVE_SENSITIVITY) {
+      camera->pivot(width, height, (width / 2.0f) - cursor_diff.first,
+                    (height / 2.0f) - cursor_diff.second);
+      scrimshaw = true;
+    }
 
     // update camera with keys
     if (InputBindings::KeyDown(GLFW_KEY_L) ||
@@ -73,13 +82,13 @@ LevelProgramMode LevelEditorUpdater::Update(
     glm::vec3 view = camera_position - look_at;
     glm::vec3 strafe = cross(glm::vec3(0, 1, 0), view);
 
-    if (InputBindings::KeyDown(GLFW_KEY_S)) {
-      camera_position += camera_move * view;
-      look_at += camera_move * view;
-    }
     if (InputBindings::KeyDown(GLFW_KEY_W)) {
       camera_position -= camera_move * view;
       look_at -= camera_move * view;
+    }
+    if (InputBindings::KeyDown(GLFW_KEY_S)) {
+      camera_position += camera_move * view;
+      look_at += camera_move * view;
     }
     if (InputBindings::KeyDown(GLFW_KEY_A)) {
       camera_position -= camera_move * strafe;
@@ -89,6 +98,7 @@ LevelProgramMode LevelEditorUpdater::Update(
       camera_position += camera_move * strafe;
       look_at += camera_move * strafe;
     }
+
     if (scrimshaw) {
       look_at += CURSOR_IN_FRONT * view;
     } else {
