@@ -15,7 +15,9 @@
 #include "CollisionCalculator.h"
 #include "DroppingPlatform.h"
 
-#define COLLISION_WIDTH 0.420f
+#define COLLISION_TOLERANCE_Y 0.420f
+#define COLLISION_TOLERANCE_Z 0.2f
+#define COLLISION_TOLERANCE_X 0.2f
 #define MAX_AERIAL_ROTATION_ANGLE 0.67f
 
 PlayerUpdater::PlayerUpdater() {}
@@ -25,9 +27,6 @@ PlayerUpdater::~PlayerUpdater() {}
 void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Player> player = game_state->GetPlayer();
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
-
-  // the max width to allow the player to be colliding with an object
-  collision_width = COLLISION_WIDTH;
 
   // Store player state before moving
   previous_player_box = player->GetBoundingBox();
@@ -177,7 +176,7 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
       // collision_width + y_velocity are acceptable error.
       if ((player_min_y > colliding_max_y) ||
           (std::abs(player_min_y - colliding_max_y) <
-           collision_width + y_velocity_tolerance)) {
+           COLLISION_TOLERANCE_Y + y_velocity_tolerance)) {
         // above colliding box, we are grounded on this platform
         Land(game_state, colliding_object);
         player_min_y = player->GetBoundingBox().GetMin().y;
@@ -191,6 +190,15 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
                   player->GetGround());
           dropping->SetDropping();
         }
+      } else if (previous_player_box.GetMin().z >
+                     colliding_box.GetMax().z - COLLISION_TOLERANCE_Z ||
+                 previous_player_box.GetMax().z <
+                     colliding_box.GetMin().z + COLLISION_TOLERANCE_Z ||
+                 previous_player_box.GetMin().x >
+                     colliding_box.GetMax().x - COLLISION_TOLERANCE_X ||
+                 previous_player_box.GetMax().x <
+                     colliding_box.GetMin().x + COLLISION_TOLERANCE_X) {
+        // within z collision tolerance, igonre collision
       } else {
         // The collision was not from above, so reset the game
         Death(game_state);
