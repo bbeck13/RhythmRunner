@@ -39,7 +39,36 @@ class GameRenderer {
       std::shared_ptr<Octree> tree);
 
  private:
+  static std::shared_ptr<std::vector<std::shared_ptr<GameObject>>>
+  GetObjectsOfType(std::unordered_set<std::shared_ptr<GameObject>>* objects,
+                   SecondaryType type_to_get);
+
   void RenderObjects(GLFWwindow* window, std::shared_ptr<GameState> game_state);
+  void RenderSingleObject(std::shared_ptr<GameObject> object,
+                          std::shared_ptr<Program> program,
+                          std::shared_ptr<Texture> texture,
+                          std::shared_ptr<MatrixStack> P,
+                          std::shared_ptr<MatrixStack> V);
+  void RenderSingleObject(std::shared_ptr<GameObject> object,
+                          std::shared_ptr<MatrixStack> P,
+                          std::shared_ptr<MatrixStack> V);
+  void RenderLevelCollectibles(
+      std::unordered_set<std::shared_ptr<GameObject>>* objects,
+      SecondaryType type_to_render,
+      std::shared_ptr<MatrixStack> P,
+      std::shared_ptr<MatrixStack> V);
+  void RenderLevelObjects(
+      std::unordered_set<std::shared_ptr<GameObject>>* objects,
+      SecondaryType type_to_render,
+      std::shared_ptr<Texture> video_texture,
+      std::shared_ptr<MatrixStack> P,
+      std::shared_ptr<MatrixStack> V);
+  void RenderLevelObjects(
+      std::unordered_set<std::shared_ptr<GameObject>>* objects,
+      SecondaryType type_to_render,
+      std::shared_ptr<MatrixStack> P,
+      std::shared_ptr<MatrixStack> V);
+
   void RenderMinimap(GLFWwindow* window, std::shared_ptr<GameState> game_state);
   void ImGuiRenderBegin(std::shared_ptr<GameState> game_state);
   void ImGuiRenderEnd();

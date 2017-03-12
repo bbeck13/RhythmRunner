@@ -11,6 +11,9 @@
 
 #define PLATFORM_MESH "models/platform.obj"
 
+#include "Program.h"
+#include "Texture.h"
+
 namespace gameobject {
 class Platform : public Obstacle {
  public:
@@ -21,6 +24,9 @@ class Platform : public Obstacle {
   ~Platform();
 
   SecondaryType GetSecondaryType() override;
+ private:
+  static std::shared_ptr<Program> platform_program;
+  static std::shared_ptr<Texture> platform_texture;
 };
 }
 

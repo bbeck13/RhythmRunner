@@ -21,6 +21,10 @@ class PlainRock : public GameObject {
 
   ObjectType GetType() override;
   SecondaryType GetSecondaryType() override;
+
+ private:
+  static std::shared_ptr<Program> rock_program;
+  static std::shared_ptr<Texture> rock_texture;
 };
 }
 #endif

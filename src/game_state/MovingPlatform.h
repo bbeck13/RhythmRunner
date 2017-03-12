@@ -25,10 +25,14 @@ class MovingPlatform : public MovingObject, public Obstacle {
                  glm::vec3 rotation_axis,
                  float rotation_angle,
                  glm::vec3 velocity,
-                 std::vector<glm::vec3> path);
+                 std::vector<glm::vec3> path = std::vector<glm::vec3>());
   virtual ~MovingPlatform();
 
   SecondaryType GetSecondaryType() override;
+
+ private:
+  static std::shared_ptr<Program> platform_program;
+  static std::shared_ptr<Texture> platform_texture;
 };
 }
 

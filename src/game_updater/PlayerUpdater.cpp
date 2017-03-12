@@ -183,7 +183,9 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
         player_min_y = player->GetBoundingBox().GetMin().y;
         // If the ground is now a dropping platform drop it
         if (player->GetGround()->GetSecondaryType() ==
-            SecondaryType::DROPPING_PLATFORM) {
+                SecondaryType::DROPPING_PLATFORM_UP ||
+            player->GetGround()->GetSecondaryType() ==
+                SecondaryType::DROPPING_PLATFORM_DOWN) {
           std::shared_ptr<gameobject::DroppingPlatform> dropping =
               std::static_pointer_cast<gameobject::DroppingPlatform>(
                   player->GetGround());

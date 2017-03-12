@@ -7,6 +7,9 @@
 
 #include <glm/ext.hpp>
 
+#include "Texture.h"
+#include "Program.h"
+
 #define ROCK_MESH "models/rock.obj"
 
 namespace gameobject {
@@ -20,6 +23,10 @@ class MoonRock : public GameObject {
 
   ObjectType GetType() override;
   SecondaryType GetSecondaryType() override;
+
+ private:
+  static std::shared_ptr<Program> moon_rock_program;
+  static std::shared_ptr<Texture> moon_rock_texture;
 };
 }
 #endif

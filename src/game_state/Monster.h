@@ -9,6 +9,8 @@
 #include "Obstacle.h"
 #include "Shape.h"
 #include "MovingObject.h"
+#include "Program.h"
+#include "Texture.h"
 
 #define MONSTER_MASH "models/bunny.obj"
 
@@ -39,6 +41,8 @@ class Monster : public MovingObject, public Obstacle {
   static std::vector<glm::vec3> default_path(glm::vec3 position,
                                              float distanceX,
                                              float distanceZ);
+  static std::shared_ptr<Program> monster_program;
+  static std::shared_ptr<Texture> monster_texture;
 };
 }
 

@@ -1,6 +1,11 @@
 #include "MovingPlatform.h"
 
+#include "GameRenderer.h"
+
 namespace gameobject {
+
+std::shared_ptr<Program> MovingPlatform::platform_program;
+std::shared_ptr<Texture> MovingPlatform::platform_texture;
 
 MovingPlatform::MovingPlatform(glm::vec3 position, std::vector<glm::vec3> path)
     : Obstacle(MOVING_PLATFORM_MESH,
@@ -8,7 +13,18 @@ MovingPlatform::MovingPlatform(glm::vec3 position, std::vector<glm::vec3> path)
                glm::vec3(),
                0,
                glm::vec3(3, .6, 2.0f)),
-      MovingObject(path, position, 0.01f) {}
+      MovingObject(path, position, 0.01f) {
+  if (!platform_program) {
+    platform_program =
+        GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/moving_plat.json");
+  }
+  if (!platform_texture) {
+    platform_texture =
+        GameRenderer::TextureFromJSON(ASSET_DIR "/textures/lunarrock.json");
+  }
+  program = platform_program;
+  texture = platform_texture;
+}
 
 MovingPlatform::MovingPlatform(glm::vec3 position,
                                glm::vec3 scale,
@@ -21,7 +37,18 @@ MovingPlatform::MovingPlatform(glm::vec3 position,
                rotation_axis,
                rotation_angle,
                scale),
-      MovingObject(path, position, velocity) {}
+      MovingObject(path, position, velocity) {
+  if (!platform_program) {
+    platform_program =
+        GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/moving_plat.json");
+  }
+  if (!platform_texture) {
+    platform_texture =
+        GameRenderer::TextureFromJSON(ASSET_DIR "/textures/lunarrock.json");
+  }
+  program = platform_program;
+  texture = platform_texture;
+}
 
 MovingPlatform::MovingPlatform(glm::vec3 position,
                                std::vector<glm::vec3> path,
@@ -31,7 +58,18 @@ MovingPlatform::MovingPlatform(glm::vec3 position,
                glm::vec3(),
                0,
                glm::vec3(3, .6, 2.0f)),
-      MovingObject(path, position, velocity) {}
+      MovingObject(path, position, velocity) {
+  if (!platform_program) {
+    platform_program =
+        GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/moving_plat.json");
+  }
+  if (!platform_texture) {
+    platform_texture =
+        GameRenderer::TextureFromJSON(ASSET_DIR "/textures/lunarrock.json");
+  }
+  program = platform_program;
+  texture = platform_texture;
+}
 
 MovingPlatform::~MovingPlatform() {}
 

@@ -3,11 +3,16 @@
 #ifndef GAME_OBJECT_H_
 #define GAME_OBJECT_H_
 
+#include <unordered_map>
+#include <unordered_set>
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
 #include <memory>
+#include <tuple>
 
 #include "PhysicalObject.h"
+#include "MatrixStack.h"
+#include "Program.h"
 
 enum ObjectType { OBSTACLE, COLLECTIBLE, PLAYER, SCENERY };
 enum SecondaryType {
@@ -15,7 +20,8 @@ enum SecondaryType {
   PLATFORM,
   BIKE,
   MOVING_PLATFORM,
-  DROPPING_PLATFORM,
+  DROPPING_PLATFORM_UP,
+  DROPPING_PLATFORM_DOWN,
   SKY,
   MOONROCK,
   PLAINROCK,

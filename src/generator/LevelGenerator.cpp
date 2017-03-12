@@ -175,7 +175,9 @@ LevelGenerator::Generate() {
         objs->pop_back();
         objs->pop_back();
         if (objs->back()->GetSecondaryType() ==
-            SecondaryType::DROPPING_PLATFORM) {
+                SecondaryType::DROPPING_PLATFORM_UP ||
+            objs->back()->GetSecondaryType() ==
+                SecondaryType::DROPPING_PLATFORM_DOWN) {
           objs->pop_back();
           objs->push_back(std::make_shared<gameobject::Platform>(
               glm::vec3(xPos - 2 * PLATFORM_X_DELTA, yPos, zPos),
@@ -204,7 +206,9 @@ LevelGenerator::Generate() {
       } else {
         if (std::abs(delta) > EPISILON) {
           if (objs->back()->GetSecondaryType() ==
-              SecondaryType::DROPPING_PLATFORM) {
+                  SecondaryType::DROPPING_PLATFORM_UP ||
+              objs->back()->GetSecondaryType() ==
+                  SecondaryType::DROPPING_PLATFORM_DOWN) {
             yPos = objs->back()->GetPosition().y + 0.1f;
           }
           objs->push_back(std::make_shared<gameobject::Platform>(
