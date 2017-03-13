@@ -17,6 +17,7 @@
 #include "VideoTexture.h"
 #include "Sky.h"
 #include "LevelEditorState.h"
+#include "SoundEffects.h"
 
 class GameState {
  public:
@@ -48,6 +49,7 @@ class GameState {
   double GetEndingTime();
   double GetProgressRatio();
   bool ReachedEndOfLevel();
+  SoundEffects GetSoundEffects();
 
   void AddVideoTexture(std::string name, std::shared_ptr<VideoTexture> texture);
   void SetLevel(std::shared_ptr<Level> level);
@@ -68,6 +70,7 @@ class GameState {
   std::unordered_set<std::shared_ptr<GameObject>>* objectsInView;
   std::shared_ptr<LevelEditorState> level_editor_state;
   GLFWwindow* window;
+  SoundEffects effects;
 
   uint64_t elapsed_ticks;
   uint64_t start_tick;      // value of elapsed_ticks when game started
@@ -76,6 +79,7 @@ class GameState {
   PlayingState playing_state;
   uint64_t game_end_tick;  // tick when the game was won or lost
   double game_end_time;    // value of glfwGetTime() when game was won/lost
+  bool previously_paused = false;
 };
 
 #endif

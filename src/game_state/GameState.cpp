@@ -147,6 +147,12 @@ void GameState::SetPlayingState(PlayingState playing_state) {
     case GameState::PlayingState::PLAYING:
       // on resume start the music back up
       if (music->getStatus() != sf::SoundSource::Status::Playing) {
+        if (previously_paused) {
+          effects.Unpause();
+          while (!effects.ComingBackFromAPause())
+            ;  // coming in from a pause
+          previously_paused = false;
+        }
         music->play();
       }
       break;
@@ -154,6 +160,8 @@ void GameState::SetPlayingState(PlayingState playing_state) {
       // pause the music
       if (music->getStatus() == sf::SoundSource::Status::Playing) {
         music->pause();
+        effects.Pause();
+        previously_paused = true;
       }
       break;
     case GameState::PlayingState::FAILURE:
@@ -161,6 +169,7 @@ void GameState::SetPlayingState(PlayingState playing_state) {
       // stop the music
       if (music->getStatus() == sf::SoundSource::Status::Playing) {
         music->stop();
+        effects.Death();
       }
       break;
   }
@@ -176,4 +185,8 @@ void GameState::SetPlayingState(PlayingState playing_state) {
       InputBindings::SetCursorMode(InputBindings::CursorMode::FREE);
       break;
   }
+}
+
+SoundEffects GameState::GetSoundEffects() {
+  return effects;
 }
