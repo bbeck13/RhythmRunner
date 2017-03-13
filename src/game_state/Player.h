@@ -69,6 +69,8 @@ class Player : public GameObject {
   float GetYVelocity();
   float GetZVelocity();
   bool GetDoubleJump();
+  bool GetBlockedUpZ();
+  bool GetBlockedDownZ();
   DuckDir GetDucking();
   std::shared_ptr<GameObject> GetGround();  // null if no ground
   int GetScore();
@@ -92,10 +94,14 @@ class Player : public GameObject {
   void SetAnimationStartTick(uint64_t animation_start_tick);
   void SetWheelRotationSpeed(float wheel_rotation_speed);
   void SetCurrentTick(uint64_t current_tick);
+  void SetBlockedUpZ(bool blocked);
+  void SetBlockedDownZ(bool blocked);
 
  private:
   std::shared_ptr<GameObject> ground;
   bool can_double_jump;
+  bool blocked_up_z;
+  bool blocked_down_z;
   float y_velocity;
   float z_velocity;
   int score;

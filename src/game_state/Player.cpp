@@ -46,6 +46,9 @@ Player::Player(glm::vec3 position,
 
   AddSubObject(rear_wheel);
   AddSubObject(front_wheel);
+
+  blocked_up_z = false;
+  blocked_down_z = false;
 }
 
 Player::~Player() {}
@@ -70,7 +73,7 @@ void Player::Reset() {
   score = 0;
   y_velocity = 0;
   z_velocity = 0;
-  can_double_jump = false;
+  can_double_jump = blocked_up_z = blocked_down_z = false;
   RemoveGround();
 }
 
@@ -202,4 +205,20 @@ float Player::GetGroundYVelocity() {
 
 void Player::SetCurrentTick(uint64_t current_tick) {
   this->current_tick = current_tick;
+}
+
+void Player::SetBlockedUpZ(bool blocked) {
+  this->blocked_up_z = blocked;
+}
+
+void Player::SetBlockedDownZ(bool blocked) {
+  this->blocked_down_z = blocked;
+}
+
+bool Player::GetBlockedUpZ() {
+  return blocked_up_z;
+}
+
+bool Player::GetBlockedDownZ() {
+  return blocked_down_z;
 }

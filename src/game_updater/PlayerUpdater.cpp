@@ -60,12 +60,12 @@ void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
   Player::DuckDir target_duck;
   // always check for ducking (be ware of ducks)
   // let the player move up/down Z (sock it to me)
-  if (InputBindings::KeyDown(GLFW_KEY_A)) {
+  if (InputBindings::KeyDown(GLFW_KEY_A) && !player->GetBlockedDownZ()) {
     target_duck = Player::DuckDir::LEFT;
     player->MoveDownZ();
     camera->setPosition(prevCameraPos -
                         glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
-  } else if (InputBindings::KeyDown(GLFW_KEY_D)) {
+  } else if (InputBindings::KeyDown(GLFW_KEY_D) && !player->GetBlockedUpZ()) {
     target_duck = Player::DuckDir::RIGHT;
     player->MoveUpZ();
     camera->setPosition(prevCameraPos +
@@ -171,6 +171,13 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
       float colliding_max_y = colliding_object->GetBoundingBox().GetMax().y;
       float y_velocity_tolerance = player->GetYVelocity();
 
+      if (previous_player_box.GetMin().z >
+          colliding_box.GetMax().z - COLLISION_TOLERANCE_Z) {
+        player->SetBlockedDownZ(true);
+      } else if (previous_player_box.GetMax().z <
+                 colliding_box.GetMin().z + COLLISION_TOLERANCE_Z) {
+        player->SetBlockedUpZ(true);
+      }
       // If the player's bounding box was "above" the platform's box before
       // collision, then we consider the collision "landing" on the platform.
       // collision_width + y_velocity are acceptable error.
@@ -198,13 +205,16 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
                      colliding_box.GetMax().x - COLLISION_TOLERANCE_X ||
                  previous_player_box.GetMax().x <
                      colliding_box.GetMin().x + COLLISION_TOLERANCE_X) {
-        // within z collision tolerance, igonre collision
+        // within z and x collision tolerance, igonre collision
       } else {
         // The collision was not from above, so reset the game
         Death(game_state);
         return;
       }
     }
+  } else {
+    player->SetBlockedUpZ(false);
+    player->SetBlockedDownZ(false);
   }
 
   // Check to see if the player fell out of the world.
