@@ -4,11 +4,23 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <stdio.h>
+
+#define TEMP_DIR ASSET_DIR "/temp"
+
 #ifdef _WIN32
+
 #include <windows.h>
-#else
+#include <urlmon.h>
+#define EXECUTABLE_DIR ASSET_DIR "/executables/windows"
+
+#else  // _WIN32
+
 #include <glob.h>
-#endif
+#define EXECUTABLE_DIR (ASSET_DIR "/executables/mac")
+
+#endif  // _WIN32
 
 namespace FileSystemUtils {
 
@@ -42,5 +54,31 @@ std::vector<std::string> ListFiles(const std::string& path,
 
 bool FileExists(const std::string& path) {
   return std::ifstream(path).good();
+}
+
+int DownloadYoutubeVideo(const std::string& url) {
+  // TODO(jarhar): use popen()/CreateProcess() to capture output from system()
+  // TODO(jarhar): figure out if video was already downloaded?
+  // TODO(jarhar): figure out how to accomodate 30fps and 60fps videos
+
+  int system_return;
+  std::stringstream command_stream;
+
+#ifdef _WIN32
+  command_stream << "cd " TEMP_DIR " & " EXECUTABLE_DIR "/youtube-dl \"" << url
+                 << "\" -o video.mp4 & " EXECUTABLE_DIR
+                    "/ffmpeg -i video.mp4 image-%05d.jpg";
+#else   // _WIN32
+  command_stream << "cd " TEMP_DIR " && export PATH=$PATH:" EXECUTABLE_DIR
+                    " && " EXECUTABLE_DIR "/youtube-dl \""
+                 << url << "\" -o video.mp4 && " EXECUTABLE_DIR
+                           "/ffmpeg -i video.mp4 image-%05d.jpg";
+#endif  // _WIN32
+  system_return = system(command_stream.str().c_str());
+#ifdef DEBUG
+  std::cout << __FUNCTION__ << " system() returned: " << system_return
+            << std::endl;
+#endif  // DEBUG
+  return system_return;
 }
 }

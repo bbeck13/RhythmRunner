@@ -9,8 +9,9 @@ namespace FileSystemUtils {
 
 std::vector<std::string> ListFiles(const std::string& path,
                                    const std::string& pattern);
-
 bool FileExists(const std::string& path);
+
+int DownloadYoutubeVideo(const std::string& url);
 }
 
 #endif
