@@ -26,7 +26,7 @@ class GameRenderer {
   GameRenderer();
   ~GameRenderer();
 
-  void Init(const std::string& resource_dir);
+  void Init(const std::string& resource_dir, GLFWwindow* window);
   MainProgramMode Render(GLFWwindow* window,
                          std::shared_ptr<GameState> game_state);
   LevelProgramMode RenderLevelEditor(GLFWwindow* window,
@@ -72,12 +72,18 @@ class GameRenderer {
   void RenderMinimap(GLFWwindow* window, std::shared_ptr<GameState> game_state);
   void ImGuiRenderBegin(std::shared_ptr<GameState> game_state);
   void ImGuiRenderEnd();
+  void RenderQuad();
   MainProgramMode ImGuiRenderGame(std::shared_ptr<GameState> game_state);
   LevelProgramMode ImGuiRenderEditor(std::shared_ptr<GameState> game_state);
 
   std::unordered_map<std::string, std::shared_ptr<Program>> programs;
   std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
   std::vector<glm::vec3> color_vec;
+
+  GLuint hdrFBO;
+  GLuint hdrColorBuffers[2];
+  GLuint pingpongFBO[2];
+  GLuint pingpongColorbuffers[2];
 };
 
 #endif

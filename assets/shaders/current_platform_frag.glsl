@@ -17,10 +17,10 @@ void main() {
   vec3 diffuse = diff * vec3(1, 1, 1);
   vec3 result = (diffuse + ambient) * vec3(1, 1, 1);
   vec4 surfaceColor = texture(Texture0, fragTexCoord);
-  color = vec4(surfaceColor.rgb, surfaceColor.a);
+  color = vec4(result * surfaceColor.rgb, surfaceColor.a);
   float brightness = dot(color, vec4(0.3126, 0.5152, 0.2722, 0.0));
-  if (brightness > 0.1)
-    brightColor = color * 1.3;
+  if (brightness > 0.6)
+    brightColor = color * 0.75;
   else
     brightColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

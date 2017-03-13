@@ -64,7 +64,7 @@ GameRenderer::GameRenderer() {}
 
 GameRenderer::~GameRenderer() {}
 
-void GameRenderer::Init(const std::string& resource_dir) {
+void GameRenderer::Init(const std::string& resource_dir, GLFWwindow* window) {
   glClearColor(.2f, .2f, .2f, 1.0f);
   // Initialize all programs from JSON files in assets folder
   std::shared_ptr<Program> temp_program;
@@ -82,6 +82,63 @@ void GameRenderer::Init(const std::string& resource_dir) {
     temp_texture = GameRenderer::TextureFromJSON(texture_files[i]);
     textures[temp_texture->getName()] = temp_texture;
   }
+
+  programs["bloom_final_prog"]->bind();
+  glUniform1i(programs["bloom_final_prog"]->getUniform("scene"), 0);
+  glUniform1i(programs["bloom_final_prog"]->getUniform("bloomBlur"), 1);
+  programs["bloom_final_prog"]->unbind();
+
+  int width, height = 0;
+  glfwGetFramebufferSize(window, &width, &height);
+  // hdrFBO stores normal scene and to-be-blurred scene
+  glGenFramebuffers(1, &hdrFBO);
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+  glGenTextures(2, hdrColorBuffers);
+  for (GLuint i = 0; i < 2; i++)
+  {
+    glBindTexture(GL_TEXTURE_2D, hdrColorBuffers[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F,
+                 width, height, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
+                           GL_TEXTURE_2D, hdrColorBuffers[i], 0);
+  }
+  // depth framebuffer
+  GLuint rboDepth;
+  glGenRenderbuffers(1, &rboDepth);
+  glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                            GL_RENDERBUFFER, rboDepth);
+  GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+  glDrawBuffers(2, attachments);
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    std::cout << "Framebuffer not complete!" << std::endl;
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  // pingpongFBO and pingpongColorbuffers used for blurring
+  glGenFramebuffers(2, pingpongFBO);
+  glGenTextures(2, pingpongColorbuffers);
+  float tempTexWidth = width / 2;
+  float tempTexHeight = height / 2;
+  for (GLuint i = 0; i < 2; i++)
+  {
+    glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+    glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, tempTexWidth, tempTexHeight,
+                 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
+  }
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    std::cout << "Framebuffer not complete!" << std::endl;
+
 
   // Set up rainbow of colors in color_vector
   // TODO move somewhere else
@@ -413,14 +470,17 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   std::shared_ptr<Player> player = game_state->GetPlayer();
   std::shared_ptr<Sky> sky = game_state->GetSky();
 
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
   float aspect = width / (float)height;
-
   auto P = std::make_shared<MatrixStack>();
   auto V = std::make_shared<MatrixStack>(camera->getView());
   auto MV = std::make_shared<MatrixStack>();
+
 
   P->pushMatrix();
   // small far for aggressive culling
@@ -440,10 +500,9 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
 
   RenderSingleObject(player, P, V);
   if (player->GetGround()) {
-    RenderSingleObject(player->GetGround(), programs["player_prog"],
+    RenderSingleObject(player->GetGround(), programs["current_platform_prog"],
                        textures["rainbowass"], P, V);
   }
-
   RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::PLATFORM,
                      textures["nightsky"], P, V);
   RenderLevelObjects(game_state->GetObjectsInView(),
@@ -464,8 +523,77 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::PLAINROCK,
                      P, V);
   RenderSingleObject(sky, P, V);
+
   P->popMatrix();
   V->popMatrix();
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  // blur the brightColor scene using blur fragment shader
+  programs["blur_prog"]->bind();
+
+  GLboolean horizontal = true, first_iteration = true;
+  GLuint amount = 8;
+  glViewport(0, 0, width / 2.0, height / 2.0);
+  for (GLuint i = 0; i < amount; i++)
+  {
+    glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
+    glUniform1i(programs["blur_prog"]->getUniform("horizontal"), horizontal);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, first_iteration ? hdrColorBuffers[1] :
+                  pingpongColorbuffers[!horizontal]);
+    RenderQuad();
+    horizontal = !horizontal;
+    if (first_iteration)
+      first_iteration = false;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  }
+  programs["blur_prog"]->unbind();
+
+  // combine bloom and normal scenes
+  glViewport(0, 0, width, height);
+  GLboolean bloom = true;
+  GLfloat exposure = 1.2f;
+  programs["bloom_final_prog"]->bind();
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, hdrColorBuffers[0]);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[horizontal]);
+  glUniform1i(programs["bloom_final_prog"]->getUniform("bloom"), bloom);
+  glUniform1f(programs["bloom_final_prog"]->getUniform("exposure"), exposure);
+  RenderQuad();
+  programs["bloom_final_prog"]->unbind();
+}
+
+GLuint quadVAO = 0;
+GLuint quadVBO;
+void GameRenderer::RenderQuad()
+{
+  if (quadVAO == 0)
+  {
+    GLfloat quadVertices[] = {
+      // Positions        // Texture Coords
+      -1.0f, 1.0f,  0.0f, 0.0f, 1.0f,
+      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+      1.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+      1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
+    };
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices),
+                 &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          5 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
+                          5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+  }
+  glBindVertexArray(quadVAO);
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  glBindVertexArray(0);
 }
 
 void GameRenderer::ImGuiRenderBegin(std::shared_ptr<GameState> game_state) {

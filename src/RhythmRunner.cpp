@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
   GameUpdater game_updater;
   MenuRenderer menu_renderer;
   GameRenderer game_renderer;
-  game_renderer.Init(ASSET_DIR);
+  game_renderer.Init(ASSET_DIR, window);
 
   // Start the game at the Menu
   std::shared_ptr<GameState> game_state;

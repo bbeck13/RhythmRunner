@@ -1,0 +1,15 @@
+{
+  "attributes": [
+    "vertPos",
+    "vertTex"
+  ],
+  "frag": "bloom_final_frag.glsl",
+  "name": "bloom_final_prog",
+  "uniforms": [
+    "scene",
+    "bloomBlur",
+    "bloom",
+    "exposure"
+  ],
+  "vert": "bloom_final_vert.glsl"
+}

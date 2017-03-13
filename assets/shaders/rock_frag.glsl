@@ -5,7 +5,8 @@ in vec3 fragNor;
 in vec4 fragPos;
 in vec2 fragTexCoord;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
+layout (location = 1) out vec4 brightColor;
 
 void main() {
   float amb_str = 0.8f;
@@ -17,4 +18,9 @@ void main() {
   vec3 result = (diffuse + ambient) * vec3(.3, .3, .3);
   vec4 surfaceColor = texture(Texture0, fragTexCoord);
   color = vec4(result * surfaceColor.rgb, surfaceColor.a);
+  float brightness = dot(color, vec4(0.3126, 0.5152, 0.2722, 0.0));
+  if (brightness > 0.4)
+    brightColor = color;
+  else
+    brightColor = vec4(0.0, 0.0, 0.0, 1.0);
 }
