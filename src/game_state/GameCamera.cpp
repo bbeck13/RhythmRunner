@@ -54,12 +54,12 @@ glm::vec3 GameCamera::getPosition() {
 }
 
 void GameCamera::Reset() {
-   glm::vec3 previousLookAtPos = lookAtPos;
-   lookAtPos = Player::INITIAL_POSITION +
-               glm::vec3(FORWARD_CAMERA_SPACING, 0, 0);
-   glm::vec3 lookAtPosDiff = previousLookAtPos - lookAtPos;
-   eyePos = eyePos - lookAtPosDiff;
-   up = glm::vec3(0,1,0);
+  glm::vec3 previousLookAtPos = lookAtPos;
+  lookAtPos =
+      Player::INITIAL_POSITION + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0);
+  glm::vec3 lookAtPosDiff = previousLookAtPos - lookAtPos;
+  eyePos = eyePos - lookAtPosDiff;
+  up = glm::vec3(0, 1, 0);
 }
 
 MatrixStack GameCamera::pivot(int width, int height, double xpos, double ypos) {
@@ -97,16 +97,23 @@ void GameCamera::SetCameraPlayerSpacing(glm::vec3 camera_player_spacing) {
   this->camera_player_spacing = camera_player_spacing;
 }
 
-void GameCamera::revolveAroundLookAt(float radiansVertical, float radiansHorizontal) {
-   glm::vec3 eyePosRelativeToLookAt = eyePos - lookAtPos;
-   glm::vec3 eyeNormal = glm::cross(eyePosRelativeToLookAt, glm::vec3(0.0f, 1.0f, 0.0f));
+void GameCamera::revolveAroundLookAt(float radiansVertical,
+                                     float radiansHorizontal) {
+  glm::vec3 eyePosRelativeToLookAt = eyePos - lookAtPos;
+  glm::vec3 eyeNormal =
+      glm::cross(eyePosRelativeToLookAt, glm::vec3(0.0f, 1.0f, 0.0f));
 
-   auto eyeTranslateOffset = glm::translate(glm::mat4(), -eyePosRelativeToLookAt);
-   auto eyeRotateHorizontal = glm::rotate(eyeTranslateOffset, radiansHorizontal, glm::vec3(0.0f, 1.0f, 0.0f));
-   auto eyeRotateVertical = glm::rotate(eyeRotateHorizontal, radiansVertical, eyeNormal);
-   auto eyeInverseTranslation = glm::inverse(eyeTranslateOffset);
+  auto eyeTranslateOffset =
+      glm::translate(glm::mat4(), -eyePosRelativeToLookAt);
+  auto eyeRotateHorizontal = glm::rotate(eyeTranslateOffset, radiansHorizontal,
+                                         glm::vec3(0.0f, 1.0f, 0.0f));
+  auto eyeRotateVertical =
+      glm::rotate(eyeRotateHorizontal, radiansVertical, eyeNormal);
+  auto eyeInverseTranslation = glm::inverse(eyeTranslateOffset);
 
-   eyePos = glm::vec3(eyeRotateVertical * eyeInverseTranslation * glm::vec4(eyePosRelativeToLookAt, 0.0f)) + lookAtPos;
+  eyePos = glm::vec3(eyeRotateVertical * eyeInverseTranslation *
+                     glm::vec4(eyePosRelativeToLookAt, 0.0f)) +
+           lookAtPos;
 
-   Refresh();
+  Refresh();
 }

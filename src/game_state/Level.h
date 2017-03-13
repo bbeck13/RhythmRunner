@@ -32,6 +32,7 @@ class Level {
 
   void SetTree(std::shared_ptr<Octree> tree);
   void AddItem(std::shared_ptr<GameObject> object);
+  void RemoveItem(std::shared_ptr<GameObject> object);
 
  private:
   std::shared_ptr<sf::Music> music;

@@ -7,6 +7,7 @@
 #include <queue>
 #include <ctime>
 #include "MovingObject.h"
+#include "DroppingPlatform.h"
 
 Octree::Octree(
     std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects)
@@ -158,7 +159,8 @@ void Octree::remove(std::shared_ptr<GameObject> object) {
 
   auto it = std::find(objects->begin(), objects->end(), object);
   if (it != objects->end()) {
-    objects->erase(it);
+    std::swap(*it, objects->back());
+    objects->pop_back();
   }
 }
 
@@ -204,20 +206,63 @@ Node* Octree::constructOctree(std::vector<std::shared_ptr<GameObject>>* objs) {
 
   std::vector<Node*>* children = new std::vector<Node*>();
 
-  // TODO(bnbeck) profile quad tree vs octree
   for (AxisAlignedBox a : splitOct(bb)) {
     std::vector<std::shared_ptr<GameObject>>* objects =
         getObjectsInBox(objs, a);
     if (!objects->empty()) {
-      children->push_back(constructOctree(objects));
+      // manual split this can happen if one of the full boxes say for a moving
+      // platform is too big
+      if (objects->size() == objs->size()) {
+        std::vector<std::shared_ptr<GameObject>>* v1 =
+            new std::vector<std::shared_ptr<GameObject>>(
+                objects->begin(), objects->begin() + objects->size() / 8);
+        std::vector<std::shared_ptr<GameObject>>* v2 =
+            new std::vector<std::shared_ptr<GameObject>>(
+                objects->begin() + objects->size() / 8,
+                objects->begin() + 2 * (objects->size() / 8));
+        std::vector<std::shared_ptr<GameObject>>* v3 =
+            new std::vector<std::shared_ptr<GameObject>>(
+                objects->begin() + 2 * (objects->size() / 8),
+                objects->begin() + 3 * (objects->size() / 8));
+        std::vector<std::shared_ptr<GameObject>>* v4 =
+            new std::vector<std::shared_ptr<GameObject>>(
+                objects->begin() + 3 * (objects->size() / 8),
+                objects->begin() + 4 * (objects->size() / 8));
+        std::vector<std::shared_ptr<GameObject>>* v5 =
+            new std::vector<std::shared_ptr<GameObject>>(
+                objects->begin() + 4 * (objects->size() / 8),
+                objects->begin() + 5 * (objects->size() / 8));
+        std::vector<std::shared_ptr<GameObject>>* v6 =
+            new std::vector<std::shared_ptr<GameObject>>(
+                objects->begin() + 5 * (objects->size() / 8),
+                objects->begin() + 6 * (objects->size() / 8));
+        std::vector<std::shared_ptr<GameObject>>* v7 =
+            new std::vector<std::shared_ptr<GameObject>>(
+                objects->begin() + 6 * (objects->size() / 8),
+                objects->begin() + 7 * (objects->size() / 8));
+        std::vector<std::shared_ptr<GameObject>>* v8 =
+            new std::vector<std::shared_ptr<GameObject>>(
+                objects->begin() + 7 * (objects->size() / 8),
+                objects->begin() + objects->size());
+
+        children->push_back(constructOctree(v1));
+        children->push_back(constructOctree(v2));
+        children->push_back(constructOctree(v3));
+        children->push_back(constructOctree(v4));
+        children->push_back(constructOctree(v5));
+        children->push_back(constructOctree(v6));
+        children->push_back(constructOctree(v7));
+        children->push_back(constructOctree(v8));
+        break;
+      } else {
+        children->push_back(constructOctree(objects));
+      }
     }
   }
 
   return new Node(new std::vector<std::shared_ptr<GameObject>>(), bb, children);
 }
 
-// TODO(bnbeck) is it worth it to implement this?
-// TODONE(bnbeck) yes, yes it is
 std::vector<AxisAlignedBox> Octree::splitQuad(AxisAlignedBox toSplit) {
   std::vector<AxisAlignedBox> quadrants;
 
@@ -325,6 +370,9 @@ glm::vec3 Octree::getMin(std::vector<std::shared_ptr<GameObject>>* objs) {
     if (std::shared_ptr<MovingObject> movingObj =
             std::dynamic_pointer_cast<MovingObject>(g)) {
       cur = movingObj->GetFullBox(g->GetModel(), g->GetScale()).GetMin();
+    } else if (std::shared_ptr<gameobject::DroppingPlatform> droppingPlatform =
+                   std::dynamic_pointer_cast<gameobject::DroppingPlatform>(g)) {
+      cur = droppingPlatform->GetFullBox().GetMin();
     } else {
       cur = g->GetBoundingBox().GetMin();
     }
@@ -348,6 +396,9 @@ glm::vec3 Octree::getMax(std::vector<std::shared_ptr<GameObject>>* objs) {
     if (std::shared_ptr<MovingObject> movingObj =
             std::dynamic_pointer_cast<MovingObject>(g)) {
       cur = movingObj->GetFullBox(g->GetModel(), g->GetScale()).GetMax();
+    } else if (std::shared_ptr<gameobject::DroppingPlatform> droppingPlatform =
+                   std::dynamic_pointer_cast<gameobject::DroppingPlatform>(g)) {
+      cur = droppingPlatform->GetFullBox().GetMax();
     } else {
       cur = g->GetBoundingBox().GetMax();
     }

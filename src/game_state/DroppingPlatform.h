@@ -6,6 +6,7 @@
 
 #include "Obstacle.h"
 #include "GameObject.h"
+#include "AxisAlignedBox.h"
 
 #define PLATFORM_SHAPE "models/platform.obj"
 
@@ -24,6 +25,7 @@ class DroppingPlatform : public Obstacle {
   bool IsDropping() const;
   void SetDropping();
   float GetYVelocity() const;
+  AxisAlignedBox GetFullBox();
 
  private:
   float dropVel;

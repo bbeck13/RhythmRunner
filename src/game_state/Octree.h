@@ -5,8 +5,8 @@
 #include "GameObject.h"
 #include "AxisAlignedBox.h"
 
-// TODO(bnbeck) play around with this value it can change the performace a lot
-#define OBJS_IN_LEAF 25
+// TODO(bnbeck) play around with this value it can change the performance a lot
+#define OBJS_IN_LEAF 20
 
 class Node {
  public:

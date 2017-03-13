@@ -1,6 +1,7 @@
 #include "DroppingPlatform.h"
 
 #include "GameRenderer.h"
+#include "TimingConstants.h"
 
 namespace gameobject {
 
@@ -59,5 +60,17 @@ SecondaryType DroppingPlatform::GetSecondaryType() {
   return program == platform_program_down
              ? SecondaryType::DROPPING_PLATFORM_DOWN
              : SecondaryType::DROPPING_PLATFORM_UP;
+}
+
+AxisAlignedBox DroppingPlatform::GetFullBox() {
+  AxisAlignedBox box(shape, scale, position, rotation_angle, rotation_axis);
+  glm::vec3 pos =
+      position +
+      glm::vec3(0.0f, dropVel * std::ceill((box.GetMax().x - box.GetMin().x) /
+                                           DELTA_X_PER_TICK),
+                0.0f);
+  box = box.merge(
+      AxisAlignedBox(shape, scale, pos, rotation_angle, rotation_axis));
+  return box;
 }
 }
