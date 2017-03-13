@@ -153,6 +153,7 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
   // Collect the collectibles we are colliding with.
   for (std::shared_ptr<Collectible> collectible : colliding_collectibles) {
     if (!collectible->GetCollected()) {
+      game_state->GetSoundEffects().OhYes();
       collectible->SetCollected();
       game_state->GetPlayer()->SetScore(game_state->GetPlayer()->GetScore() +
                                         1);
