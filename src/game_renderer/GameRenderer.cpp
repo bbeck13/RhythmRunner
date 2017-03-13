@@ -540,7 +540,8 @@ MainProgramMode GameRenderer::ImGuiRenderGame(
       if (glfwGetTime() >
           game_state->GetEndingTime() + ENDGAME_MENU_WAIT_SECONDS) {
         RendererSetup::ImGuiCenterWindow(0.5, RendererSetup::DYNAMIC);
-        ImGui::Begin(success ? "SUCCESS" : "FAILURE", NULL, RendererSetup::DYNAMIC_WINDOW_FLAGS);
+        ImGui::Begin(success ? "SUCCESS" : "FAILURE", NULL,
+                     RendererSetup::DYNAMIC_WINDOW_FLAGS);
         ImGui::Text(success ? "YOU WIN!" : "YOU FAILED");
         ImGui::Text(score_string.c_str());
         ImGui::Text(progress_string.c_str());
@@ -749,7 +750,7 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
             game_state->GetLevel()->getTree());
 
     if (!colliding_objs->empty()) {
-      game_state->GetLevel()->getTree()->remove(*colliding_objs->begin());
+      game_state->GetLevel()->RemoveItem(*colliding_objs->begin());
     }
   }
 
