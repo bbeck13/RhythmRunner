@@ -6,7 +6,8 @@ in vec3 fragNor;
 in vec4 fragPos;
 in vec2 fragTexCoord;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
+layout (location = 1) out vec4 brightColor;
 
 #define MAX_LIGHTS 12
 
@@ -35,11 +36,16 @@ void main() {
   Light light;
   light.position = vec4(100, 1000, -4, 0);
   light.color = light.color + 0.5;
-  light.color = texture(SkyTexture0, fragTexCoord).rgb + 0.5; 
+  light.color = texture(SkyTexture0, fragTexCoord).rgb + 0.5;
   light.attenuation = 10;
   light.ambient = 0.8;
   light.angle = 0;
   light.direction = 0;
   vec4 surfaceColor = texture(Texture0, fragTexCoord) + vec4(0.1, 0.3, 0.9, 1);
   color = vec4(ComputeLight(light, surfaceColor, fragNor, fragPos), 1);
+  float brightness = dot(color, vec4(0.3126, 0.5152, 0.2722, 0.0));
+  if (brightness > 0.8)
+    brightColor = color;
+  else
+    brightColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

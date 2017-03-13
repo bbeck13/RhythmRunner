@@ -1,0 +1,13 @@
+{
+  "attributes": [
+    "vertPos",
+    "vertTex"
+  ],
+  "frag": "blur_frag.glsl",
+  "name": "blur_prog",
+  "uniforms": [
+    "image",
+    "horizontal"
+  ],
+  "vert": "blur_vert.glsl"
+}

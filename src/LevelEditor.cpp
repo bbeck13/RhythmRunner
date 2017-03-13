@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
   std::shared_ptr<GameState> game_state;
   LevelProgramMode program_mode = LevelProgramMode::MENU_SCREEN;
   GameRenderer game_renderer;
-  game_renderer.Init(ASSET_DIR);
+  game_renderer.Init(ASSET_DIR, window);
 
   while (!glfwWindowShouldClose(window)) {
     switch (program_mode) {
