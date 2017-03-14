@@ -17,6 +17,7 @@
 #include "Octree.h"
 #include "TimingConstants.h"
 #include "VideoTexture.h"
+#include "Particles.h"
 
 #define COLLISION_WIDTH 0.15f
 
@@ -301,6 +302,7 @@ void GameUpdater::UpdatePlayer(std::shared_ptr<GameState> game_state) {
       game_state->GetLevel()->getTree()->GetKillZone()) {
     StopGame(game_state);
   }
+    //Particles->Update(20, game_state->GetPlayer(), glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {

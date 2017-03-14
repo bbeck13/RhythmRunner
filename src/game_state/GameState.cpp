@@ -22,6 +22,7 @@ GameState::GameState(std::shared_ptr<Level> level,
   this->music_end_tick =
       level->getMusic()->getDuration().asMicroseconds() * TICKS_PER_MICRO +
       GetMusicStartTick();
+
 }
 
 GameState::~GameState() {

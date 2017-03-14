@@ -12,6 +12,7 @@
 #include "GameState.h"
 #include "MatrixStack.h"
 #include "Program.h"
+#include "Particles.h"
 
 #define PLATFORM_PROG "platform_prog"
 
@@ -34,6 +35,7 @@ class GameRenderer {
   static std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView(
       std::shared_ptr<std::vector<glm::vec4>> vfplane,
       std::shared_ptr<Octree> tree);
+  ParticleGenerator *Particles;
 
  private:
   void RenderIt(GLFWwindow* window,

@@ -17,6 +17,7 @@
 #include "VideoTexture.h"
 #include "Sky.h"
 #include "LevelEditorState.h"
+#include "Particles.h"
 
 class GameState {
  public:
@@ -52,7 +53,6 @@ class GameState {
   void SetItemsInView(std::unordered_set<std::shared_ptr<GameObject>>* objects);
   void SetLevelEditorState(
       std::shared_ptr<LevelEditorState> level_editor_state);
-
  private:
   std::shared_ptr<Level> level;
   std::shared_ptr<GameCamera> camera;
