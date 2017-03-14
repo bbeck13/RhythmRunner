@@ -11,6 +11,7 @@ out vec3 fragNor;
 out vec4 fragPos;
 out vec2 fragTexCoord;
 
+
 void main() {
     gl_Position = P * V * MV * vertPos;
     fragNor = (MV * vec4(vertNor, 0.0)).xyz;

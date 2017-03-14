@@ -10,7 +10,10 @@
     "P",
     "V",
     "MV",
-    "in_obj_color"
+    "in_obj_color",
+    "isCollected",
+    "timeCollected"
   ],
-  "vert": "note_vert.glsl"
+  "vert": "note_vert.glsl",
+  "geom": "explode_geom.glsl"
 }

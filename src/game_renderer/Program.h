@@ -21,6 +21,7 @@ public:
    }
 
    void setShaderNames(const std::string &v, const std::string &f);
+   void setShaderNames(const std::string &v, const std::string &f, const std::string &g);
    virtual bool init();
    virtual void bind();
    virtual void unbind();
@@ -35,6 +36,7 @@ public:
 protected:
    std::string vShaderName;
    std::string fShaderName;
+   std::string gShaderName;
    std::string progName;
 
 private:
