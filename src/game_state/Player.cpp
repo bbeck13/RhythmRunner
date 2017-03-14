@@ -163,7 +163,7 @@ void Player::SetWheelRotationSpeed(float wheel_rotation_speed) {
 }
 
 glm::mat4 Player::GetRotationMatrix() const {
-  float duck_rotation;
+  float duck_rotation = 0.0f;
   float duck_ratio = std::min(
       (current_tick - duck_start_tick) / (float)DUCK_FINISH_TICKS, 1.0f);
   switch (duck_dir) {

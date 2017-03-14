@@ -207,8 +207,6 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
   std::shared_ptr<Sky> sky = game_state->GetSky();
-  Particles = new ParticleGenerator(5000);
-  RendererSetup::PreRender(window);
 
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
@@ -456,14 +454,14 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
     std::shared_ptr<Program> current_program;
     std::shared_ptr<Texture> current_texture;
     // Particles
-    Particles->Update(2, game_state->GetPlayer(), glm::vec3(0.0f, 0.0f, 0.0f));
+    Particles.Update(2, game_state->GetPlayer(), glm::vec3(0.0f, 0.0f, 0.0f));
     current_program = programs["particle_prog"];
     current_program->bind();
     current_texture = textures["particletex"];
     current_texture->bind(current_program->getUniform("Texture0"));
     glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                        glm::value_ptr(P->topMatrix()));
-    Particles->DrawParticles(current_program);
+    Particles.DrawParticles(current_program);
     current_program->unbind();
   P->popMatrix();
   V->popMatrix();
