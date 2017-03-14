@@ -16,6 +16,7 @@
 #include "Octree.h"
 #include "TimingConstants.h"
 #include "VideoTexture.h"
+#include "Particles.h"
 
 #define CAMERA_SPACING_INCREMENT 0.01f
 
