@@ -38,6 +38,10 @@ class GameRenderer {
       std::shared_ptr<std::vector<glm::vec4>> vfplane,
       std::shared_ptr<Octree> tree);
 
+  static void InitBloom(int height, int width);
+  void Bloom(int height, int width);
+  void SetBloom(bool doBloom);
+
  private:
   static std::shared_ptr<std::vector<std::shared_ptr<GameObject>>>
   GetObjectsOfType(std::unordered_set<std::shared_ptr<GameObject>>* objects,
@@ -76,14 +80,17 @@ class GameRenderer {
   MainProgramMode ImGuiRenderGame(std::shared_ptr<GameState> game_state);
   LevelProgramMode ImGuiRenderEditor(std::shared_ptr<GameState> game_state);
 
-  std::unordered_map<std::string, std::shared_ptr<Program>> programs;
+  static std::unordered_map<std::string, std::shared_ptr<Program>> programs;
   std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
   std::vector<glm::vec3> color_vec;
 
-  GLuint hdrFBO;
-  GLuint hdrColorBuffers[2];
-  GLuint pingpongFBO[2];
-  GLuint pingpongColorbuffers[2];
+  static GLuint hdrFBO;
+  static GLuint hdrColorBuffers[2];
+  static GLuint pingpongFBO[2];
+  static GLuint pingpongColorbuffers[2];
+  GLuint quadVAO = 0;
+  GLuint quadVBO;
+  GLboolean bloom = true;
 };
 
 #endif
