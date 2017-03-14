@@ -15,6 +15,7 @@
 #include "Octree.h"
 #include "TimingConstants.h"
 #include "VideoTexture.h"
+#include "Particles.h"
 
 GameUpdater::GameUpdater() {}
 

@@ -10,6 +10,7 @@
 #include "Octree.h"
 #include "GameObject.h"
 #include "PlayerUpdater.h"
+#include "Particles.h"
 
 class GameUpdater {
  public:
@@ -21,7 +22,8 @@ class GameUpdater {
   void Reset(std::shared_ptr<GameState> game_state);
   void Init(std::shared_ptr<GameState> game_state);
   uint64_t CalculateTargetTicks(std::shared_ptr<GameState> game_state);
-
+  ParticleGenerator *Particles;
+    
  private:
   void UpdateLevel(std::shared_ptr<GameState> game_state);
   void UpdateCamera(std::shared_ptr<GameState> game_state);
