@@ -1,0 +1,14 @@
+{
+  "attributes": [
+    "vertPos"
+  ],
+  "frag": "particle_frag.glsl",
+  "name": "particle_prog",
+  "uniforms": [
+    "P",
+    "Offset",
+    "Color",
+    "Texture0"
+  ],
+  "vert": "particle_vert.glsl"
+}
