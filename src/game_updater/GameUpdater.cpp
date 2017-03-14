@@ -25,9 +25,14 @@ void GameUpdater::Init(std::shared_ptr<GameState> game_state) {
 }
 
 void GameUpdater::PostGameUpdate(std::shared_ptr<GameState> game_state) {
-  // animate the player after you win or lose
+  // run animations after winning or losing
+  std::shared_ptr<gameobject::Note> note;
+  for (std::shared_ptr<GameObject> game_object : *game_state->GetObjectsInView()) {
+    if (note = std::dynamic_pointer_cast<gameobject::Note>(game_object)) {
+      note->Animate();
+    }
+  }
   player_updater.AnimatePlayer(game_state);
-  game_state->IncrementTicks();  // increment ticks just for animations
 }
 
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
