@@ -3,6 +3,7 @@
 #include "InputBindings.h"
 
 #include "Logging.h"
+#include "GameRenderer.h"
 
 static GLFWwindow* static_window;
 static bool key_pressed_buffer[512];
@@ -110,6 +111,7 @@ void InputBindings::ErrorCallback(int error, const char* description) {
 
 void InputBindings::ResizeCallback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
+  GameRenderer::InitBloom(width, height);
 }
 
 void InputBindings::CursorCallback(GLFWwindow* window,
