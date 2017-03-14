@@ -80,6 +80,9 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
       std::shared_ptr<gameobject::Note> note =
           std::dynamic_pointer_cast<gameobject::Note>(obj);
       note->Animate();
+      if (note->GetCollected()) {
+         note->IncrementTicksCollected();
+      }
     }
   }
 

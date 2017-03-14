@@ -127,14 +127,28 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   std::string vert_name = json_handler["vert"];
   std::string frag_name = json_handler["frag"];
   std::string prog_name = json_handler["name"];
+  std::string geom_name;
+  bool isGeomShader = false;
+  if (json_handler.find("geom") != json_handler.end()) {
+    geom_name = json_handler["geom"];
+    isGeomShader = true;
+  }
 
   // Create new shader program
   std::shared_ptr<Program> new_program;
   new_program = std::make_shared<Program>();
   new_program->setVerbose(true);
   new_program->setName(prog_name);
-  new_program->setShaderNames(ASSET_DIR "/shaders/" + vert_name,
-                              ASSET_DIR "/shaders/" + frag_name);
+  
+  if (isGeomShader) {
+    new_program->setShaderNames(ASSET_DIR "/shaders/" + vert_name,
+                                ASSET_DIR "/shaders/" + frag_name,
+                                ASSET_DIR "/shaders/" + geom_name);
+  } else {
+    new_program->setShaderNames(ASSET_DIR "/shaders/" + vert_name,
+                                ASSET_DIR "/shaders/" + frag_name);
+  }
+
   new_program->init();
 
   // Create the uniforms
@@ -374,18 +388,18 @@ void GameRenderer::RenderLevelCollectibles(
     for (std::shared_ptr<GameObject> obj : *objects_to_render) {
       if (std::shared_ptr<Collectible> collectible =
               std::static_pointer_cast<Collectible>(obj)) {
-        if (!collectible->GetCollected()) {
-          glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
-                             glm::value_ptr(collectible->GetTransform()));
-          glm::vec3 cur_color = color_vec.at(color_count);
-          color_count++;
-          if (color_count == 5) {
-            color_count = 0;
-          }
-          glUniform3f(program->getUniform("in_obj_color"), cur_color.x,
-                      cur_color.y, cur_color.z);
-          collectible->GetModel()->draw(program);
+        glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
+                           glm::value_ptr(collectible->GetTransform()));
+        glm::vec3 cur_color = color_vec.at(color_count);
+        color_count++;
+        if (color_count == 5) {
+          color_count = 0;
         }
+        glUniform3f(program->getUniform("in_obj_color"), cur_color.x,
+                    cur_color.y, cur_color.z);
+        glUniform1i(program->getUniform("isCollected"), collectible->GetCollected());
+        glUniform1i(program->getUniform("timeCollected"), collectible->GetTicksCollected());
+        collectible->GetModel()->draw(program);
       }
     }
     program->unbind();

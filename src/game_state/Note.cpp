@@ -18,6 +18,7 @@ Note::Note(glm::vec3 position,
            bool collected)
     : Collectible(NOTE_MESH,
                   collected,
+                  0,
                   position,
                   rotation_axis,
                   rotation_angle,

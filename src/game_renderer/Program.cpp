@@ -10,6 +10,7 @@ using namespace std;
 Program::Program() :
    vShaderName(""),
    fShaderName(""),
+   gShaderName(""),
    pid(0),
    verbose(true) {
 
@@ -24,18 +25,38 @@ void Program::setShaderNames(const string &v, const string &f) {
    fShaderName = f;
 }
 
+void Program::setShaderNames(const string &v, const string &f, const string &g) {
+   vShaderName = v;
+   fShaderName = f;
+   gShaderName = g;
+}
+
 bool Program::init() {
    GLint rc;
+   bool isGeomShader = false;
+   if (this->gShaderName != "") {
+      isGeomShader = true;
+   }
 
    // Create shader handles
    GLuint VS = glCreateShader(GL_VERTEX_SHADER);
    GLuint FS = glCreateShader(GL_FRAGMENT_SHADER);
+   GLuint GS;
+   if (isGeomShader) {
+      GS = glCreateShader(GL_GEOMETRY_SHADER);
+   }
 
    // Read shader sources
    const char *vshader = GLSL::textFileRead(vShaderName.c_str());
    const char *fshader = GLSL::textFileRead(fShaderName.c_str());
+   const char *gshader;
    glShaderSource(VS, 1, &vshader, NULL);
    glShaderSource(FS, 1, &fshader, NULL);
+
+   if (isGeomShader) {
+      gshader = GLSL::textFileRead(gShaderName.c_str());
+      glShaderSource(GS, 1, &gshader, NULL); 
+   }
 
    // Compile vertex shader
    glCompileShader(VS);
@@ -59,10 +80,26 @@ bool Program::init() {
       return false;
    }
 
+   if (isGeomShader) {
+      // Compile geom shader
+      glCompileShader(GS);
+      glGetShaderiv(GS, GL_COMPILE_STATUS, &rc);
+      if(!rc) {
+         if(isVerbose()) {
+            GLSL::printShaderInfoLog(GS);
+            cout << "Error compiling geom shader " << gShaderName << endl;
+         }
+         return false;
+      }
+   }
+
    // Create the program and link
    pid = glCreateProgram();
    glAttachShader(pid, VS);
    glAttachShader(pid, FS);
+   if (isGeomShader) {
+      glAttachShader(pid, GS);
+   }
    glLinkProgram(pid);
    glGetProgramiv(pid, GL_LINK_STATUS, &rc);
    if(!rc) {
