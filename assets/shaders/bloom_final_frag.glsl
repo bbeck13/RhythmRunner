@@ -9,7 +9,7 @@ uniform float exposure;
 
 void main()
 {
-  const float gamma = 1.1;
+  const float gamma = 1.2;
   vec3 hdrColor = texture(scene, fragTexCoord).rgb;
   vec3 bloomColor = texture(bloomBlur, fragTexCoord).rgb;
   if(bloom)

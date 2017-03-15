@@ -41,19 +41,6 @@ GLuint GameRenderer::pingpongColorbuffers[2];
 
 namespace {
 
-/*std::unordered_map<std::string,
-                   std::shared_ptr<Program>> programs;
-GLuint hdrFBO;
-GLuint hdrColorBuffers[2];
-GLuint pingpongFBO[2];
-GLuint pingpongColorbuffers[2];*/
-/*std::unordered_map<std::string,
-                   std::shared_ptr<Program>> GameRenderer::programs;
-GLuint GameRenderer::hdrFBO;
-GLuint GameRenderer::hdrColorBuffers[2];
-GLuint GameRenderer::pingpongFBO[2];
-GLuint GameRenderer::pingpongColorbuffers[2];*/
-
 void DrawPhysicalObjectTree(std::shared_ptr<Program> program,
                             MatrixStack P,
                             MatrixStack V,
@@ -164,7 +151,7 @@ std::shared_ptr<Program> GameRenderer::ProgramFromJSON(std::string filepath) {
   new_program = std::make_shared<Program>();
   new_program->setVerbose(true);
   new_program->setName(prog_name);
-  
+
   if (isGeomShader) {
     new_program->setShaderNames(ASSET_DIR "/shaders/" + vert_name,
                                 ASSET_DIR "/shaders/" + frag_name,
@@ -535,8 +522,12 @@ void GameRenderer::InitBloom(int width, int height) {
   // pingpongFBO and pingpongColorbuffers used for blurring
   glGenFramebuffers(2, pingpongFBO);
   glGenTextures(2, pingpongColorbuffers);
-  float tempTexWidth = width / 2;
-  float tempTexHeight = height / 2;
+  int tempTexWidth = width / 2;
+  int tempTexHeight = height / 2;
+  while (tempTexWidth * tempTexHeight > 1000000) {
+    tempTexWidth = tempTexWidth / 2;
+    tempTexHeight = tempTexHeight / 2;
+  }
   for (GLuint i = 0; i < 2; i++) {
     glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
     glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
@@ -561,7 +552,13 @@ void GameRenderer::Bloom(int width, int height) {
 
   GLboolean horizontal = true, first_iteration = true;
   GLuint amount = 8;
-  glViewport(0, 0, width / 2.0, height / 2.0);
+  int tempTexWidth = width / 2;
+  int tempTexHeight = height / 2;
+  while (tempTexWidth * tempTexHeight > 1000000) {
+    tempTexWidth = tempTexWidth / 2;
+    tempTexHeight = tempTexHeight / 2;
+  }
+  glViewport(0, 0, tempTexWidth, tempTexHeight);
   for (GLuint i = 0; i < amount; i++) {
     glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
     glUniform1i(programs["blur_prog"]->getUniform("horizontal"), horizontal);
@@ -579,7 +576,7 @@ void GameRenderer::Bloom(int width, int height) {
 
   // combine bloom and normal scenes
   glViewport(0, 0, width, height);
-  GLfloat exposure = 1.2f;
+  GLfloat exposure = 1.3f;
   programs["bloom_final_prog"]->bind();
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, hdrColorBuffers[0]);
