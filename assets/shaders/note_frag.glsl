@@ -15,9 +15,6 @@ void main() {
   vec3 diffuse = diff * vec3(1, 1, 1);
   vec3 result = (diffuse + ambient) * vec3(obj_color_out);
   color = vec4(result, 1.0);
-  float brightness = dot(color, vec4(0.3126, 0.5152, 0.2722, 0.0));
-  if (brightness > 0.2)
-    brightColor = color * 1.25;
-  else
-    brightColor = vec4(0.0, 0.0, 0.0, 1.0);
+  // always bloom notes
+  brightColor = color * 1.5;
 }
