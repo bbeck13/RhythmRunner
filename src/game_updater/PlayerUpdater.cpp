@@ -172,12 +172,14 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
       float colliding_max_y = colliding_object->GetBoundingBox().GetMax().y;
       float y_velocity_tolerance = player->GetYVelocity();
 
-      if (previous_player_box.GetMin().z >
-          colliding_box.GetMax().z - COLLISION_TOLERANCE_Z) {
-        player->SetBlockedDownZ(true);
-      } else if (previous_player_box.GetMax().z <
-                 colliding_box.GetMin().z + COLLISION_TOLERANCE_Z) {
-        player->SetBlockedUpZ(true);
+      if (!(colliding_object->GetSecondaryType() == SecondaryType::MONSTER)) {
+        if (previous_player_box.GetMin().z >
+            colliding_box.GetMax().z - COLLISION_TOLERANCE_Z) {
+          player->SetBlockedDownZ(true);
+        } else if (previous_player_box.GetMax().z <
+                   colliding_box.GetMin().z + COLLISION_TOLERANCE_Z) {
+          player->SetBlockedUpZ(true);
+        }
       }
       // If the player's bounding box was "above" the platform's box before
       // collision, then we consider the collision "landing" on the platform.
@@ -185,18 +187,24 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
       if ((player_min_y > colliding_max_y) ||
           (std::abs(player_min_y - colliding_max_y) <
            COLLISION_TOLERANCE_Y + y_velocity_tolerance)) {
-        // above colliding box, we are grounded on this platform
-        Land(game_state, colliding_object);
-        player_min_y = player->GetBoundingBox().GetMin().y;
-        // If the ground is now a dropping platform drop it
-        if (player->GetGround()->GetSecondaryType() ==
-                SecondaryType::DROPPING_PLATFORM_UP ||
-            player->GetGround()->GetSecondaryType() ==
-                SecondaryType::DROPPING_PLATFORM_DOWN) {
-          std::shared_ptr<gameobject::DroppingPlatform> dropping =
-              std::static_pointer_cast<gameobject::DroppingPlatform>(
-                  player->GetGround());
-          dropping->SetDropping();
+        if (!(colliding_object->GetSecondaryType() == SecondaryType::MONSTER)) {
+          // above colliding box, we are grounded on this platform
+          Land(game_state, colliding_object);
+          player_min_y = player->GetBoundingBox().GetMin().y;
+          // If the ground is now a dropping platform drop it
+          if (player->GetGround()->GetSecondaryType() ==
+                  SecondaryType::DROPPING_PLATFORM_UP ||
+              player->GetGround()->GetSecondaryType() ==
+                  SecondaryType::DROPPING_PLATFORM_DOWN) {
+            std::shared_ptr<gameobject::DroppingPlatform> dropping =
+                std::static_pointer_cast<gameobject::DroppingPlatform>(
+                    player->GetGround());
+            dropping->SetDropping();
+          }
+        } else {
+          // you've been spooked friend-o
+          Death(game_state);
+          return;
         }
       } else if (previous_player_box.GetMin().z >
                      colliding_box.GetMax().z - COLLISION_TOLERANCE_Z ||
