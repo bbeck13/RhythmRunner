@@ -22,10 +22,13 @@ void Shape::loadMesh(const std::string& meshName) {
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> objMaterials;
   std::string errStr;
-  bool rc = tinyobj::LoadObj(shapes, objMaterials, errStr, meshName.c_str());
+  tinyobj::attrib_t attrib;
+  bool rc = tinyobj::LoadObj(&attrib, &shapes, &objMaterials, &errStr, meshName.c_str());
+  //bool rc = tinyobj::LoadObj(shapes, objMaterials, errStr, meshName.c_str());
   if (!rc) {
     std::cerr << errStr << std::endl;
   } else {
+    posBuf = attrib.vertices;
     posBuf = shapes[0].mesh.positions;
     norBuf = shapes[0].mesh.normals;
     texBuf = shapes[0].mesh.texcoords;

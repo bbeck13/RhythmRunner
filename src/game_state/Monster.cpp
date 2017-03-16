@@ -1,6 +1,10 @@
 #include "Monster.h"
 
 #include "GameRenderer.h"
+
+//#define MONSTER_MASH "models/bunny.obj"
+#define MONSTER_MASH "models/monster.obj"
+
 namespace gameobject {
 
 std::shared_ptr<Program> Monster::monster_program;

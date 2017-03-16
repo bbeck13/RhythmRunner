@@ -12,8 +12,6 @@
 #include "Program.h"
 #include "Texture.h"
 
-#define MONSTER_MASH "models/bunny.obj"
-
 namespace gameobject {
 class Monster : public MovingObject, public Obstacle {
  public:
