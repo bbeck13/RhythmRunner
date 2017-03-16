@@ -6,6 +6,9 @@
   "name": "particle_prog",
   "uniforms": [
     "P",
+    "V",
+    "CamUp",
+    "CamRight",
     "Offset",
     "Color",
     "Texture0"
