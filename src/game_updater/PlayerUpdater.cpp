@@ -288,7 +288,6 @@ void PlayerUpdater::ChangeAnimation(std::shared_ptr<GameState> game_state,
   if (animation & Player::ANIMATION_ENDGAME_BIT) {
     // do fun spins after the game ends
     // TODO(jarhar): add particle/sound effects here?
-      player->SetZVelocity(1);
     player->SetRotationAxis(glm::vec3(1, 0, 0));
   } else {
     // rock fowards/backwards for jumping
