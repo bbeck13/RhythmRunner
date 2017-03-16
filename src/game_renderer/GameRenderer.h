@@ -40,7 +40,8 @@ class GameRenderer {
   static std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView(
       std::shared_ptr<std::vector<glm::vec4>> vfplane,
       std::shared_ptr<Octree> tree);
-  ParticleGenerator *Particles;
+    ParticleGenerator Particles = *(new ParticleGenerator(5000));
+;
 
   static void InitBloom(int height, int width);
   void Bloom(int height, int width);
