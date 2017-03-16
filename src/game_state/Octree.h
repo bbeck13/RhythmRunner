@@ -7,6 +7,8 @@
 
 // TODO(bnbeck) play around with this value it can change the performance a lot
 #define OBJS_IN_LEAF 20
+#define DISTANCE 10
+#define OCT 8
 
 class Node {
  public:
@@ -19,10 +21,12 @@ class Node {
        std::vector<Node*>* childs)
       : objects(items), boundingBox(bb), children(childs) {}
   ~Node() {
-    for (Node* n : *children) {
-      delete n;
+    if (children != nullptr) {
+      for (Node* n : *children) {
+        delete n;
+      }
+      delete children;
     }
-    delete children;
   }
 
  private:
@@ -45,18 +49,14 @@ class Octree {
  private:
   Node* root;
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects;
-  void prune();
 
   static std::string ToString(Node* n);
 
-  static Node* constructOctree(std::vector<std::shared_ptr<GameObject>>* objs);
   static std::vector<std::shared_ptr<GameObject>>* getObjectsInBox(
       std::vector<std::shared_ptr<GameObject>>* objs,
       AxisAlignedBox box);
   static glm::vec3 getMin(std::vector<std::shared_ptr<GameObject>>* objs);
   static glm::vec3 getMax(std::vector<std::shared_ptr<GameObject>>* objs);
-  static std::vector<AxisAlignedBox> splitOct(AxisAlignedBox toSplit);
-  static std::vector<AxisAlignedBox> splitQuad(AxisAlignedBox toSplit);
 };
 
 #endif

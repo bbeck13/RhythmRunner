@@ -39,8 +39,10 @@ class GameCamera {
   glm::vec3 getPosition();
   glm::vec3 getUp();
   glm::vec3 GetCameraPlayerSpacing();
+  float GetForwardSpacing();
 
   void setLookAt(glm::vec3 new_lookat);
+  void SetForwardSpacing(float forward_spacing);
   glm::vec3 getLookAt();
 
   void SetCameraPlayerSpacing(glm::vec3 camera_player_spacing);
@@ -52,15 +54,16 @@ class GameCamera {
  private:
   glm::vec3 camera_player_spacing;
   MatrixStack ViewMatrix = MatrixStack();
-  glm::vec3 lookAtPos = Player::INITIAL_POSITION +
-                        glm::vec3(FORWARD_CAMERA_SPACING, 0, 0);
-  glm::vec3 eyePos = lookAtPos + glm::vec3(-8,2,1);
+  glm::vec3 lookAtPos =
+      Player::INITIAL_POSITION + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0);
+  glm::vec3 eyePos = lookAtPos + glm::vec3(-8, 2, 1);
   glm::vec3 up = glm::vec3(0, 1, 0);
   float obeta = -(M_PI_2);
   float oalpha = 0;
   float beta = 0;
   float alpha = 0;
   float limit = DEGREES_IN_CIRCLE / M_PI / VIEWING_ANGLE;
+  float forward_spacing = FORWARD_CAMERA_SPACING;
 };
 
 #endif

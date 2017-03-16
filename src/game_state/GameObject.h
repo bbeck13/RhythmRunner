@@ -25,7 +25,10 @@ enum SecondaryType {
   SKY,
   MOONROCK,
   PLAINROCK,
-  MONSTER
+  MONSTER,
+  DMT,
+  ACID,
+  COCAINUM
 };
 
 // GameObjects are functional game entities which have one or more

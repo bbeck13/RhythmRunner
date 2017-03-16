@@ -54,7 +54,7 @@ class GameState {
   void AddVideoTexture(std::string name, std::shared_ptr<VideoTexture> texture);
   void SetLevel(std::shared_ptr<Level> level);
   void SetCamera(std::shared_ptr<GameCamera> camera);
-  void IncrementTicks();
+  void IncrementTicks(float time_warp);
   void SetStartTime();
   void SetItemsInView(std::unordered_set<std::shared_ptr<GameObject>>* objects);
   void SetLevelEditorState(
@@ -72,7 +72,7 @@ class GameState {
   GLFWwindow* window;
   SoundEffects effects;
 
-  uint64_t elapsed_ticks;
+  double elapsed_ticks;
   uint64_t start_tick;      // value of elapsed_ticks when game started
   double start_time;        // value of glfwGetTime() when game started
   uint64_t music_end_tick;  // number of ticks we will be at when music ends

@@ -17,15 +17,16 @@ class Collectible : public GameObject {
 
   void SetCollected();
   void SetUncollected();
-  void IncrementTicksCollected();
+  void IncrementTicksCollected(float inc_amt);
   bool GetCollected() const;
   int GetTicksCollected();
 
   ObjectType GetType() override;
+  void Animate(float time_warp);
 
  protected:
   bool isCollected;
-  int ticksSinceCollected;
+  float ticksSinceCollected;
 };
 
 #endif

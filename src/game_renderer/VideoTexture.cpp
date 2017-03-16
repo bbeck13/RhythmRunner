@@ -22,9 +22,7 @@ std::shared_ptr<Texture> VideoTexture::GetCurFrame() {
 }
 
 void VideoTexture::IncrementFrame() {
-  if (cur_frame + 1 == textures.size()) {
-    cur_frame = cur_frame;
-  } else {
+  if (!(cur_frame + 1 == textures.size())) {
     cur_frame++;
   }
 }

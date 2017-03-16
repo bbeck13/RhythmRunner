@@ -27,6 +27,8 @@ class GameRenderer {
   ~GameRenderer();
 
   void Init(const std::string& resource_dir, GLFWwindow* window);
+  MainProgramMode RenderCameraSetup(GLFWwindow* window,
+                                    std::shared_ptr<GameState> game_state);
   MainProgramMode Render(GLFWwindow* window,
                          std::shared_ptr<GameState> game_state);
   LevelProgramMode RenderLevelEditor(GLFWwindow* window,
@@ -59,6 +61,12 @@ class GameRenderer {
   void RenderLevelCollectibles(
       std::unordered_set<std::shared_ptr<GameObject>>* objects,
       SecondaryType type_to_render,
+      std::shared_ptr<MatrixStack> P,
+      std::shared_ptr<MatrixStack> V);
+  void RenderLevelCollectibles(
+      std::unordered_set<std::shared_ptr<GameObject>>* objects,
+      SecondaryType type_to_render,
+      glm::vec3 color,
       std::shared_ptr<MatrixStack> P,
       std::shared_ptr<MatrixStack> V);
   void RenderLevelObjects(

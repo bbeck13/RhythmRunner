@@ -23,19 +23,11 @@ std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> Level::getObjects() {
 }
 
 void Level::AddItem(std::shared_ptr<GameObject> object) {
-  tree->getObjects()->push_back(object);
-  tree = std::make_shared<Octree>(tree->getObjects());
+  tree->insert(object);
 }
 
 void Level::RemoveItem(std::shared_ptr<GameObject> object) {
-  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects =
-      tree->getObjects();
-  auto it = std::find(objects->begin(), objects->end(), object);
-  if (it != objects->end()) {
-    std::swap(*it, objects->back());
-    objects->pop_back();
-  }
-  tree = std::make_shared<Octree>(objects);
+  tree->remove(object);
 }
 
 void Level::SetTree(std::shared_ptr<Octree> tree) {

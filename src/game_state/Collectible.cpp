@@ -1,5 +1,10 @@
 #include "Collectible.h"
 
+#include "TimingConstants.h"
+
+#define ROTATION_PER_SECOND 6.0
+#define ROTATION_PER_TICK (ROTATION_PER_SECOND * SECONDS_PER_TICK)
+
 Collectible::Collectible(const std::string& shape_path,
                          bool isCollected,
                          int ticksSinceCollected,
@@ -8,7 +13,8 @@ Collectible::Collectible(const std::string& shape_path,
                          float rotation_angle,
                          glm::vec3 scale)
     : GameObject(shape_path, position, rotation_axis, rotation_angle, scale),
-      isCollected(isCollected), ticksSinceCollected(ticksSinceCollected) {}
+      isCollected(isCollected),
+      ticksSinceCollected(ticksSinceCollected) {}
 
 Collectible::~Collectible() {}
 
@@ -25,14 +31,20 @@ bool Collectible::GetCollected() const {
   return this->isCollected;
 }
 
-void Collectible::IncrementTicksCollected() {
-  this->ticksSinceCollected++;
+void Collectible::IncrementTicksCollected(float inc_amt) {
+  this->ticksSinceCollected += inc_amt;
 }
 
 int Collectible::GetTicksCollected() {
-  return this->ticksSinceCollected;
+  return std::floor(this->ticksSinceCollected);
 }
 
 ObjectType Collectible::GetType() {
   return ObjectType::COLLECTIBLE;
+}
+
+void Collectible::Animate(float time_warp) {
+  // spin to win
+  SetRotationAxis(glm::vec3(0, 1, 0));
+  SetRotationAngle(GetRotationAngle() + ROTATION_PER_TICK * time_warp);
 }

@@ -8,12 +8,12 @@ std::shared_ptr<Program> MovingPlatform::platform_program;
 std::shared_ptr<Texture> MovingPlatform::platform_texture;
 
 MovingPlatform::MovingPlatform(glm::vec3 position, std::vector<glm::vec3> path)
-    : Obstacle(MOVING_PLATFORM_MESH,
+    : MovingObject(path, position, 0.01f),
+      Obstacle(MOVING_PLATFORM_MESH,
                position,
                glm::vec3(),
                0,
-               glm::vec3(3, .6, 2.0f)),
-      MovingObject(path, position, 0.01f) {
+               glm::vec3(3, .6, 2.0f)) {
   if (!platform_program) {
     platform_program =
         GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/moving_plat.json");
@@ -32,12 +32,12 @@ MovingPlatform::MovingPlatform(glm::vec3 position,
                                float rotation_angle,
                                glm::vec3 velocity,
                                std::vector<glm::vec3> path)
-    : Obstacle(MOVING_PLATFORM_MESH,
+    : MovingObject(path, position, velocity),
+      Obstacle(MOVING_PLATFORM_MESH,
                position,
                rotation_axis,
                rotation_angle,
-               scale),
-      MovingObject(path, position, velocity) {
+               scale) {
   if (!platform_program) {
     platform_program =
         GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/moving_plat.json");
@@ -53,12 +53,12 @@ MovingPlatform::MovingPlatform(glm::vec3 position,
 MovingPlatform::MovingPlatform(glm::vec3 position,
                                std::vector<glm::vec3> path,
                                float velocity)
-    : Obstacle(MOVING_PLATFORM_MESH,
+    : MovingObject(path, position, velocity),
+      Obstacle(MOVING_PLATFORM_MESH,
                position,
                glm::vec3(),
                0,
-               glm::vec3(3, .6, 2.0f)),
-      MovingObject(path, position, velocity) {
+               glm::vec3(3, .6, 2.0f)) {
   if (!platform_program) {
     platform_program =
         GameRenderer::ProgramFromJSON(ASSET_DIR "/shaders/moving_plat.json");

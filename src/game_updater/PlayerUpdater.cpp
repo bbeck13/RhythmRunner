@@ -16,8 +16,8 @@
 #include "DroppingPlatform.h"
 
 #define COLLISION_TOLERANCE_Y 0.420f
-#define COLLISION_TOLERANCE_Z 0.2f
-#define COLLISION_TOLERANCE_X 0.2f
+#define COLLISION_TOLERANCE_Z 0.419f
+#define COLLISION_TOLERANCE_X 0.418f
 #define MAX_AERIAL_ROTATION_ANGLE 0.67f
 
 PlayerUpdater::PlayerUpdater() {}
@@ -53,26 +53,23 @@ void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
 
   // apply gravity
   if (!player->GetGround()) {
-    player->SetYVelocity(player->GetYVelocity() - PLAYER_GRAVITY);
+    player->SetYVelocity(player->GetYVelocity() -
+                         (PLAYER_GRAVITY * player->GetTimeWarp()));
   }
-
-  glm::vec3 prevCameraPos = camera->getPosition();
   Player::DuckDir target_duck;
   // always check for ducking (be ware of ducks)
   // let the player move up/down Z (sock it to me)
   if (InputBindings::KeyDown(GLFW_KEY_A) && !player->GetBlockedDownZ()) {
     target_duck = Player::DuckDir::LEFT;
-    player->MoveDownZ();
-    camera->setPosition(prevCameraPos -
-                        glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
+    player->SetZVelocity(-PLAYER_DELTA_Z_PER_TICK * player->GetTimeWarp());
   } else if (InputBindings::KeyDown(GLFW_KEY_D) && !player->GetBlockedUpZ()) {
     target_duck = Player::DuckDir::RIGHT;
-    player->MoveUpZ();
-    camera->setPosition(prevCameraPos +
-                        glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
+    player->SetZVelocity(PLAYER_DELTA_Z_PER_TICK * player->GetTimeWarp());
   } else {
     target_duck = Player::DuckDir::NONE;
+    player->SetZVelocity(0);
   }
+
   if ((InputBindings::KeyDown(GLFW_KEY_LEFT_SHIFT) ||
        InputBindings::KeyDown(GLFW_KEY_RIGHT_SHIFT)) &&
       target_duck == Player::DuckDir::NONE) {
@@ -85,7 +82,7 @@ void PlayerUpdater::MovePlayer(std::shared_ptr<GameState> game_state) {
 
   // Update player position based on new velocity.
   player->SetPosition(player->GetPosition() +
-                      glm::vec3(DELTA_X_PER_TICK, player->GetYVelocity(),
+                      glm::vec3(player->GetXVelocity(), player->GetYVelocity(),
                                 player->GetZVelocity()));
 }
 
@@ -94,7 +91,6 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
   std::shared_ptr<PhysicalObject> rear_wheel = player->GetRearWheel();
   std::shared_ptr<PhysicalObject> front_wheel = player->GetFrontWheel();
   Player::Animation current_animation = player->GetAnimation();
-
   // Rotate the wheels
   if (current_animation & Player::ANIMATION_WHEELSPIN_BIT) {
     player->SetWheelRotationSpeed(WHEEL_ROTATION_PER_TICK);
@@ -103,10 +99,12 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
   } else {
     player->SetWheelRotationSpeed(0);
   }
-  player->GetRearWheel()->SetRotationAngle(rear_wheel->GetRotationAngle() +
-                                           player->GetWheelRotationSpeed());
-  player->GetFrontWheel()->SetRotationAngle(front_wheel->GetRotationAngle() +
-                                            player->GetWheelRotationSpeed());
+  player->GetRearWheel()->SetRotationAngle(
+      rear_wheel->GetRotationAngle() +
+      (player->GetWheelRotationSpeed() * player->GetTimeWarp()));
+  player->GetFrontWheel()->SetRotationAngle(
+      front_wheel->GetRotationAngle() +
+      (player->GetWheelRotationSpeed() * player->GetTimeWarp()));
 
   if (current_animation == Player::Animation::FAILURE) {
     // go crazy
@@ -129,6 +127,13 @@ void PlayerUpdater::AnimatePlayer(std::shared_ptr<GameState> game_state) {
   // make sure the player is on the ground if grounded.
   // this is also important for staying attached to moving platforms
   SnapToGround(game_state);
+}
+
+void PlayerUpdater::PowerUpPlayer(std::shared_ptr<GameState> game_state) {
+  std::shared_ptr<Player> player = game_state->GetPlayer();
+  // check to see if the player has sobered up
+  player->SoberUp();
+  game_state->GetLevel()->getMusic()->setPitch(player->GetTimeWarp());
 }
 
 void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
@@ -157,6 +162,13 @@ void PlayerUpdater::CollisionCheck(std::shared_ptr<GameState> game_state) {
       collectible->SetCollected();
       game_state->GetPlayer()->SetScore(game_state->GetPlayer()->GetScore() +
                                         1);
+      if (collectible->GetSecondaryType() == SecondaryType::ACID) {
+        player->TakeAHit(Player::Trip::ACID);
+      } else if (collectible->GetSecondaryType() == SecondaryType::COCAINUM) {
+        player->TakeAHit(Player::Trip::COCAINUM);
+      } else if (collectible->GetSecondaryType() == SecondaryType::DMT) {
+        player->TakeAHit(Player::Trip::DMT);
+      }
     }
   }
 

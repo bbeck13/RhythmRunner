@@ -91,14 +91,23 @@ int main(int argc, char** argv) {
         game_state->AddVideoTexture("sky", vid);
         game_updater.Init(game_state);
         delete level_generator;
+        program_mode = MainProgramMode::SET_CAMERA;
 
-        // continue to RESET_GAME
+        // continue to SET_CAMERA
+      }
+      case MainProgramMode::SET_CAMERA: {
+        game_updater.UpdateCamera(game_state);
+        game_renderer.RenderCameraSetup(window, game_state);
+        if (InputBindings::KeyDown(GLFW_KEY_ENTER)) {
+          program_mode = MainProgramMode::RESET_GAME;
+        }
+        break;
       }
       case MainProgramMode::RESET_GAME:
         game_updater.Reset(game_state);
         // lock cursor when starting game
         InputBindings::SetCursorMode(InputBindings::CursorMode::LOCKED);
-        // continue to GAME_SCREEN
+      // continue to GAME_SCREEN
       case MainProgramMode::GAME_SCREEN: {
         switch (game_state->GetPlayingState()) {
           case GameState::PlayingState::FAILURE:
@@ -114,7 +123,7 @@ int main(int argc, char** argv) {
             // TODO(jarhar): consider basic infinite loop detection here
             // TODO(jarhar): consider re-assessing timing after each call to
             // Update().
-            //  What if the music starts/stops during one of multiple Update()s?
+            //  What if the music starts/stops during one of multiple Updates?
             while (game_state->GetElapsedTicks() < target_tick_count) {
               game_updater.Update(game_state);
             }

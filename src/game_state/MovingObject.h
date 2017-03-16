@@ -11,9 +11,7 @@
 
 class MovingObject {
  public:
-  MovingObject(std::vector<glm::vec3> path,
-               glm::vec3 position,
-               float velocity);
+  MovingObject(std::vector<glm::vec3> path, glm::vec3 position, float velocity);
 
   MovingObject(std::vector<glm::vec3> path,
                glm::vec3 position,
@@ -23,7 +21,7 @@ class MovingObject {
 
   std::vector<glm::vec3> GetPath() const;
 
-  glm::vec3 updatePosition(glm::vec3 position);
+  glm::vec3 updatePosition(glm::vec3 position, float time_warp);
 
   glm::vec3 GetMovementVector();
 

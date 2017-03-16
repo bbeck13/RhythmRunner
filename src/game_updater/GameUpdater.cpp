@@ -1,4 +1,5 @@
 // Joseph Arhar
+// Jotaro Kujo
 
 #include "GameUpdater.h"
 
@@ -16,6 +17,8 @@
 #include "TimingConstants.h"
 #include "VideoTexture.h"
 
+#define CAMERA_SPACING_INCREMENT 0.01f
+
 GameUpdater::GameUpdater() {}
 
 GameUpdater::~GameUpdater() {}
@@ -26,10 +29,15 @@ void GameUpdater::Init(std::shared_ptr<GameState> game_state) {
 
 void GameUpdater::PostGameUpdate(std::shared_ptr<GameState> game_state) {
   // run animations after winning or losing
-  std::shared_ptr<gameobject::Note> note;
-  for (std::shared_ptr<GameObject> game_object : *game_state->GetObjectsInView()) {
-    if (note = std::dynamic_pointer_cast<gameobject::Note>(game_object)) {
-      note->Animate();
+  for (std::shared_ptr<GameObject> obj : *game_state->GetObjectsInView()) {
+    if (obj->GetType() == ObjectType::COLLECTIBLE) {
+      std::shared_ptr<Collectible> collectible =
+          std::dynamic_pointer_cast<Collectible>(obj);
+      collectible->Animate(game_state->GetPlayer()->GetTimeWarp());
+      if (collectible->GetCollected()) {
+        collectible->IncrementTicksCollected(
+            game_state->GetPlayer()->GetTimeWarp());
+      }
     }
   }
   player_updater.AnimatePlayer(game_state);
@@ -38,7 +46,7 @@ void GameUpdater::PostGameUpdate(std::shared_ptr<GameState> game_state) {
 void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   if (game_state->ReachedEndOfLevel()) {
     game_state->SetPlayingState(GameState::PlayingState::SUCCESS);
-    game_state->IncrementTicks();
+    game_state->IncrementTicks(game_state->GetPlayer()->GetTimeWarp());
     return;
   }
 
@@ -58,9 +66,10 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   player_updater.MovePlayer(game_state);
   player_updater.AnimatePlayer(game_state);
   player_updater.CollisionCheck(game_state);
-  UpdateCamera(game_state);
+  player_updater.PowerUpPlayer(game_state);
+  UpdateCamera(game_state, true);
 
-  game_state->IncrementTicks();
+  game_state->IncrementTicks(game_state->GetPlayer()->GetTimeWarp());
 }
 
 void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
@@ -69,7 +78,8 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
     if (GameObject::Moves(obj->GetSecondaryType())) {
       std::shared_ptr<MovingObject> movingObj =
           std::dynamic_pointer_cast<MovingObject>(obj);
-      obj->SetPosition(movingObj->updatePosition(obj->GetPosition()));
+      obj->SetPosition(movingObj->updatePosition(
+          obj->GetPosition(), game_state->GetPlayer()->GetTimeWarp()));
 
       // Drop the dropping Platforms
     } else if (obj->GetSecondaryType() == SecondaryType::DROPPING_PLATFORM_UP ||
@@ -79,20 +89,27 @@ void GameUpdater::UpdateLevel(std::shared_ptr<GameState> game_state) {
           std::dynamic_pointer_cast<gameobject::DroppingPlatform>(obj);
       if (dropper->IsDropping()) {
         obj->SetPosition(obj->GetPosition() +
-                         glm::vec3(0.0f, dropper->GetYVelocity(), 0.0f));
+                         glm::vec3(0.0f,
+                                   dropper->GetYVelocity() *
+                                       game_state->GetPlayer()->GetTimeWarp(),
+                                   0.0f));
       }
-    } else if (obj->GetSecondaryType() == SecondaryType::NOTE) {
-      std::shared_ptr<gameobject::Note> note =
-          std::dynamic_pointer_cast<gameobject::Note>(obj);
-      note->Animate();
-      if (note->GetCollected()) {
-         note->IncrementTicksCollected();
+    } else if (obj->GetType() == ObjectType::COLLECTIBLE) {
+      std::shared_ptr<Collectible> collectible =
+          std::dynamic_pointer_cast<Collectible>(obj);
+      collectible->Animate(game_state->GetPlayer()->GetTimeWarp());
+      if (collectible->GetCollected()) {
+        collectible->IncrementTicksCollected(
+            game_state->GetPlayer()->GetTimeWarp());
       }
     }
   }
 
-  game_state->GetSky()->SetPosition(game_state->GetSky()->GetPosition() +
-                                    glm::vec3(DELTA_X_PER_TICK, 0, 0));
+  game_state->GetSky()->SetPosition(
+      game_state->GetSky()->GetPosition() +
+      glm::vec3(game_state->GetPlayer()->GetXVelocity(),
+                game_state->GetPlayer()->GetYVelocity(),
+                game_state->GetPlayer()->GetZVelocity()));
 }
 
 void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
@@ -137,19 +154,25 @@ void GameUpdater::Reset(std::shared_ptr<GameState> game_state) {
   if (music->getStatus() != sf::SoundSource::Status::Stopped) {
     music->stop();
   }
+  music->setPitch(1);
+  music->setVolume(50);
 }
 
 void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
-  std::shared_ptr<GameCamera> camera = game_state->GetCamera();
+  UpdateCamera(game_state, false);
+}
 
+void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state,
+                               bool update_with_player) {
+  std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   glm::vec3 player_position = game_state->GetPlayer()->GetPosition();
-  glm::vec3 camera_spacing = camera->GetCameraPlayerSpacing();
   float minCameraYLimit = player_position[1] + 1.5;
   float maxCameraYLimit = player_position[1] + 3.5;
 
   // update camera with cursor
   std::pair<double, double> cursor_diff = InputBindings::GetCursorDiff();
-  camera->revolveAroundLookAt(0.0f, -cursor_diff.first * CAMERA_YAW_MOVE / 4000.0f);
+  camera->revolveAroundLookAt(0.0f,
+                              -cursor_diff.first * CAMERA_YAW_MOVE / 4000.0f);
 
   // update camera with keys
   if (InputBindings::KeyDown(GLFW_KEY_L) ||
@@ -158,33 +181,46 @@ void GameUpdater::UpdateCamera(std::shared_ptr<GameState> game_state) {
   }
   if (InputBindings::KeyDown(GLFW_KEY_H) ||
       InputBindings::KeyDown(GLFW_KEY_LEFT)) {
-    camera->revolveAroundLookAt(0.0f, -1 * CAMERA_YAW_MOVE / 1000.0f);
+    camera->revolveAroundLookAt(0.0f, -CAMERA_YAW_MOVE / 1000.0f);
   }
-  if (game_state->GetPlayer()->GetGround()) {
-    if (InputBindings::KeyDown(GLFW_KEY_K) ||
-        InputBindings::KeyDown(GLFW_KEY_UP)) {
-      glm::vec3 prevCameraPos = camera->getPosition();
-      camera->revolveAroundLookAt(CAMERA_YAW_MOVE / 1000.0f, 0.0f);
-      if (camera->getPosition()[1] > maxCameraYLimit) {
-        camera->setPosition(prevCameraPos);
-      }
+  if (InputBindings::KeyDown(GLFW_KEY_K) ||
+      InputBindings::KeyDown(GLFW_KEY_UP)) {
+    glm::vec3 prevCameraPos = camera->getPosition();
+    camera->revolveAroundLookAt(CAMERA_YAW_MOVE / 1000.0f, 0.0f);
+    if (camera->getPosition()[1] > maxCameraYLimit) {
+      camera->setPosition(prevCameraPos);
     }
-    if (InputBindings::KeyDown(GLFW_KEY_L) ||
-        InputBindings::KeyDown(GLFW_KEY_DOWN)) {
-      glm::vec3 prevCameraPos = camera->getPosition();
-      camera->revolveAroundLookAt(-1 * CAMERA_YAW_MOVE / 1000.0f, 0.0f);
-      if (camera->getPosition()[1] < minCameraYLimit) {
-        camera->setPosition(prevCameraPos);
-      }
+  }
+  if (InputBindings::KeyDown(GLFW_KEY_J) ||
+      InputBindings::KeyDown(GLFW_KEY_DOWN)) {
+    glm::vec3 prevCameraPos = camera->getPosition();
+    camera->revolveAroundLookAt(-1 * CAMERA_YAW_MOVE / 1000.0f, 0.0f);
+    if (camera->getPosition()[1] < minCameraYLimit) {
+      camera->setPosition(prevCameraPos);
     }
+  }
+  glm::vec3 camera_position = camera->getPosition();
+  glm::vec3 look_at = camera->getLookAt();
+  glm::vec3 view = camera_position - look_at;
+  if (InputBindings::KeyDown(GLFW_KEY_C)) {
+    camera->setPosition(camera->getPosition() -
+                        CAMERA_SPACING_INCREMENT * view);
+  }
+  if (InputBindings::KeyDown(GLFW_KEY_E)) {
+    camera->setPosition(camera->getPosition() +
+                        CAMERA_SPACING_INCREMENT * view);
   }
 
-  camera->setPosition(camera->getPosition() +
-                      glm::vec3(DELTA_X_PER_TICK, 0, 0));
+  if (update_with_player) {
+    camera->setPosition(camera->getPosition() +
+                        glm::vec3(game_state->GetPlayer()->GetXVelocity(), 0,
+                                  game_state->GetPlayer()->GetZVelocity()));
+  }
 
   // Always look directly at the player.
   // Add FORWARD_CAMERA_SPACING to align camera
-  camera->setLookAt(player_position + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0));
+  camera->setLookAt(player_position +
+                    glm::vec3(camera->GetForwardSpacing(), 0, 0));
 
   if (InputBindings::KeyDown(GLFW_KEY_1)) {  // view 1
     camera->SetCameraPlayerSpacing(

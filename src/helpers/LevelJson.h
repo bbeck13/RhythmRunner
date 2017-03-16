@@ -14,6 +14,9 @@
 #include "PlainRock.h"
 #include "MoonRock.h"
 #include "Monster.h"
+#include "DMT.h"
+#include "Acid.h"
+#include "Cocainum.h"
 #include "json.hpp"
 
 namespace glm {
@@ -61,6 +64,16 @@ void to_json(nlohmann::json& j, const std::vector<gameobject::Monster>& items);
 void from_json(const nlohmann::json& j,
                std::vector<gameobject::Monster>& items);
 
+void to_json(nlohmann::json& j, const std::vector<gameobject::DMT>& items);
+void from_json(const nlohmann::json& j, std::vector<gameobject::DMT>& items);
+
+void to_json(nlohmann::json& j, const std::vector<gameobject::Acid>& items);
+void from_json(const nlohmann::json& j, std::vector<gameobject::Acid>& items);
+
+void to_json(nlohmann::json& j, const std::vector<gameobject::Cocainum>& items);
+void from_json(const nlohmann::json& j,
+               std::vector<gameobject::Cocainum>& items);
+
 void to_json(nlohmann::json& j,
              const std::vector<std::shared_ptr<GameObject>>& level);
 void from_json(const nlohmann::json& j,
@@ -88,6 +101,15 @@ void from_json(const nlohmann::json& j, PlainRock& rock);
 
 void to_json(nlohmann::json& j, const Monster& monster);
 void from_json(const nlohmann::json& j, Monster& monster);
+
+void to_json(nlohmann::json& j, const DMT& dmt);
+void from_json(const nlohmann::json& j, DMT& dmt);
+
+void to_json(nlohmann::json& j, const Acid& acid);
+void from_json(const nlohmann::json& j, Acid& acid);
+
+void to_json(nlohmann::json& j, const Cocainum& cocainum);
+void from_json(const nlohmann::json& j, Cocainum& cocainum);
 }
 
 #endif

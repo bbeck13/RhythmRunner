@@ -1,24 +1,24 @@
-// Alex Ottoboni
-
-#ifndef __NOTE_H__
-#define __NOTE_H__
+#ifndef __ACID_H__
+#define __ACID_H__
 
 #include <glm/ext.hpp>
 
 #include "Collectible.h"
 #include "Program.h"
 
-#define NOTE_MESH "models/note.obj"
+#define ACID_MESH "models/rock.obj"
 
 namespace gameobject {
-class Note : public Collectible {
+class Acid : public Collectible {
  public:
-  Note(glm::vec3 position = glm::vec3(),
+  static const glm::vec3 color;
+
+  Acid(glm::vec3 position = glm::vec3(),
        glm::vec3 scale = glm::vec3(0.5, 0.5, 0.5),
        glm::vec3 rotation_axis = glm::vec3(0, 1, 0),
        float rotation_angle = 0,
        bool collected = false);
-  virtual ~Note();
+  virtual ~Acid();
 
   SecondaryType GetSecondaryType() override;
 

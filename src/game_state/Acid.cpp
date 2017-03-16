@@ -1,19 +1,20 @@
-#include "Note.h"
+#include "Acid.h"
 
 #include <memory>
 
-#include "TimingConstants.h"
 #include "GameRenderer.h"
 
 namespace gameobject {
 
-std::shared_ptr<Program> Note::note_prog;
-Note::Note(glm::vec3 position,
+const glm::vec3 Acid::color = glm::vec3(89.0 / 255.0, 236.0 / 255, 0);
+
+std::shared_ptr<Program> Acid::note_prog;
+Acid::Acid(glm::vec3 position,
            glm::vec3 scale,
            glm::vec3 rotation_axis,
            float rotation_angle,
            bool collected)
-    : Collectible(NOTE_MESH,
+    : Collectible(ACID_MESH,
                   collected,
                   0,
                   position,
@@ -26,9 +27,9 @@ Note::Note(glm::vec3 position,
   program = note_prog;
 }
 
-Note::~Note() {}
+Acid::~Acid() {}
 
-SecondaryType Note::GetSecondaryType() {
-  return SecondaryType::NOTE;
+SecondaryType Acid::GetSecondaryType() {
+  return SecondaryType::ACID;
 }
 }

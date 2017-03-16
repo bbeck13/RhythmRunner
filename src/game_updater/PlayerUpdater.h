@@ -14,6 +14,7 @@ class PlayerUpdater {
   virtual ~PlayerUpdater();
 
   void MovePlayer(std::shared_ptr<GameState> game_state);
+  void PowerUpPlayer(std::shared_ptr<GameState> game_state);
   void AnimatePlayer(std::shared_ptr<GameState> game_state);
   void CollisionCheck(std::shared_ptr<GameState> game_state);
   void ChangeAnimation(std::shared_ptr<GameState> game_state,
@@ -29,7 +30,6 @@ class PlayerUpdater {
 
   // used to store state between MovePlayer() and CollisionCheck()
   AxisAlignedBox previous_player_box;
-  float collision_width;
 };
 
 #endif  // PLAYER_UPDATER_H_

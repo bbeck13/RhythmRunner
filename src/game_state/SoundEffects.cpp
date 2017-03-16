@@ -85,7 +85,6 @@ void SoundEffects::Unpause() {
 void SoundEffects::Death() {
   std::srand(std::time(NULL));
   int index = std::rand() % deaths.size();
-  std::cerr << std::endl << index << std::endl;
   deaths.at(index)->play();
   deaths.at(index)->setLoop(false);
 }
