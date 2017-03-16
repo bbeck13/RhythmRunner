@@ -30,10 +30,13 @@ class AxisAlignedBox {
   ~AxisAlignedBox();
 
   AxisAlignedBox merge(AxisAlignedBox other);
+  std::vector<AxisAlignedBox> split_oct();
+  std::vector<AxisAlignedBox> split_quad();
   glm::vec3 GetMin();
   glm::vec3 GetMax();
   glm::vec3 GetCenter();
   std::string ToString();
+  float Distance(AxisAlignedBox other);
 
  private:
   glm::vec3 min, max;

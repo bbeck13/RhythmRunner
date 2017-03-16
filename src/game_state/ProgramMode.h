@@ -11,7 +11,8 @@ enum class MainProgramMode {
   RESET_GAME,
   GAME_SCREEN,
   MENU_SCREEN,
-  EXIT
+  EXIT,
+  SET_CAMERA
 };
 
 enum class LevelProgramMode {

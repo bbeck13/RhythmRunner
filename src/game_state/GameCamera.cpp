@@ -55,8 +55,7 @@ glm::vec3 GameCamera::getPosition() {
 
 void GameCamera::Reset() {
   glm::vec3 previousLookAtPos = lookAtPos;
-  lookAtPos =
-      Player::INITIAL_POSITION + glm::vec3(FORWARD_CAMERA_SPACING, 0, 0);
+  lookAtPos = Player::INITIAL_POSITION + glm::vec3(GetForwardSpacing(), 0, 0);
   glm::vec3 lookAtPosDiff = previousLookAtPos - lookAtPos;
   eyePos = eyePos - lookAtPosDiff;
   up = glm::vec3(0, 1, 0);
@@ -116,4 +115,12 @@ void GameCamera::revolveAroundLookAt(float radiansVertical,
            lookAtPos;
 
   Refresh();
+}
+
+float GameCamera::GetForwardSpacing() {
+  return forward_spacing;
+}
+
+void GameCamera::SetForwardSpacing(float forward_spacing) {
+  this->forward_spacing = forward_spacing;
 }

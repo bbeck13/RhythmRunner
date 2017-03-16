@@ -89,3 +89,87 @@ AxisAlignedBox AxisAlignedBox::merge(AxisAlignedBox other) {
       glm::vec3(std::max(max.x, otherMax.x), std::max(max.y, otherMax.y),
                 std::max(max.z, otherMax.z)));
 }
+
+float AxisAlignedBox::Distance(AxisAlignedBox other) {
+  if (IsColliding(*this, other)) {
+    return 0;
+  }
+  return distance(this->GetCenter(), other.GetCenter());
+}
+
+std::vector<AxisAlignedBox> AxisAlignedBox::split_quad() {
+  std::vector<AxisAlignedBox> quadrants;
+
+  // mid
+  glm::vec3 mid_top_mid(0.5f * (GetMin().x + GetMax().x), GetMax().y,
+                        0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 right_top_mid(GetMax().x, GetMax().y,
+                          0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 left_bottom_mid(GetMin().x, GetMin().y,
+                            0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 mid_bottom_mid(0.5f * (GetMin().x + GetMax().x), GetMin().y,
+                           0.5f * (GetMin().z + GetMax().z));
+  // front
+  glm::vec3 mid_bottom_front(0.5f * (GetMin().x + GetMax().x), GetMin().y,
+                             GetMin().z);
+  // back
+  glm::vec3 mid_top_back(0.5f * (GetMin().x + GetMax().x), GetMax().y,
+                         GetMax().z);
+
+  quadrants.push_back(AxisAlignedBox(GetMin(), mid_top_mid));
+  quadrants.push_back(AxisAlignedBox(mid_bottom_front, right_top_mid));
+
+  quadrants.push_back(AxisAlignedBox(left_bottom_mid, mid_top_back));
+  quadrants.push_back(AxisAlignedBox(mid_bottom_mid, GetMax()));
+
+  return quadrants;
+}
+
+std::vector<AxisAlignedBox> AxisAlignedBox::split_oct() {
+  std::vector<AxisAlignedBox> quadrants;
+
+  // front points
+  glm::vec3 mid_bottom_front(0.5f * (GetMin().x + GetMax().x), GetMin().y,
+                             GetMin().z);
+  glm::vec3 left_mid_front(GetMin().x, 0.5f * (GetMin().y + GetMax().y),
+                           GetMin().z);
+  glm::vec3 mid_mid_front(0.5f * (GetMin().x + GetMax().x),
+                          0.5f * (GetMin().y + GetMax().y), GetMin().z);
+  // middle points
+  glm::vec3 left_bottom_mid(GetMin().x, GetMin().y,
+                            0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 mid_bottom_mid(0.5f * (GetMin().x + GetMax().x), GetMin().y,
+                           0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 left_mid_mid(GetMin().x, 0.5f * (GetMin().y + GetMax().y),
+                         0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 right_mid_mid(GetMax().x, 0.5f * (GetMin().y + GetMax().y),
+                          0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 mid_mid_mid(0.5f * (GetMin().x + GetMax().x),
+                        0.5f * (GetMin().y + GetMax().y),
+                        0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 mid_top_mid(0.5f * (GetMin().x + GetMax().x), GetMax().y,
+                        0.5f * (GetMin().z + GetMax().z));
+  glm::vec3 right_top_mid(GetMax().x, GetMax().y,
+                          0.5f * (GetMin().z + GetMax().z));
+  // far points
+  glm::vec3 mid_mid_back(0.5f * (GetMin().x + GetMax().x),
+                         0.5f * (GetMin().y + GetMax().y), GetMax().z);
+  glm::vec3 mid_top_back(0.5f * (GetMin().x + GetMax().x), GetMax().y,
+                         GetMax().z);
+  glm::vec3 right_mid_back(GetMax().x, 0.5f * (GetMin().y + GetMax().y),
+                           GetMax().z);
+
+  // front quadrants
+  quadrants.push_back(AxisAlignedBox(GetMin(), mid_mid_mid));
+  quadrants.push_back(AxisAlignedBox(mid_bottom_front, right_mid_mid));
+  quadrants.push_back(AxisAlignedBox(left_mid_front, mid_top_mid));
+  quadrants.push_back(AxisAlignedBox(mid_mid_front, right_top_mid));
+
+  // back quadrants
+  quadrants.push_back(AxisAlignedBox(left_bottom_mid, mid_mid_back));
+  quadrants.push_back(AxisAlignedBox(mid_bottom_mid, right_mid_back));
+  quadrants.push_back(AxisAlignedBox(left_mid_mid, mid_top_back));
+  quadrants.push_back(AxisAlignedBox(mid_mid_mid, GetMax()));
+
+  return quadrants;
+}

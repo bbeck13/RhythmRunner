@@ -68,12 +68,12 @@ glm::vec3 MovingObject::calculateMovementVector(glm::vec3 goal,
   return moveVector;
 }
 
-glm::vec3 MovingObject::updatePosition(glm::vec3 position) {
+glm::vec3 MovingObject::updatePosition(glm::vec3 position, float time_warp) {
   glm::vec3 newPosition;
 
-  newPosition.x = position.x + movementVector.x * velocity.x;
-  newPosition.y = position.y + movementVector.y * velocity.y;
-  newPosition.z = position.z + movementVector.z * velocity.z;
+  newPosition.x = position.x + movementVector.x * velocity.x * time_warp;
+  newPosition.y = position.y + movementVector.y * velocity.y * time_warp;
+  newPosition.z = position.z + movementVector.z * velocity.z * time_warp;
 
   if (path.size() > 0) {
     // if we moved farther from the goal position rather than closer

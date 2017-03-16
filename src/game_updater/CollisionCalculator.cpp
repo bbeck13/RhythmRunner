@@ -15,15 +15,14 @@ CollisionCalculator::GetCollidingObjects(AxisAlignedBox primary_object,
   while (!toVisit.empty()) {
     Node* node = toVisit.front();
     toVisit.pop();
-    if (node->objects->empty()) {
+    if (node->children != nullptr) {
       for (Node* child : *(node->children)) {
         if (AxisAlignedBox::IsColliding(child->boundingBox, primary_object)) {
-          if (!(child->objects->empty() && child->children->empty())) {
-            toVisit.push(child);
-          }
+          toVisit.push(child);
         }
       }
-    } else {
+    }
+    if (node->objects != nullptr) {
       for (std::shared_ptr<GameObject> objectInBox : *(node->objects)) {
         if (AxisAlignedBox::IsColliding(objectInBox->GetBoundingBox(),
                                         primary_object)) {

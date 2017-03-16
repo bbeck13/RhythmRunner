@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
+#include <cstdlib>
 #include <queue>
 #include <algorithm>  // std::copy_if, std::distance
 
@@ -24,6 +25,9 @@
 #include "MoonRock.h"
 #include "PlainRock.h"
 #include "Monster.h"
+#include "DMT.h"
+#include "Acid.h"
+#include "Cocainum.h"
 #include "LevelJson.h"
 #include "GameUpdater.h"
 #include "CollisionCalculator.h"
@@ -32,8 +36,8 @@
 #define SHOW_ME_THE_MENU_ITEMS 4
 #define ENDGAME_MENU_WAIT_SECONDS 0.5
 
-std::unordered_map<std::string,
-                   std::shared_ptr<Program>> GameRenderer::programs;
+std::unordered_map<std::string, std::shared_ptr<Program>>
+    GameRenderer::programs;
 GLuint GameRenderer::hdrFBO;
 GLuint GameRenderer::hdrColorBuffers[2];
 GLuint GameRenderer::pingpongFBO[2];
@@ -187,13 +191,14 @@ std::unordered_set<std::shared_ptr<GameObject>>* GameRenderer::GetObjectsInView(
   while (!toVisit.empty()) {
     Node* node = toVisit.front();
     toVisit.pop();
-    if (node->objects->empty()) {
+    if (node->children != nullptr) {
       for (Node* child : *(node->children)) {
         if (!ViewFrustumCulling::IsCulled(child->boundingBox, vfplane)) {
           toVisit.push(child);
         }
       }
-    } else {
+    }
+    if (node->objects != nullptr) {
       for (std::shared_ptr<GameObject> objectInBox : *(node->objects)) {
         if (!ViewFrustumCulling::IsCulled(objectInBox->GetBoundingBox(),
                                           vfplane)) {
@@ -213,6 +218,25 @@ MainProgramMode GameRenderer::Render(GLFWwindow* window,
   MainProgramMode next_mode = ImGuiRenderGame(game_state);
   RendererSetup::PostRender(window);
   return next_mode;
+}
+
+MainProgramMode GameRenderer::RenderCameraSetup(
+    GLFWwindow* window,
+    std::shared_ptr<GameState> game_state) {
+  MainProgramMode program_mode = MainProgramMode::SET_CAMERA;
+  RenderObjects(window, game_state);
+  glClear(GL_DEPTH_BUFFER_BIT);
+  ImGuiRenderBegin(game_state);
+  RendererSetup::ImGuiTopLeftCornerWindow(0.3, RendererSetup::STATIC);
+  ImGui::Begin("Adjust Camera", NULL, RendererSetup::STATIC_WINDOW_FLAGS);
+  ImGui::Text("[Enter] To start");
+  ImGui::Text("1, 2 for default views");
+  ImGui::Text("Arrow Keys to adjust views");
+  ImGui::Text("[C] to zoom in [E] to zoom out");
+  ImGui::End();
+  ImGuiRenderEnd();
+  RendererSetup::PostRender(window);
+  return program_mode;
 }
 
 LevelProgramMode GameRenderer::RenderLevelEditor(
@@ -282,6 +306,13 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
                      textures["nightsky"], P, V);
   RenderLevelCollectibles(game_state->GetObjectsInView(), SecondaryType::NOTE,
                           P, V);
+  RenderLevelCollectibles(game_state->GetObjectsInView(), SecondaryType::DMT,
+                          gameobject::DMT::color, P, V);
+  RenderLevelCollectibles(game_state->GetObjectsInView(), SecondaryType::ACID,
+                          gameobject::Acid::color, P, V);
+  RenderLevelCollectibles(game_state->GetObjectsInView(),
+                          SecondaryType::COCAINUM, gameobject::Cocainum::color,
+                          P, V);
   RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::MONSTER, P,
                      V);
   RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::MOONROCK, P,
@@ -291,6 +322,7 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
   P->popMatrix();
   V->popMatrix();
 }
+
 void GameRenderer::RenderSingleObject(std::shared_ptr<GameObject> object,
                                       std::shared_ptr<Program> program,
                                       std::shared_ptr<Texture> texture,
@@ -354,6 +386,7 @@ void GameRenderer::RenderLevelObjects(
     program->unbind();
   }
 }
+
 void GameRenderer::RenderLevelObjects(
     std::unordered_set<std::shared_ptr<GameObject>>* objects,
     SecondaryType type_to_render,
@@ -409,10 +442,44 @@ void GameRenderer::RenderLevelCollectibles(
         }
         glUniform3f(program->getUniform("in_obj_color"), cur_color.x,
                     cur_color.y, cur_color.z);
-        glUniform1i(program->getUniform("isCollected"), collectible->GetCollected());
-        glUniform1i(program->getUniform("timeCollected"), collectible->GetTicksCollected());
+        glUniform1i(program->getUniform("isCollected"),
+                    collectible->GetCollected());
+        glUniform1i(program->getUniform("timeCollected"),
+                    collectible->GetTicksCollected());
         collectible->GetModel()->draw(program);
       }
+    }
+    program->unbind();
+  }
+}
+
+void GameRenderer::RenderLevelCollectibles(
+    std::unordered_set<std::shared_ptr<GameObject>>* objects,
+    SecondaryType type_to_render,
+    glm::vec3 color,
+    std::shared_ptr<MatrixStack> P,
+    std::shared_ptr<MatrixStack> V) {
+  std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> objects_to_render =
+      GetObjectsOfType(objects, type_to_render);
+  if (!objects_to_render->empty()) {
+    std::shared_ptr<Program> program = objects_to_render->front()->GetProgram();
+    program->bind();
+    glUniformMatrix4fv(program->getUniform("P"), 1, GL_FALSE,
+                       glm::value_ptr(P->topMatrix()));
+    glUniformMatrix4fv(program->getUniform("V"), 1, GL_FALSE,
+                       glm::value_ptr(V->topMatrix()));
+    for (std::shared_ptr<GameObject> obj : *objects_to_render) {
+      std::shared_ptr<Collectible> collectible =
+          std::static_pointer_cast<Collectible>(obj);
+      glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
+                         glm::value_ptr(collectible->GetTransform()));
+      glUniform3f(program->getUniform("in_obj_color"), color.x, color.y,
+                  color.z);
+      glUniform1i(program->getUniform("isCollected"),
+                  collectible->GetCollected());
+      glUniform1i(program->getUniform("timeCollected"),
+                  collectible->GetTicksCollected());
+      collectible->GetModel()->draw(program);
     }
     program->unbind();
   }
@@ -426,7 +493,18 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   std::shared_ptr<Sky> sky = game_state->GetSky();
 
   glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  if (game_state->GetPlayer()->Tripping() == Player::Trip::DMT) {
+    if (game_state->GetElapsedTicks() % 10 == 0) {
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+    float r = ((double)rand() / (RAND_MAX));
+    float g = ((double)rand() / (RAND_MAX));
+    float b = ((double)rand() / (RAND_MAX));
+    glClearColor(r, g, b, 1.0);
+  } else {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(.2f, .2f, .2f, 1.0f);
+  }
 
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
@@ -469,6 +547,13 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
                      SecondaryType::DROPPING_PLATFORM_DOWN,
                      textures["nightsky"], P, V);
   RenderLevelCollectibles(game_state->GetObjectsInView(), SecondaryType::NOTE,
+                          P, V);
+  RenderLevelCollectibles(game_state->GetObjectsInView(), SecondaryType::DMT,
+                          gameobject::DMT::color, P, V);
+  RenderLevelCollectibles(game_state->GetObjectsInView(), SecondaryType::ACID,
+                          gameobject::Acid::color, P, V);
+  RenderLevelCollectibles(game_state->GetObjectsInView(),
+                          SecondaryType::COCAINUM, gameobject::Cocainum::color,
                           P, V);
   RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::MONSTER, P,
                      V);
@@ -749,12 +834,13 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
 
   ImGui::Text(look_at.c_str());
   const char* game_object_types[] = {
-      "Platform",  "MovingPlatform", "Note",   "DroppingPlatform",
-      "PlainRock", "MoonRock",       "Monster"};
+      "Platform",  "MovingPlatform", "Note",    "DroppingPlatform",
+      "PlainRock", "MoonRock",       "Monster", "DMT",
+      "Acid",      "Cocainum"};
   static int listbox_item_current = -1;
   // TODO Snake Plisken is there a way to do number of members of a c array
   ImGui::ListBox("##game_object_select", &listbox_item_current,
-                 game_object_types, 7, SHOW_ME_THE_MENU_ITEMS);
+                 game_object_types, 10, SHOW_ME_THE_MENU_ITEMS);
   static glm::vec3 scale;
   static glm::vec3 rotation_axis;
   static glm::vec3 p1;
@@ -858,6 +944,43 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
       ImGui::InputFloat("Velocity", &drop_vel, 0.05f);
       ImGui::InputFloat("Travel X", &distanceX, 0.05f);
       ImGui::InputFloat("Travel Z", &distanceZ, 0.05f);
+      break;
+    }
+    case 7: {  // DMT
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.2f);
+      ImGui::InputFloat("Y", &scale.y, 0.2f);
+      ImGui::InputFloat("Z", &scale.z, 0.2f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      break;
+    }
+    case 8: {  // Acid
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.2f);
+      ImGui::InputFloat("Y", &scale.y, 0.2f);
+      ImGui::InputFloat("Z", &scale.z, 0.2f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      break;
+    }
+    case 9: {  // Cocainum
+      ImGui::Text(std::string("Scale").c_str());
+      ImGui::InputFloat("X", &scale.x, 0.2f);
+      ImGui::InputFloat("Y", &scale.y, 0.2f);
+      ImGui::InputFloat("Z", &scale.z, 0.2f);
+      ImGui::Text(std::string("Rotation Axis").c_str());
+      ImGui::InputFloat("X Axis", &rotation_axis.x, 0.2f);
+      ImGui::InputFloat("Y Axis", &rotation_axis.y, 0.2f);
+      ImGui::InputFloat("Z Axis", &rotation_axis.z, 0.2f);
+      ImGui::InputFloat("Rotation Angle (radians)", &rotation_angle, 0.2f);
+      break;
     }
     default:
       break;
@@ -902,6 +1025,19 @@ LevelProgramMode GameRenderer::ImGuiRenderEditor(
         game_state->GetLevel()->AddItem(std::make_shared<gameobject::Monster>(
             pos, scale, rotation_axis, rotation_angle,
             glm::vec3(drop_vel, drop_vel, drop_vel), distanceX, distanceZ));
+        break;
+      case 7:
+        game_state->GetLevel()->AddItem(std::make_shared<gameobject::DMT>(
+            pos, scale, rotation_axis, rotation_angle, false));
+        break;
+      case 8:
+        game_state->GetLevel()->AddItem(std::make_shared<gameobject::Acid>(
+            pos, scale, rotation_axis, rotation_angle, false));
+        break;
+      case 9:
+        game_state->GetLevel()->AddItem(std::make_shared<gameobject::Cocainum>(
+            pos, scale, rotation_axis, rotation_angle, false));
+        break;
       default:
         break;
     }

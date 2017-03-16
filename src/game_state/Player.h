@@ -9,6 +9,7 @@
 #include "PhysicalObject.h"
 #include "MatrixStack.h"
 #include "Program.h"
+#include "TimingConstants.h"
 
 #define PLAYER_MESH "models/body_of_bike.obj"
 #define WHEEL_MESH "models/note.obj"
@@ -16,6 +17,9 @@
 #define WHEEL_SCALE 0.4
 #define WHEEL_ROTATION_PER_SECOND 12.0
 #define WHEEL_ROTATION_PER_TICK (WHEEL_ROTATION_PER_SECOND * SECONDS_PER_TICK)
+#define MAX_TRIP_LENGTH 4.20 * TICKS_PER_SECOND
+#define ACID_SLODOWN 0.6f
+#define COCAINUM_SPEEDUP 1.2f
 
 #define SHADER_PROGRAM "player_prog"
 #define TEXTURE "rainbowglass"
@@ -50,6 +54,8 @@ class Player : public GameObject {
 
   enum DuckDir { NONE, LEFT, RIGHT };
 
+  enum Trip { GOPHER, ACID, DMT, COCAINUM };
+
   // Represents size of gap between grounded platform
   static const float PLATFORM_SPACING;
   // TODO(jarhar): consider removing initial position
@@ -68,9 +74,12 @@ class Player : public GameObject {
 
   float GetYVelocity();
   float GetZVelocity();
+  float GetXVelocity();
   bool GetDoubleJump();
   bool GetBlockedUpZ();
   bool GetBlockedDownZ();
+  float GetTimeWarp();
+  Trip Tripping();
   DuckDir GetDucking();
   std::shared_ptr<GameObject> GetGround();  // null if no ground
   int GetScore();
@@ -82,9 +91,8 @@ class Player : public GameObject {
   float GetGroundYVelocity();
 
   void SetYVelocity(float y_velocity);
-  void MoveDownZ();
-  void MoveUpZ();
   void SetZVelocity(float z_velocity);
+  void SetXVelocity(float x_velocity);
   void SetDoubleJump(bool can_double_jump);
   void SetDucking(DuckDir ducking);
   void SetGround(std::shared_ptr<GameObject> ground);
@@ -96,15 +104,21 @@ class Player : public GameObject {
   void SetCurrentTick(uint64_t current_tick);
   void SetBlockedUpZ(bool blocked);
   void SetBlockedDownZ(bool blocked);
+  void TakeAHit(Trip substance);
+  void SoberUp();
 
  private:
   std::shared_ptr<GameObject> ground;
   bool can_double_jump;
   bool blocked_up_z;
   bool blocked_down_z;
+  Trip trip_n;
   float y_velocity;
   float z_velocity;
+  float x_velocity;
+  int trip_length;
   int score;
+  float time_warp;
 
   Animation animation;
   uint64_t current_tick;

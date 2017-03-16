@@ -27,10 +27,16 @@ Player::Player(glm::vec3 position,
                float rotation_angle,
                glm::vec3 scale)
     : GameObject(PLAYER_MESH, position, rotation_axis, rotation_angle, scale),
-      score(0),
+      can_double_jump(false),
+      blocked_up_z(false),
+      blocked_down_z(false),
+      trip_n(Trip::GOPHER),
       y_velocity(0),
       z_velocity(0),
-      can_double_jump(false),
+      x_velocity(DELTA_X_PER_TICK),
+      trip_length(0),
+      score(0),
+      time_warp(1),
       animation(Animation::JUMPING),
       wheel_rotation_speed(0) {
   rear_wheel = std::make_shared<PhysicalObject>(
@@ -71,9 +77,12 @@ std::shared_ptr<GameObject> Player::GetGround() {
 void Player::Reset() {
   SetPosition(Player::INITIAL_POSITION);
   score = 0;
-  y_velocity = 0;
-  z_velocity = 0;
+  y_velocity = z_velocity = 0;
+  trip_length = 0;
+  time_warp = 1;
+  x_velocity = DELTA_X_PER_TICK;
   can_double_jump = blocked_up_z = blocked_down_z = false;
+  trip_n = Trip::GOPHER;
   RemoveGround();
 }
 
@@ -146,14 +155,6 @@ std::shared_ptr<PhysicalObject> Player::GetFrontWheel() {
   return front_wheel;
 }
 
-void Player::MoveDownZ() {
-  SetPosition(GetPosition() - glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
-}
-
-void Player::MoveUpZ() {
-  SetPosition(GetPosition() + glm::vec3(0, 0, PLAYER_DELTA_Z_PER_TICK));
-}
-
 float Player::GetWheelRotationSpeed() {
   return wheel_rotation_speed;
 }
@@ -221,4 +222,52 @@ bool Player::GetBlockedUpZ() {
 
 bool Player::GetBlockedDownZ() {
   return blocked_down_z;
+}
+
+float Player::GetXVelocity() {
+  return x_velocity;
+}
+
+void Player::SetXVelocity(float x_velocity) {
+  this->x_velocity = x_velocity;
+}
+
+Player::Trip Player::Tripping() {
+  return trip_n;
+}
+
+void Player::TakeAHit(Trip substance) {
+  switch (substance) {
+    case ACID:
+      time_warp *= ACID_SLODOWN;
+      x_velocity *= ACID_SLODOWN;
+      break;
+    case COCAINUM:
+      time_warp *= COCAINUM_SPEEDUP;
+      x_velocity *= COCAINUM_SPEEDUP;
+      break;
+    case DMT:
+      trip_n = Trip::DMT;
+    case GOPHER:
+      break;
+  }
+  // leave the player fucked up on DMT if they already are
+  if (trip_n != Trip::DMT) {
+    trip_n = substance;
+  }
+  trip_length = 0;
+}
+
+void Player::SoberUp() {
+  trip_length++;
+  if (trip_length >= MAX_TRIP_LENGTH) {
+    trip_length = 0;
+    time_warp = 1;
+    trip_n = Trip::GOPHER;
+    x_velocity = DELTA_X_PER_TICK;
+  }
+}
+
+float Player::GetTimeWarp() {
+  return time_warp;
 }

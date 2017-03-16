@@ -40,11 +40,11 @@ class PhysicalObject {
   void AddSubObject(std::shared_ptr<PhysicalObject> sub_object);
 
  protected:
+  std::shared_ptr<Shape> shape;
   glm::vec3 position;
   glm::vec3 rotation_axis;
   float rotation_angle;
   glm::vec3 scale;
-  std::shared_ptr<Shape> shape;
   std::shared_ptr<Texture> texture;
   std::shared_ptr<Program> program;
 
