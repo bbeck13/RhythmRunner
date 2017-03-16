@@ -75,7 +75,6 @@ void GameRenderer::Init(const std::string& resource_dir) {
     temp_program = GameRenderer::ProgramFromJSON(json_files[i]);
     programs[temp_program->getName()] = temp_program;
   }
-
   std::shared_ptr<Texture> temp_texture;
   std::vector<std::string> texture_files =
       FileSystemUtils::ListFiles(ASSET_DIR "/textures", "*.json");
@@ -207,8 +206,6 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
   std::shared_ptr<GameCamera> camera = game_state->GetCamera();
   std::shared_ptr<Player> player = game_state->GetPlayer();
   std::shared_ptr<Sky> sky = game_state->GetSky();
-  Particles = new ParticleGenerator(5000);
-  RendererSetup::PreRender(window);
 
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
@@ -455,16 +452,23 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   RenderSingleObject(sky, P, V);
     std::shared_ptr<Program> current_program;
     std::shared_ptr<Texture> current_texture;
+    
     // Particles
-    Particles->Update(2, game_state->GetPlayer(), glm::vec3(0.0f, 0.0f, 0.0f));
+    Particles.Update(9, game_state->GetPlayer(), glm::vec3(0.0f, 0.0f, 0.0f));
     current_program = programs["particle_prog"];
     current_program->bind();
     current_texture = textures["particletex"];
     current_texture->bind(current_program->getUniform("Texture0"));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                        glm::value_ptr(P->topMatrix()));
-    Particles->DrawParticles(current_program);
+    glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
+                       glm::value_ptr(V->topMatrix()));
+    glUniform3f(current_program->getUniform("CamRight"), V->topMatrix()[0][0], V->topMatrix()[1][0], V->topMatrix()[2][0]);
+    glUniform3f(current_program->getUniform("CamUp"), V->topMatrix()[0][1], V->topMatrix()[1][1], V->topMatrix()[2][1]);
+    Particles.DrawParticles(current_program);
     current_program->unbind();
+    
   P->popMatrix();
   V->popMatrix();
 }

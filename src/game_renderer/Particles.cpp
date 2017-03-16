@@ -1,4 +1,4 @@
-//
+  //
 //  Particles.cpp
 //  RhythmRunner
 //
@@ -25,7 +25,7 @@ void ParticleGenerator::Update(GLuint newParticles, std::shared_ptr<Player> obje
     for(GLuint i = 0; i < this->amount; ++i)
     {
         Particle &p = this->particles[i];
-        p.Life -= .1;
+        p.Life -= 1.0f;
         if(p.Life > 0.0f)
         {
             p.Position -= p.Velocity ;
@@ -37,7 +37,7 @@ void ParticleGenerator::Update(GLuint newParticles, std::shared_ptr<Player> obje
 void ParticleGenerator::DrawParticles(const std::shared_ptr<Program> prog)
 {
     int h_pos = -1;
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
  
     for(Particle particle : this->particles)
     {
@@ -57,7 +57,7 @@ void ParticleGenerator::DrawParticles(const std::shared_ptr<Program> prog)
         }
     }
     
-   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void ParticleGenerator::init()
@@ -88,9 +88,9 @@ void ParticleGenerator::init()
     }
 }
 
-GLuint lastUsedParticle = 0;
 GLuint ParticleGenerator::firstUnusedParticle()
 {
+    GLuint lastUsedParticle = 0;
     for(GLuint i = lastUsedParticle; i < this->amount; ++i)
     {
         if(this->particles[i].Life <= 0.0f)
@@ -115,12 +115,22 @@ GLuint ParticleGenerator::firstUnusedParticle()
 
 void ParticleGenerator::respawn(Particle &particle, std::shared_ptr<Player> object, glm::vec3 offset)
 {
-    GLfloat random = ((rand() % 100) - 50) / 10.0f;
-    GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
-    particle.Position = glm::vec3(object->GetPosition().x + random + offset.x, object->GetPosition().y + random + offset.y, object->GetPosition().z + random + offset.z);
-    particle.Color = glm::vec4(rColor, rColor, rColor, 1.0f);
-    particle.Life = 100.0f;
-    particle.Velocity = glm::vec3(0, object->GetYVelocity() * 0.1f,object->GetZVelocity() * 0.1f);
+    GLfloat random = ((rand() % 11) - 5) / 10.0f;
+    GLfloat rV1 = ((rand() % 10) - 5) / 100.0f;
+    GLfloat rV2 = ((rand() % 10) - 5)/ 100.0f;
+    GLfloat rV3 = ((rand() % 10) - 5)/ 100.0f;
+    GLfloat rColor1 = 0.1 + ((rand() % 100) / 100.0f);
+    GLfloat rColor2 = 0.1 + ((rand() % 100) / 100.0f);
+    GLfloat rColor3 = 0.1 + ((rand() % 100) / 100.0f);
+    particle.Position = glm::vec3(object->GetPosition().x + random * 1.3 - 0.5, object->GetPosition().y + random, object->GetPosition().z + random);
+    particle.Color = glm::vec4(rColor1, rColor2, rColor3, 1.0f);
+    particle.Life = 80.0f;
+    particle.Velocity = glm::vec3(rV1, object->GetYVelocity() * 0.5f + rV2,object->GetZVelocity() * 0.5f + rV3);
+    if(object->GetZVelocity() == 1)
+    {
+        particle.Velocity = glm::vec3(rV1 * 5, object->GetYVelocity() * 0.5f + rV2 * 5,rV3 * 5);
+        particle.Color = glm::vec4(1.0f, rColor2, rColor3 / 2, 0.5f);
+    }
 }
-                            
+    
 

@@ -5,14 +5,18 @@ out vec2 TexCoords;
 out vec4 ParticleColor;
 
 uniform mat4 P;
+uniform mat4 V;
 uniform vec3 Offset;
 uniform vec4 Color;
+uniform vec3 CamRight;
+uniform vec3 CamUp;
 
 void main()
 {
-    float scale = 1.0f;
+    float scale = 0.3f;
     TexCoords = vertPos.zw;
     ParticleColor = Color;
-    gl_Position = P * vec4((vertPos.xy * scale) + Offset.xy, Offset.z, 1.0);
-
+    vec3 pos = Offset + CamRight * vertPos.z * scale + CamUp * vertPos.w * scale;
+    
+    gl_Position = P * V * vec4(pos, 1.0f);
 }
