@@ -6,7 +6,7 @@
 #include "Collectible.h"
 #include "Program.h"
 
-#define ACID_MESH "models/rock.obj"
+#define ACID_MESH "models/pill.obj"
 
 namespace gameobject {
 class Acid : public Collectible {
