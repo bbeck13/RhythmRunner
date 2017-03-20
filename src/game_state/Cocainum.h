@@ -6,7 +6,7 @@
 #include "Collectible.h"
 #include "Program.h"
 
-#define COCAINUM_MESH "models/rock.obj"
+#define COCAINUM_MESH "models/pill.obj"
 
 namespace gameobject {
 class Cocainum : public Collectible {
