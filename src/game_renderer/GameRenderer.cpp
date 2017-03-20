@@ -532,9 +532,13 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
 
   RenderSingleObject(player, P, V);
   if (player->GetGround()) {
-    RenderSingleObject(player->GetGround(), programs["current_platform_prog"],
-                       textures["rainbowass"], P, V);
+    switch(player->GetGround()->GetSecondaryType()){
+      case SecondaryType::PLATFORM :
+        RenderSingleObject(player->GetGround(), P, V);
+        break;
+    }
   }
+
   RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::PLATFORM,
                      textures["nightsky"], P, V);
   RenderLevelObjects(game_state->GetObjectsInView(),
