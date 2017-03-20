@@ -516,7 +516,7 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
 
   P->pushMatrix();
   // small far for aggressive culling
-  P->perspective(45.0f, aspect, 0.01f, 150.0f);
+  P->perspective(45.0f, aspect, 0.01f, 1000.0f);
   V->pushMatrix();
 
   std::shared_ptr<std::vector<glm::vec4>> vfplane =
@@ -528,7 +528,7 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   // large far for sexy looks
   P->popMatrix();
   P->pushMatrix();
-  P->perspective(45.0f, aspect, 0.01f, 1000.0f);
+  P->perspective(45.0f, aspect, 0.01f, 10000.0f);
 
   RenderSingleObject(player, P, V);
   if (player->GetGround()) {
