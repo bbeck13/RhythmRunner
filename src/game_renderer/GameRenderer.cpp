@@ -458,6 +458,12 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
       case SecondaryType::PLATFORM :
         RenderSingleObject(player->GetGround(), P, V);
         break;
+      case SecondaryType::PLAINROCK :
+        RenderSingleObject(player->GetGround(), programs["current_platform_prog"], textures["rainbowass"], P, V);
+        break;
+      case SecondaryType::MOONROCK :
+        RenderSingleObject(player->GetGround(), programs["current_platform_prog"], textures["rainbowass"], P, V);
+        break;
     }
   }
 
