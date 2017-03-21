@@ -10,6 +10,7 @@ Rhythm Runner [![Build Status](https://travis-ci.org/bbeck13/RhythmRunner.svg?br
 About
 -----
 Rhythm Runner is a graphics project for Zoe Wood's [CPE 476 class](http://users.csc.calpoly.edu/~zwood/teaching/csc476/index.html)
+
 Authors
 -------
 - Alex Ottoboni (alexottoboni)
@@ -55,11 +56,18 @@ To mark a pull as QA'd comment `QA :emoji:`.
 
 Playing
 -------
-Coming soon!
+Press the spacebar to jump, press it again to double jump. Use A and D to move left and
+right to avoid obstacles. Collect the notes for points and the pills for "power ups".
+Run the Rhythm!
+ 
+![Image](./assets/readme/rr.png?raw=true)
+
+**Waring**: Play with caution. 3 out of 5 doctors don't recommend running the rhythm to their
+family.
 
 Cover
 -----
 
 For your rhythm running pleasure
 
-![Image](./assets/cover/cover.jpg?raw=true)
+![Image](./assets/readme/cover.jpg?raw=true)
