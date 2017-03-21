@@ -62,7 +62,7 @@ Run the Rhythm!
  
 ![Image](./assets/readme/rr.png?raw=true)
 
-**Waring**: Play with caution. 3 out of 5 doctors don't recommend running the rhythm to their
+**Warning**: Play with caution. 3 out of 5 doctors don't recommend running the rhythm to their
 family.
 
 Cover
