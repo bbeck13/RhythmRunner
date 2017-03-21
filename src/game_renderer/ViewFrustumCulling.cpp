@@ -8,8 +8,6 @@ namespace ViewFrustumCulling {
 // Code from CPE-476 lab
 std::shared_ptr<std::vector<glm::vec4>> GetViewFrustumPlanes(glm::mat4 P,
                                                              glm::mat4 V) {
-  std::clock_t start;
-  start = std::clock();
   glm::vec4 Left, Right, Bottom, Top, Near, Far;
   glm::vec3 normal;
   float normal_length;
@@ -67,7 +65,6 @@ std::shared_ptr<std::vector<glm::vec4>> GetViewFrustumPlanes(glm::mat4 P,
   planes->push_back(Near);
   planes->push_back(Far);
 
-  std::cout << (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000) <<  std::endl;
   return planes;
 }
 
