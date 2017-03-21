@@ -494,16 +494,16 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
 
   glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
   if (game_state->GetPlayer()->Tripping() == Player::Trip::DMT) {
-    if (game_state->GetElapsedTicks() % 10 == 0) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
     float r = ((double)rand() / (RAND_MAX));
     float g = ((double)rand() / (RAND_MAX));
     float b = ((double)rand() / (RAND_MAX));
     glClearColor(r, g, b, 1.0);
+    if (game_state->GetElapsedTicks() % 10 == 0) {
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
   } else {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(.2f, .2f, .2f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
   int width, height;
