@@ -233,6 +233,9 @@ MainProgramMode GameRenderer::RenderCameraSetup(
   ImGui::Text("1, 2 for default views");
   ImGui::Text("Arrow Keys to adjust views");
   ImGui::Text("[C] to zoom in [E] to zoom out");
+  ImGui::Text("[A] [D] to strafe left / right");
+  ImGui::Text("[SPACE] to jump");
+  ImGui::Text("[SPACE] while in the air to double jump");
   ImGui::End();
   ImGuiRenderEnd();
   RendererSetup::PostRender(window);
