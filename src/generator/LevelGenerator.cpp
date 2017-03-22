@@ -18,21 +18,6 @@
 
 std::pair<double, double> LevelGenerator::sizeRange(2.6f, 8.0f);
 
-namespace {
-template <typename tVal>
-tVal mapRange(std::pair<tVal, tVal> a, std::pair<tVal, tVal> b, tVal inVal) {
-  tVal inValNorm = inVal - a.first;
-  tVal aUpperNorm = a.second - a.first;
-  tVal normPosition = inValNorm / aUpperNorm;
-
-  tVal bUpperNorm = b.second - b.first;
-  tVal bValNorm = normPosition * bUpperNorm;
-  tVal outVal = b.first + bValNorm;
-
-  return outVal;
-}
-}
-
 LevelGenerator::LevelGenerator(std::string musicFile) {
   this->wav = std::make_shared<Aquila::WaveFile>(musicFile);
   loaded = false;
@@ -76,13 +61,44 @@ LevelGenerator::Generate() {
   sources = std::make_shared<std::vector<Aquila::SignalSource>>();
   if (loaded) {
     objs = level;
+    Aquila::SampleType maxValue = 0, minValue = 0;
+    size_t j;
+    double avgpower = 0;
+    for (j = 0; j < wav->getSamplesCount(); ++j) {
+      std::vector<Aquila::SampleType> v = {wav->sample(j)};
+      Aquila::SignalSource src(v, wav->getSampleFrequency());
+      if (Aquila::power(src) > maxValue) {
+        maxValue = Aquila::power(src);
+      }
+      if (Aquila::power(src) < minValue) {
+        minValue = Aquila::power(src);
+      }
+      avgpower -= avgpower / (float)wav->getSamplesCount();
+      avgpower += Aquila::power(src) / (float)wav->getSamplesCount();
+    }
+    range = std::pair<double, double>(minValue, maxValue);
+    int num_platforms = wav->getAudioLength() / (float)MS_PER_PLATFORM;
+    int samplesPerPlatform = MS_PER_PLATFORM * (wav->getSamplesCount() /
+                                                (double)wav->getAudioLength());
+    int lastSample = samplesPerPlatform;
+    for (int i = 1; i < num_platforms; i++) {
+      std::vector<Aquila::SampleType> sample;
+      for (int j = lastSample;
+           j < (lastSample + samplesPerPlatform) && j < wav->getSamplesCount();
+           j++) {
+        sample.push_back(wav->sample(j));
+      }
+
+      lastSample += samplesPerPlatform;
+      Aquila::SignalSource src(sample, wav->getSampleFrequency());
+      sources->push_back(src);
+    }
   } else {
     std::srand(time(NULL));
 
 #ifdef DEBUG
     std::cerr << "Generating level ...." << std::endl;
 #endif
-    std::pair<double, double> range;
     Aquila::SampleType maxValue = 0, minValue = 0;
 
     size_t j;
@@ -124,7 +140,7 @@ LevelGenerator::Generate() {
 
       lastSample += samplesPerPlatform;
       Aquila::SignalSource src(sample, wav->getSampleFrequency());
-      power = mapRange(range, sizeRange, Aquila::power(src));
+      power = Level::mapRange(range, sizeRange, Aquila::power(src));
       sources->push_back(src);
       double delta = power - lastPower;
       lastPower = power;
@@ -197,8 +213,8 @@ LevelGenerator::Generate() {
 
         objs->push_back(std::make_shared<gameobject::MovingPlatform>(
             path.at(2), path,
-            mapRange(sizeRange, std::pair<double, double>(0.01, 0.1),
-                     power + .1)));
+            Level::mapRange(sizeRange, std::pair<double, double>(0.01, 0.1),
+                            power + .1)));
         ups = downs = 0;
         moving = 1;
       } else if (moving == 1) {
@@ -241,7 +257,7 @@ std::shared_ptr<Level> LevelGenerator::generateLevel() {
 #endif
   std::shared_ptr<Octree> tree = std::make_shared<Octree>(Generate());
   std::shared_ptr<Level> level =
-      std::make_shared<Level>(this->getMusic(), tree, sources);
+      std::make_shared<Level>(this->getMusic(), tree, sources, range);
 #ifdef DEBUG
   std::cerr << "Generated octree!!" << std::endl;
 #endif

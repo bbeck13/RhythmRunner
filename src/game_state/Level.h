@@ -23,21 +23,28 @@ class Level {
  public:
   Level(std::shared_ptr<sf::Music> music,
         std::shared_ptr<Octree> tree,
-        std::shared_ptr<std::vector<Aquila::SignalSource>> sources);
+        std::shared_ptr<std::vector<Aquila::SignalSource>> sources,
+        std::pair<double, double> range);
   ~Level();
 
   std::shared_ptr<sf::Music> getMusic();
   std::shared_ptr<Octree> getTree();
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> getObjects();
+  double GetPower(double progress);
 
   void SetTree(std::shared_ptr<Octree> tree);
   void AddItem(std::shared_ptr<GameObject> object);
   void RemoveItem(std::shared_ptr<GameObject> object);
 
+  static double mapRange(std::pair<double, double> a,
+                         std::pair<double, double> b,
+                         double inVal);
+
  private:
   std::shared_ptr<sf::Music> music;
   std::shared_ptr<Octree> tree;
   std::shared_ptr<std::vector<Aquila::SignalSource>> sources;
+  std::pair<double, double> range;
 };
 
 #endif

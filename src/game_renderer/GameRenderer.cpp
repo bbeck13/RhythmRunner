@@ -587,6 +587,7 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
 
   Bloom(width, height);
 }
+
 void GameRenderer::RenderParticles(std::shared_ptr<ParticleGenerator> particles,
                                    std::shared_ptr<MatrixStack> P,
                                    std::shared_ptr<MatrixStack> V) {

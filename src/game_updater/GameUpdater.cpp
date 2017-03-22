@@ -283,6 +283,8 @@ uint64_t GameUpdater::CalculateTargetTicks(
 }
 
 void GameUpdater::UpdateParticles(std::shared_ptr<GameState> game_state) {
-  game_state->GetParticles()->Update(9, game_state->GetPlayer(),
-                                     glm::vec3(0, 0, 0));
+  game_state->GetParticles()->Update(
+      std::ceil(
+          game_state->GetLevel()->GetPower(game_state->GetProgressRatio())),
+      game_state->GetPlayer(), glm::vec3(-0.3, -1.1, -0.5));
 }
