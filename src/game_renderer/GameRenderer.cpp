@@ -233,6 +233,9 @@ MainProgramMode GameRenderer::RenderCameraSetup(
   ImGui::Text("1, 2 for default views");
   ImGui::Text("Arrow Keys to adjust views");
   ImGui::Text("[C] to zoom in [E] to zoom out");
+  ImGui::Text("[A] [D] to strafe left / right");
+  ImGui::Text("[SPACE] to jump");
+  ImGui::Text("[SPACE] while in the air to double jump");
   ImGui::End();
   ImGuiRenderEnd();
   RendererSetup::PostRender(window);
@@ -532,15 +535,19 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
 
   RenderSingleObject(player, P, V);
   if (player->GetGround()) {
-    switch(player->GetGround()->GetSecondaryType()){
-      case SecondaryType::PLATFORM :
+    switch (player->GetGround()->GetSecondaryType()) {
+      case SecondaryType::PLATFORM:
         RenderSingleObject(player->GetGround(), P, V);
         break;
-      case SecondaryType::PLAINROCK :
-        RenderSingleObject(player->GetGround(), programs["current_platform_prog"], textures["rainbowass"], P, V);
+      case SecondaryType::PLAINROCK:
+        RenderSingleObject(player->GetGround(),
+                           programs["current_platform_prog"],
+                           textures["rainbowass"], P, V);
         break;
-      case SecondaryType::MOONROCK :
-        RenderSingleObject(player->GetGround(), programs["current_platform_prog"], textures["rainbowass"], P, V);
+      case SecondaryType::MOONROCK:
+        RenderSingleObject(player->GetGround(),
+                           programs["current_platform_prog"],
+                           textures["rainbowass"], P, V);
         break;
     }
   }
