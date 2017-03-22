@@ -54,10 +54,9 @@ void ParticleGenerator::DrawParticles(const std::shared_ptr<Program> prog) {
 }
 
 void ParticleGenerator::init() {
-  GLfloat particle_quad[] = {
-      0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-
-      0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+  GLfloat particle_quad[] = {0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+                             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+                             1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
   glGenVertexArrays(1, &this->VAO);
   glGenBuffers(1, &VBO);
   glBindVertexArray(this->VAO);
@@ -106,16 +105,16 @@ void ParticleGenerator::respawn(Particle& particle,
   GLfloat rColor1 = 0.1 + ((rand() % 100) / 100.0f);
   GLfloat rColor2 = 0.1 + ((rand() % 100) / 100.0f);
   GLfloat rColor3 = 0.1 + ((rand() % 100) / 100.0f);
-  particle.Position = glm::vec3(object->GetPosition().x + random * 1.3 - 0.5,
-                                object->GetPosition().y + random,
-                                object->GetPosition().z + random);
+  particle.Position =
+      glm::vec3(object->GetPosition().x + offset.x + random * 1.3 - 0.5,
+                object->GetPosition().y + offset.y + random,
+                object->GetPosition().z + offset.z + random);
   particle.Color = glm::vec4(rColor1, rColor2, rColor3, 1.0f);
   particle.Life = 80.0f;
-  particle.Velocity = glm::vec3(rV1, object->GetYVelocity() * 0.5f + rV2,
-                                object->GetZVelocity() * 0.5f + rV3);
+  particle.Velocity =
+      glm::vec3(rV1, std::abs(rV2), object->GetZVelocity() * 0.5f + rV3);
   if (object->GetZVelocity() == 1) {
-    particle.Velocity =
-        glm::vec3(rV1 * 5, object->GetYVelocity() * 0.5f + rV2 * 5, rV3 * 5);
+    particle.Velocity = glm::vec3(rV1 * 5, std::abs(rV2), rV3 * 5);
     particle.Color = glm::vec4(1.0f, rColor2, rColor3 / 2, 0.5f);
   }
 }

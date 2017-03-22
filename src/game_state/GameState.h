@@ -70,11 +70,11 @@ class GameState {
   std::shared_ptr<GameCamera> camera;
   std::shared_ptr<Player> player;
   std::shared_ptr<Sky> sky;
-  std::shared_ptr<ParticleGenerator> particles;
   std::unordered_map<std::string, std::shared_ptr<VideoTexture>> video_textures;
   std::unordered_set<std::shared_ptr<GameObject>>* objectsInView;
   std::shared_ptr<LevelEditorState> level_editor_state;
   GLFWwindow* window;
+  std::shared_ptr<ParticleGenerator> particles;
   SoundEffects effects;
 
   double elapsed_ticks;

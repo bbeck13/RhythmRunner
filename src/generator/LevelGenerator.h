@@ -37,6 +37,7 @@ class LevelGenerator {
   std::shared_ptr<std::vector<std::shared_ptr<GameObject>>> level;
   std::shared_ptr<std::vector<Aquila::SignalSource>> sources;
   bool loaded;
+  std::pair<double, double> range;
   static std::pair<double, double> sizeRange;
 };
 
