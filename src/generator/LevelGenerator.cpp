@@ -7,6 +7,7 @@
 #include "Note.h"
 #include "Level.h"
 #include "Octree.h"
+#include "Platform.h"
 #include "MovingPlatform.h"
 #include "DroppingPlatform.h"
 #include "MoonRock.h"
@@ -94,8 +95,6 @@ LevelGenerator::Generate() {
       sources->push_back(src);
     }
   } else {
-    std::srand(time(NULL));
-
 #ifdef DEBUG
     std::cerr << "Generating level ...." << std::endl;
 #endif
@@ -184,7 +183,6 @@ LevelGenerator::Generate() {
           downs++;
         }
       }
-
       xPos += PLATFORM_X_DELTA;
       if (wobble == 2) {
         wobble = 0;
@@ -247,6 +245,9 @@ LevelGenerator::Generate() {
         }
       }
     }
+#ifdef DEBUG
+    std::cerr << "Generated level ...." << std::endl;
+#endif
   }
   return objs;
 }

@@ -19,11 +19,12 @@ class Platform : public Obstacle {
  public:
   Platform(glm::vec3 position = glm::vec3(),
            glm::vec3 scale = glm::vec3(4, .5, 4),
-           glm::vec3 rotation_axis = glm::vec3(),
+           glm::vec3 rotation_axis = glm::vec3(1, 0, 0),
            float rotaiton_angle = 0);
   ~Platform();
 
   SecondaryType GetSecondaryType() override;
+
  private:
   static std::shared_ptr<Program> platform_program;
   static std::shared_ptr<Texture> platform_texture;
