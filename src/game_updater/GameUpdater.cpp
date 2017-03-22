@@ -16,7 +16,6 @@
 #include "Octree.h"
 #include "TimingConstants.h"
 #include "VideoTexture.h"
-#include "Particles.h"
 
 #define CAMERA_SPACING_INCREMENT 0.01f
 
@@ -69,6 +68,9 @@ void GameUpdater::Update(std::shared_ptr<GameState> game_state) {
   player_updater.CollisionCheck(game_state);
   player_updater.PowerUpPlayer(game_state);
   UpdateCamera(game_state, true);
+  if (game_state->GetParticles()) {
+    UpdateParticles(game_state);
+  }
 
   game_state->IncrementTicks(game_state->GetPlayer()->GetTimeWarp());
 }
@@ -278,4 +280,9 @@ uint64_t GameUpdater::CalculateTargetTicks(
     double elapsed_seconds = glfwGetTime() - game_state->GetStartTime();
     return elapsed_seconds * TICKS_PER_SECOND;
   }
+}
+
+void GameUpdater::UpdateParticles(std::shared_ptr<GameState> game_state) {
+  game_state->GetParticles()->Update(9, game_state->GetPlayer(),
+                                     glm::vec3(0, 0, 0));
 }

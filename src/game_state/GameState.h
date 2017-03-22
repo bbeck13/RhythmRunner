@@ -18,6 +18,7 @@
 #include "Sky.h"
 #include "LevelEditorState.h"
 #include "SoundEffects.h"
+#include "ParticleGenerator.h"
 
 class GameState {
  public:
@@ -27,13 +28,16 @@ class GameState {
             std::shared_ptr<GameCamera> camera,
             std::shared_ptr<Player> player,
             std::shared_ptr<Sky> sky,
-            GLFWwindow* window);
+            GLFWwindow* window,
+            std::shared_ptr<ParticleGenerator> particles =
+                std::shared_ptr<ParticleGenerator>());
   virtual ~GameState();
 
   std::shared_ptr<Level> GetLevel();
   std::shared_ptr<GameCamera> GetCamera();
   std::shared_ptr<Player> GetPlayer();
   std::shared_ptr<Sky> GetSky();
+  std::shared_ptr<ParticleGenerator> GetParticles();
   std::unordered_map<std::string, std::shared_ptr<VideoTexture>>
   GetVideoTextures();
   std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView();
@@ -66,6 +70,7 @@ class GameState {
   std::shared_ptr<GameCamera> camera;
   std::shared_ptr<Player> player;
   std::shared_ptr<Sky> sky;
+  std::shared_ptr<ParticleGenerator> particles;
   std::unordered_map<std::string, std::shared_ptr<VideoTexture>> video_textures;
   std::unordered_set<std::shared_ptr<GameObject>>* objectsInView;
   std::shared_ptr<LevelEditorState> level_editor_state;

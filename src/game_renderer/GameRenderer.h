@@ -13,7 +13,7 @@
 #include "MatrixStack.h"
 #include "Program.h"
 #include "ProgramMode.h"
-#include "Particles.h"
+#include "ParticleGenerator.h"
 
 #define PLATFORM_PROG "platform_prog"
 
@@ -40,8 +40,6 @@ class GameRenderer {
   static std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView(
       std::shared_ptr<std::vector<glm::vec4>> vfplane,
       std::shared_ptr<Octree> tree);
-    ParticleGenerator Particles = *(new ParticleGenerator(5000));
-;
 
   static void InitBloom(int height, int width);
   void Bloom(int height, int width);
@@ -78,6 +76,9 @@ class GameRenderer {
       std::shared_ptr<Texture> video_texture,
       std::shared_ptr<MatrixStack> P,
       std::shared_ptr<MatrixStack> V);
+  void RenderParticles(std::shared_ptr<ParticleGenerator> particles,
+                       std::shared_ptr<MatrixStack> P,
+                       std::shared_ptr<MatrixStack> V);
   void RenderLevelObjects(
       std::unordered_set<std::shared_ptr<GameObject>>* objects,
       SecondaryType type_to_render,
