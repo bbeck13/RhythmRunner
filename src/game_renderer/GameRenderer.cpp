@@ -31,7 +31,7 @@
 #include "LevelJson.h"
 #include "GameUpdater.h"
 #include "CollisionCalculator.h"
-#include "Particles.h"
+#include "ParticleGenerator.h"
 
 #define TEXT_FIELD_LENGTH 256
 #define SHOW_ME_THE_MENU_ITEMS 4
@@ -532,15 +532,19 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
 
   RenderSingleObject(player, P, V);
   if (player->GetGround()) {
-    switch(player->GetGround()->GetSecondaryType()){
-      case SecondaryType::PLATFORM :
+    switch (player->GetGround()->GetSecondaryType()) {
+      case SecondaryType::PLATFORM:
         RenderSingleObject(player->GetGround(), P, V);
         break;
-      case SecondaryType::PLAINROCK :
-        RenderSingleObject(player->GetGround(), programs["current_platform_prog"], textures["rainbowass"], P, V);
+      case SecondaryType::PLAINROCK:
+        RenderSingleObject(player->GetGround(),
+                           programs["current_platform_prog"],
+                           textures["rainbowass"], P, V);
         break;
-      case SecondaryType::MOONROCK :
-        RenderSingleObject(player->GetGround(), programs["current_platform_prog"], textures["rainbowass"], P, V);
+      case SecondaryType::MOONROCK:
+        RenderSingleObject(player->GetGround(),
+                           programs["current_platform_prog"],
+                           textures["rainbowass"], P, V);
         break;
     }
   }
@@ -572,12 +576,22 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   RenderLevelObjects(game_state->GetObjectsInView(), SecondaryType::PLAINROCK,
                      P, V);
   RenderSingleObject(sky, P, V);
+  if (game_state->GetParticles()) {
+    RenderParticles(game_state->GetParticles(), P, V);
+  }
 
+  P->popMatrix();
+  V->popMatrix();
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  Bloom(width, height);
+}
+void GameRenderer::RenderParticles(std::shared_ptr<ParticleGenerator> particles,
+                                   std::shared_ptr<MatrixStack> P,
+                                   std::shared_ptr<MatrixStack> V) {
   std::shared_ptr<Program> current_program;
   std::shared_ptr<Texture> current_texture;
-
-  // Particles
-  Particles.Update(9, game_state->GetPlayer(), glm::vec3(0.0f, 0.0f, 0.0f));
   current_program = programs["particle_prog"];
   current_program->bind();
   current_texture = textures["particletex"];
@@ -591,15 +605,8 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
               V->topMatrix()[1][0], V->topMatrix()[2][0]);
   glUniform3f(current_program->getUniform("CamUp"), V->topMatrix()[0][1],
               V->topMatrix()[1][1], V->topMatrix()[2][1]);
-  Particles.DrawParticles(current_program);
+  particles->DrawParticles(current_program);
   current_program->unbind();
-
-  P->popMatrix();
-  V->popMatrix();
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-  Bloom(width, height);
 }
 
 void GameRenderer::InitBloom(int width, int height) {

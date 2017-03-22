@@ -21,6 +21,7 @@
 #include "Sky.h"
 #include "VideoTexture.h"
 #include "FileSystemUtils.h"
+#include "ParticleGenerator.h"
 
 #define MUSIC "music/3.wav"
 #define LEVEL "levels/demo_level"
@@ -84,7 +85,8 @@ int main(int argc, char** argv) {
         }
         game_state = std::make_shared<GameState>(
             level_generator->generateLevel(), std::make_shared<GameCamera>(),
-            std::make_shared<Player>(), std::make_shared<Sky>(), window);
+            std::make_shared<Player>(), std::make_shared<Sky>(), window,
+            std::make_shared<ParticleGenerator>());
         // Only Video texture we have right now
         std::shared_ptr<VideoTexture> vid = std::make_shared<VideoTexture>(
             std::string(ASSET_DIR) + "/textures/sky");

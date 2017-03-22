@@ -9,12 +9,14 @@ GameState::GameState(std::shared_ptr<Level> level,
                      std::shared_ptr<GameCamera> camera,
                      std::shared_ptr<Player> player,
                      std::shared_ptr<Sky> sky,
-                     GLFWwindow* window)
+                     GLFWwindow* window,
+                     std::shared_ptr<ParticleGenerator> particles)
     : level(level),
       camera(camera),
       player(player),
       sky(sky),
       window(window),
+      particles(particles),
       elapsed_ticks(0),
       start_tick(0),
       start_time(0),
@@ -25,7 +27,6 @@ GameState::GameState(std::shared_ptr<Level> level,
   this->music_end_tick =
       level->getMusic()->getDuration().asMicroseconds() * TICKS_PER_MICRO +
       GetMusicStartTick();
-
 }
 
 GameState::~GameState() {
@@ -190,4 +191,8 @@ void GameState::SetPlayingState(PlayingState playing_state) {
 
 SoundEffects GameState::GetSoundEffects() {
   return effects;
+}
+
+std::shared_ptr<ParticleGenerator> GameState::GetParticles() {
+  return particles;
 }
