@@ -283,6 +283,7 @@ uint64_t GameUpdater::CalculateTargetTicks(
 }
 
 void GameUpdater::UpdateParticles(std::shared_ptr<GameState> game_state) {
+  game_state->GetParticles()->SortParticles(game_state->GetCamera());
   game_state->GetParticles()->Update(
       std::ceil(
           game_state->GetLevel()->GetPower(game_state->GetProgressRatio())),

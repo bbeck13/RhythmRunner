@@ -600,7 +600,6 @@ void GameRenderer::RenderParticles(std::shared_ptr<ParticleGenerator> particles,
   current_program->bind();
   current_texture = textures["particletex"];
   current_texture->bind(current_program->getUniform("Texture0"));
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
   glUniformMatrix4fv(current_program->getUniform("P"), 1, GL_FALSE,
                      glm::value_ptr(P->topMatrix()));
   glUniformMatrix4fv(current_program->getUniform("V"), 1, GL_FALSE,
