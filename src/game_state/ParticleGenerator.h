@@ -10,6 +10,7 @@
 #define PARTICLES_H_
 
 #include "GameObject.h"
+#include "GameCamera.h"
 #include "Player.h"
 #include "Program.h"
 
@@ -30,6 +31,7 @@ class ParticleGenerator {
               std::shared_ptr<Player> object,
               glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f));
   void DrawParticles(const std::shared_ptr<Program> prog);
+  void SortParticles(const std::shared_ptr<GameCamera> camera);
   std::vector<Particle> particles;
 
  private:
@@ -41,6 +43,16 @@ class ParticleGenerator {
   void respawn(Particle& particle,
                std::shared_ptr<Player> object,
                glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f));
+
+  // sorts based on distance from camera
+  struct ParticleSort {
+    ParticleSort(glm::vec3 pos) { this->pos = pos; }
+    bool operator () (const Particle& p1, const Particle& p2) {
+      return glm::distance(pos, p1.Position) > glm::distance(pos, p2.Position);
+    }
+
+    glm::vec3 pos;
+  };
 };
 
 #endif /* PARTICLES_H */

@@ -32,8 +32,8 @@ void ParticleGenerator::Update(GLuint newParticles,
 
 void ParticleGenerator::DrawParticles(const std::shared_ptr<Program> prog) {
   int h_pos = -1;
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
+  glDepthMask(GL_FALSE);
   for (Particle particle : this->particles) {
     if (particle.Life > 0.0f) {
       glUniform3f(prog->getUniform("Offset"), particle.Position.x,
@@ -50,7 +50,7 @@ void ParticleGenerator::DrawParticles(const std::shared_ptr<Program> prog) {
     }
   }
 
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glDepthMask(GL_TRUE);
 }
 
 void ParticleGenerator::init() {
@@ -93,6 +93,10 @@ GLuint ParticleGenerator::firstUnusedParticle() {
 
   lastUsedParticle = 0;
   return 0;
+}
+
+void ParticleGenerator::SortParticles(std::shared_ptr<GameCamera> camera) {
+  std::sort(particles.begin(), particles.end(), ParticleSort(camera->getPosition()));
 }
 
 void ParticleGenerator::respawn(Particle& particle,
