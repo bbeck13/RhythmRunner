@@ -1,17 +1,17 @@
 [submodule "deps/glm"]
 	path = deps/glm
-	url = http://github.com/g-truc/glm
+	url = https://github.com/g-truc/glm
 	ignore = dirty
 [submodule "deps/glfw"]
 	path = deps/glfw
-	url = http://github.com/glfw/glfw
+	url = https://github.com/glfw/glfw
 	ignore = dirty
 [submodule "deps/glew-cmake"]
 	path = deps/glew-cmake
-	url = http://github.com/perlmint/glew-cmake
+	url = https://github.com/perlmint/glew-cmake
 [submodule "deps/sfml-audio"]
 	path = deps/sfml-audio
 	url = https://github.com/gamerslab/sfml-audio
 [submodule "deps/aquila"]
 	path = deps/aquila
-	url = http://github.com/zsiciarz/aquila
+	url = https://github.com/zsiciarz/aquila
