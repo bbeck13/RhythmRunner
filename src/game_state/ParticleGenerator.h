@@ -15,6 +15,7 @@
 #include "Program.h"
 
 #define DEFAULT_PARTICLE_COUNT 5000
+#define PLAYER_PARTICLE_OFFSET glm::vec3(-0.3, -1.1, -0.5)
 
 class ParticleGenerator {
  public:
@@ -32,6 +33,9 @@ class ParticleGenerator {
               glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f));
   void DrawParticles(const std::shared_ptr<Program> prog);
   void SortParticles(const std::shared_ptr<GameCamera> camera);
+  void SpawnAll(std::shared_ptr<Player> object,
+                glm::vec3 offset,
+                glm::vec3 color_multiplier);
   std::vector<Particle> particles;
 
  private:
@@ -42,12 +46,14 @@ class ParticleGenerator {
   GLuint firstUnusedParticle();
   void respawn(Particle& particle,
                std::shared_ptr<Player> object,
+               glm::vec3 velocity,
+               glm::vec4 color,
                glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f));
 
   // sorts based on distance from camera
   struct ParticleSort {
     ParticleSort(glm::vec3 pos) { this->pos = pos; }
-    bool operator () (const Particle& p1, const Particle& p2) {
+    bool operator()(const Particle& p1, const Particle& p2) {
       return glm::distance(pos, p1.Position) > glm::distance(pos, p2.Position);
     }
 

@@ -5,18 +5,21 @@
 #include "TimingConstants.h"
 #include "InputBindings.h"
 
+#define PASSIVE_PARTICLE_COUNT 3000
+#define JUMP_PARTICLE_COUNT 300
+
 GameState::GameState(std::shared_ptr<Level> level,
                      std::shared_ptr<GameCamera> camera,
                      std::shared_ptr<Player> player,
                      std::shared_ptr<Sky> sky,
-                     GLFWwindow* window,
-                     std::shared_ptr<ParticleGenerator> particles)
+                     GLFWwindow* window)
     : level(level),
       camera(camera),
       player(player),
       sky(sky),
       window(window),
-      particles(particles),
+      particles(std::make_shared<ParticleGenerator>(PASSIVE_PARTICLE_COUNT)),
+      jump_particles(std::make_shared<ParticleGenerator>(JUMP_PARTICLE_COUNT)),
       elapsed_ticks(0),
       start_tick(0),
       start_time(0),
@@ -195,4 +198,8 @@ SoundEffects GameState::GetSoundEffects() {
 
 std::shared_ptr<ParticleGenerator> GameState::GetParticles() {
   return particles;
+}
+
+std::shared_ptr<ParticleGenerator> GameState::GetJumpParticles() {
+  return jump_particles;
 }
