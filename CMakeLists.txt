@@ -25,13 +25,27 @@ if (UNIX AND NOT APPLE)
    set(LINUX TRUE)
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-   add_definitions(-DDEBUG)
-endif()
-add_definitions(-DASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
-
 add_executable(${CMAKE_PROJECT_NAME} ${RHYTHM_RUNNER_MAIN} ${SOURCES} ${HEADERS} ${GLSL})
 add_executable(LevelEditor ${LEVEL_EDITOR_MAIN} ${SOURCES} ${HEADERS} ${GLSL})
+
+if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+   add_definitions(-DDEBUG)
+   add_definitions(-DASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
+else()
+   # Use a relative path to the assets dir when doing a release build.
+   # Visual Studio will not be able to run release builds properly because
+   # it sets the current directory of the process outside of its own directory.
+   # http://stackoverflow.com/questions/4815423/how-do-i-set-the-working-directory-to-the-solution-directory-in-c
+   add_definitions(-DASSET_DIR="assets")
+   add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+         "${CMAKE_SOURCE_DIR}/assets"
+         "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/assets")
+   add_custom_command(TARGET LevelEditor POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+         "${CMAKE_SOURCE_DIR}/assets"
+         "$<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/assets")
+endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)

@@ -9,12 +9,12 @@
 
 <body>
   <div class="container asdf">
-    <h1><b>Rhythm Runner</b></h1>
+    <h1><b>Rhythm Runner</b> <a class="link-button btn btn-default btn-primary" href="https://github.com/bbeck13/RhythmRunner/releases/latest">Download Latest Release on GitHub</a></h1>
     <h2><em>You took candy from a stranger at Burning Man 2020...</em></h2>
     <p>Now you must guide your astral bike to safety. Feel the music and let it guide you home. Collect the most notes so you can brag to your family and friends about how you totally ran the rhythm.</p>
     <h2>Team</h2>
     <p>Alex Ottoboni, Braden Beck, Matthew Stewart, Alex Nguyen, Joseph Arhar, with object models by Ansley Chen</p>
-    <img src="team.jpg">
+    <img id="team-header" src="team.jpg" onmouseover="headerOver()" onmouseout="headerOut()">
     <h2>User Guide</h2>
     <p>Press the spacebar to jump, press it again to double jump. Use A and D to move left and right to avoid obstacles. Collect the notes for points and the pills for "power ups". Run the Rhythm!</p>
     <img src="guide.png">
@@ -68,6 +68,12 @@
     }
     function footerOut() {
       $('#team-footer').attr('src', 'team2.jpg');
+    }
+    function headerOver() {
+      $('#team-header').attr('src', 'team4.jpg');
+    }
+    function headerOut() {
+      $('#team-header').attr('src', 'team.jpg');
     }
   </script>
 </body>
