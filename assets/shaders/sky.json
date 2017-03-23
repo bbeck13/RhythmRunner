@@ -1,16 +1,19 @@
 {
-  "attributes": [
-    "vertPos",
-    "vertNor",
-    "vertTex"
-  ],
-  "frag": "sky_frag.glsl",
-  "name": "sky_prog",
-  "uniforms": [
-    "P",
-    "V",
-    "MV",
-    "Texture0"
-  ],
-  "vert": "sky_vert.glsl"
+   "attributes": [
+      "vertPos",
+      "vertNor",
+      "vertTex"
+   ],
+   "frag": "sky_frag.glsl",
+   "name": "sky_prog",
+   "uniforms": [
+      "P",
+      "V",
+      "MV",
+      "Texture0",
+      "LS",
+      "lightDir",
+      "shadowDepth"
+   ],
+   "vert": "sky_vert.glsl"
 }

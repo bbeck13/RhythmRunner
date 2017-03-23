@@ -40,37 +40,10 @@
 std::unordered_map<std::string, std::shared_ptr<Program>>
     GameRenderer::programs;
 GLuint GameRenderer::hdrFBO;
+GLuint GameRenderer::rboDepth;
 GLuint GameRenderer::hdrColorBuffers[2];
 GLuint GameRenderer::pingpongFBO[2];
 GLuint GameRenderer::pingpongColorbuffers[2];
-
-namespace {
-
-void DrawPhysicalObjectTree(std::shared_ptr<Program> program,
-                            MatrixStack P,
-                            MatrixStack V,
-                            std::shared_ptr<PhysicalObject> physical_object) {
-  std::queue<std::shared_ptr<PhysicalObject>> queue;
-  queue.push(physical_object);
-
-  while (!queue.empty()) {
-    std::shared_ptr<PhysicalObject> object = queue.front();
-    queue.pop();
-
-    glUniformMatrix4fv(program->getUniform("P"), 1, GL_FALSE,
-                       glm::value_ptr(P.topMatrix()));
-    glUniformMatrix4fv(program->getUniform("V"), 1, GL_FALSE,
-                       glm::value_ptr(V.topMatrix()));
-    glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
-                       glm::value_ptr(object->GetTransform()));
-    object->GetModel()->draw(program);
-
-    for (std::shared_ptr<PhysicalObject> sub_object : object->GetSubObjects()) {
-      queue.push(sub_object);
-    }
-  }
-}
-}
 
 GameRenderer::GameRenderer() {}
 
@@ -212,7 +185,8 @@ std::unordered_set<std::shared_ptr<GameObject>>* GameRenderer::GetObjectsInView(
 
 MainProgramMode GameRenderer::Render(GLFWwindow* window,
                                      std::shared_ptr<GameState> game_state) {
-  RenderObjects(window, game_state);
+  light_dir = game_state->GetCamera()->getPosition();
+  RenderLevel(window, game_state);
   glClear(GL_DEPTH_BUFFER_BIT);
   RenderMinimap(window, game_state);
   MainProgramMode next_mode = ImGuiRenderGame(game_state);
@@ -224,7 +198,8 @@ MainProgramMode GameRenderer::RenderCameraSetup(
     GLFWwindow* window,
     std::shared_ptr<GameState> game_state) {
   MainProgramMode program_mode = MainProgramMode::SET_CAMERA;
-  RenderObjects(window, game_state);
+  light_dir = game_state->GetCamera()->getPosition();
+  RenderLevel(window, game_state);
   glClear(GL_DEPTH_BUFFER_BIT);
   ImGuiRenderBegin(game_state);
   RendererSetup::ImGuiTopLeftCornerWindow(0.3, RendererSetup::STATIC);
@@ -245,7 +220,8 @@ MainProgramMode GameRenderer::RenderCameraSetup(
 LevelProgramMode GameRenderer::RenderLevelEditor(
     GLFWwindow* window,
     std::shared_ptr<GameState> game_state) {
-  RenderObjects(window, game_state);
+  light_dir = game_state->GetCamera()->getPosition();
+  RenderLevel(window, game_state);
   glClear(GL_DEPTH_BUFFER_BIT);
   RenderMinimap(window, game_state);
   LevelProgramMode next_mode = ImGuiRenderEditor(game_state);
@@ -326,12 +302,40 @@ void GameRenderer::RenderMinimap(GLFWwindow* window,
   V->popMatrix();
 }
 
+void GameRenderer::DrawPhysicalObjectTree(
+    std::shared_ptr<Program> program,
+    MatrixStack P,
+    MatrixStack V,
+    std::shared_ptr<PhysicalObject> physical_object) const {
+  std::queue<std::shared_ptr<PhysicalObject>> queue;
+  queue.push(physical_object);
+  while (!queue.empty()) {
+    std::shared_ptr<PhysicalObject> object = queue.front();
+    queue.pop();
+
+    glUniformMatrix4fv(program->getUniform("P"), 1, GL_FALSE,
+                       glm::value_ptr(P.topMatrix()));
+    glUniformMatrix4fv(program->getUniform("V"), 1, GL_FALSE,
+                       glm::value_ptr(V.topMatrix()));
+    glUniformMatrix4fv(program->getUniform("MV"), 1, GL_FALSE,
+                       glm::value_ptr(object->GetTransform()));
+    object->GetModel()->draw(program);
+
+    for (std::shared_ptr<PhysicalObject> sub_object : object->GetSubObjects()) {
+      queue.push(sub_object);
+    }
+  }
+}
 void GameRenderer::RenderSingleObject(std::shared_ptr<GameObject> object,
                                       std::shared_ptr<Program> program,
                                       std::shared_ptr<Texture> texture,
                                       std::shared_ptr<MatrixStack> P,
                                       std::shared_ptr<MatrixStack> V) {
   program->bind();
+  glUniform1i(program->getUniform("shadowDepth"), 1);
+  glUniform3f(program->getUniform("lightDir"), light_dir.x, light_dir.y,
+              light_dir.z);
+  glUniformMatrix4fv(program->getUniform("LS"), 1, GL_FALSE, value_ptr(LSpace));
   texture->bind(program->getUniform("Texture0"));
   DrawPhysicalObjectTree(program, *P, *V,
                          std::static_pointer_cast<PhysicalObject>(object));
@@ -488,6 +492,56 @@ void GameRenderer::RenderLevelCollectibles(
   }
 }
 
+void GameRenderer::RenderLevel(GLFWwindow* window,
+                               std::shared_ptr<GameState> game_state) {
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+  glClear(GL_DEPTH_BUFFER_BIT);
+  glCullFace(GL_FRONT);
+
+  // set up shadow shader
+  programs["depth_prog"]->bind();
+  mat4 ortho = glm::ortho<float>(-10, 10, -10, 10, 0.1, 30);
+  // fill in the glUniform call to send to the right shader!
+  glm::value_ptr(ortho);
+  mat4 cam = glm::lookAt(light_dir, vec3(0, 0, 0), vec3(0, 1, 0));
+  glUniformMatrix4fv(programs["depth_prog"]->getUniform("LV"), 1, GL_FALSE,
+                     glm::value_ptr(cam));
+  LSpace = ortho * cam;
+  RenderDepth(window, game_state);
+
+  programs["depth_prog"]->unbind();
+  glCullFace(GL_BACK);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+  glBindTexture(GL_TEXTURE_2D, rboDepth);
+  RenderObjects(window, game_state);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  Bloom(width, height);
+}
+
+void GameRenderer::RenderDepth(GLFWwindow* window,
+                               std::shared_ptr<GameState> game_state) {
+  std::shared_ptr<GameCamera> camera = game_state->GetCamera();
+  std::shared_ptr<Player> player = game_state->GetPlayer();
+  std::unordered_set<std::shared_ptr<GameObject>>* objects =
+      game_state->GetObjectsInView();
+
+  glUniformMatrix4fv(programs["depth_prog"]->getUniform("M"), 1, GL_FALSE,
+                     glm::value_ptr(player->GetTransform()));
+  player->GetModel()->draw(programs["depth_prog"]);
+  for (std::shared_ptr<GameObject> obj : *objects) {
+    glUniformMatrix4fv(programs["depth_prog"]->getUniform("M"), 1, GL_FALSE,
+                       glm::value_ptr(obj->GetTransform()));
+    obj->GetModel()->draw(programs["depth_prog"]);
+  }
+}
+
 void GameRenderer::RenderObjects(GLFWwindow* window,
                                  std::shared_ptr<GameState> game_state) {
   std::shared_ptr<Level> level = game_state->GetLevel();
@@ -495,7 +549,6 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   std::shared_ptr<Player> player = game_state->GetPlayer();
   std::shared_ptr<Sky> sky = game_state->GetSky();
 
-  glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
   if (game_state->GetPlayer()->Tripping() == Player::Trip::DMT) {
     float r = ((double)rand() / (RAND_MAX));
     float g = ((double)rand() / (RAND_MAX));
@@ -585,10 +638,6 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
 
   P->popMatrix();
   V->popMatrix();
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-  Bloom(width, height);
 }
 
 void GameRenderer::RenderParticles(std::shared_ptr<ParticleGenerator> particles,
@@ -634,7 +683,6 @@ void GameRenderer::InitBloom(int width, int height) {
                            GL_TEXTURE_2D, hdrColorBuffers[i], 0);
   }
   // depth framebuffer
-  GLuint rboDepth;
   glGenRenderbuffers(1, &rboDepth);
   glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);

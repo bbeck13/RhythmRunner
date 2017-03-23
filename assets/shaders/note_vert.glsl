@@ -12,8 +12,8 @@ out vec3 geomNor;
 out vec4 geomPos;
 
 void main() {
-  gl_Position = P * V * MV * vertPos;
-  geomNor = (MV * vec4(vertNor, 0.0)).xyz;
-  geomPos = vec4(MV * vec4(vertPos.xyz, 1.0));
-  obj_color = in_obj_color;
+   gl_Position = P * V * MV * vertPos;
+   geomNor = (MV * vec4(vertNor, 0.0)).xyz;
+   geomPos = vec4(MV * vec4(vertPos.xyz, 1.0));
+   obj_color = in_obj_color;
 }

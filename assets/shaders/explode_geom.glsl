@@ -15,7 +15,7 @@ uniform int timeCollected;
 
 vec4 explode(vec4 position, vec3 normal) {
    vec3 direction = normal * timeCollected/3.0;
-   return position + vec4(direction, 0.0f); 
+   return position + vec4(direction, 0.0f);
 }
 
 void main() {
@@ -23,7 +23,7 @@ void main() {
    fragPos = geomPos[0];
    obj_color_out = obj_color[0];
 
-   if (isCollected == 1) {   
+   if (isCollected == 1) {
       gl_Position = explode(gl_in[0].gl_Position, geomNor[0]);
       EmitVertex();
 

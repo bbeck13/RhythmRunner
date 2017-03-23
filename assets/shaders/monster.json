@@ -1,16 +1,19 @@
 {
-  "attributes": [
-    "vertPos",
-    "vertNor",
-    "vertTex"
-  ],
-  "frag": "player_frag.glsl",
-  "name": "monster_prog",
-  "uniforms": [
-    "P",
-    "V",
-    "MV",
-    "Texture0"
-  ],
-  "vert": "player_vert.glsl"
+   "attributes": [
+      "vertPos",
+      "vertNor",
+      "vertTex"
+   ],
+   "frag": "player_frag.glsl",
+   "name": "monster_prog",
+   "uniforms": [
+      "P",
+      "V",
+      "MV",
+      "Texture0",
+      "LS",
+      "lightDir",
+      "shadowDepth"
+   ],
+   "vert": "player_vert.glsl"
 }

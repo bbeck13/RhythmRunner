@@ -13,39 +13,39 @@ layout (location = 1) out vec4 brightColor;
 
 uniform int numLights;
 uniform struct Light {
-  vec4 position;
-  vec3 color;
-  float attenuation;
-  float ambient;
-  float angle;
-  float direction;
+   vec4 position;
+   vec3 color;
+   float attenuation;
+   float ambient;
+   float angle;
+   float direction;
 } allLights[MAX_LIGHTS];
 
 vec3 ComputeLight(Light light, vec4 surfaceColor, vec3 normal, vec4 position) {
-  vec3 surfaceToLight;
-  float attenuation = 1.0;
-  surfaceToLight = normalize(light.position.xyz);
-  attenuation = 1.0;
-  vec3 ambient = light.ambient * surfaceColor.rgb * light.color;
-  float diffuseCoef = max(0.0, dot(normal, surfaceToLight));
-  vec3 diffuse = diffuseCoef * surfaceColor.rgb * light.color;
-  return ambient + attenuation*(diffuse);
+   vec3 surfaceToLight;
+   float attenuation = 1.0;
+   surfaceToLight = normalize(light.position.xyz);
+   attenuation = 1.0;
+   vec3 ambient = light.ambient * surfaceColor.rgb * light.color;
+   float diffuseCoef = max(0.0, dot(normal, surfaceToLight));
+   vec3 diffuse = diffuseCoef * surfaceColor.rgb * light.color;
+   return ambient + attenuation*(diffuse);
 }
 
 void main() {
-  Light light;
-  light.position = vec4(100, 1000, -4, 0);
-  light.color = light.color + 0.5;
-  light.color = texture(SkyTexture0, fragTexCoord).rgb + 0.5;
-  light.attenuation = 10;
-  light.ambient = 0.8;
-  light.angle = 0;
-  light.direction = 0;
-  vec4 surfaceColor = texture(Texture0, fragTexCoord) + vec4(0.1, 0.3, 0.9, 1);
-  color = vec4(ComputeLight(light, surfaceColor, fragNor, fragPos), 1);
-  float brightness = dot(color, vec4(0.3126, 0.5152, 0.2722, 0.0));
-  if (brightness > 0.8)
-    brightColor = color;
-  else
-    brightColor = vec4(0.0, 0.0, 0.0, 1.0);
+   Light light;
+   light.position = vec4(100, 1000, -4, 0);
+   light.color = light.color + 0.5;
+   light.color = texture(SkyTexture0, fragTexCoord).rgb + 0.5;
+   light.attenuation = 10;
+   light.ambient = 0.8;
+   light.angle = 0;
+   light.direction = 0;
+   vec4 surfaceColor = texture(Texture0, fragTexCoord) + vec4(0.1, 0.3, 0.9, 1);
+   color = vec4(ComputeLight(light, surfaceColor, fragNor, fragPos), 1);
+   float brightness = dot(color, vec4(0.3126, 0.5152, 0.2722, 0.0));
+   if (brightness > 0.8)
+      brightColor = color;
+   else
+      brightColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

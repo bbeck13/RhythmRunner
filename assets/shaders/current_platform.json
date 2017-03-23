@@ -1,16 +1,19 @@
 {
-  "attributes": [
-    "vertPos",
-    "vertNor",
-    "vertTex"
-  ],
-  "frag": "current_platform_frag.glsl",
-  "name": "current_platform_prog",
-  "uniforms": [
-    "P",
-    "V",
-    "MV",
-    "Texture0"
-  ],
-  "vert": "current_platform_vert.glsl"
+   "attributes": [
+      "vertPos",
+      "vertNor",
+      "vertTex"
+   ],
+   "frag": "current_platform_frag.glsl",
+   "name": "current_platform_prog",
+   "uniforms": [
+      "P",
+      "V",
+      "MV",
+      "Texture0",
+      "LS",
+      "lightDir",
+      "shadowDepth"
+   ],
+   "vert": "current_platform_vert.glsl"
 }

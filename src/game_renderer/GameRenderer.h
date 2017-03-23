@@ -40,6 +40,11 @@ class GameRenderer {
   static std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView(
       std::shared_ptr<std::vector<glm::vec4>> vfplane,
       std::shared_ptr<Octree> tree);
+  void DrawPhysicalObjectTree(
+      std::shared_ptr<Program> program,
+      MatrixStack P,
+      MatrixStack V,
+      std::shared_ptr<PhysicalObject> physical_object) const;
 
   static void InitBloom(int height, int width);
   void Bloom(int height, int width);
@@ -84,6 +89,8 @@ class GameRenderer {
       SecondaryType type_to_render,
       std::shared_ptr<MatrixStack> P,
       std::shared_ptr<MatrixStack> V);
+  void RenderLevel(GLFWwindow* window, std::shared_ptr<GameState> game_state);
+  void RenderDepth(GLFWwindow* window, std::shared_ptr<GameState> game_state);
 
   void RenderMinimap(GLFWwindow* window, std::shared_ptr<GameState> game_state);
   void ImGuiRenderBegin(std::shared_ptr<GameState> game_state);
@@ -100,9 +107,12 @@ class GameRenderer {
   static GLuint hdrColorBuffers[2];
   static GLuint pingpongFBO[2];
   static GLuint pingpongColorbuffers[2];
+  static GLuint rboDepth;
   GLuint quadVAO = 0;
   GLuint quadVBO;
   GLboolean bloom = true;
+  glm::vec3 light_dir = glm::vec3(1, 1, 1);
+  glm::mat4 LSpace;
 };
 
 #endif

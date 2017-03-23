@@ -13,8 +13,8 @@ out vec2 fragTexCoord;
 
 
 void main() {
-  gl_Position = P * V * MV * vertPos;
-  fragNor = (MV * vec4(vertNor, 0.0)).xyz;
-  fragPos = vec4(MV * vec4(vertPos.xyz, 1.0));
-  fragTexCoord = vertTex;
+   gl_Position = P * V * MV * vertPos;
+   fragNor = (MV * vec4(vertNor, 0.0)).xyz;
+   fragPos = vec4(MV * vec4(vertPos.xyz, 1.0));
+   fragTexCoord = vertTex;
 }

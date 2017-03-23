@@ -1,0 +1,15 @@
+{
+   "attributes": [
+      "vertPos",
+      "vertNor",
+      "vertTex"
+   ],
+   "frag": "depth_frag.glsl",
+   "name": "depth_prog",
+   "uniforms": [
+      "LP",
+      "LV",
+      "M"
+   ],
+   "vert": "depth_vert.glsl"
+}

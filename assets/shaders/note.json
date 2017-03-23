@@ -1,19 +1,22 @@
 {
-  "attributes": [
-    "vertPos",
-    "vertNor",
-    "vertTex"
-  ],
-  "frag": "note_frag.glsl",
-  "name": "note_prog",
-  "uniforms": [
-    "P",
-    "V",
-    "MV",
-    "in_obj_color",
-    "isCollected",
-    "timeCollected"
-  ],
-  "vert": "note_vert.glsl",
-  "geom": "explode_geom.glsl"
+   "attributes": [
+      "vertPos",
+      "vertNor",
+      "vertTex"
+   ],
+   "frag": "note_frag.glsl",
+   "name": "note_prog",
+   "uniforms": [
+      "P",
+      "V",
+      "MV",
+      "in_obj_color",
+      "isCollected",
+      "timeCollected",
+      "LS",
+      "lightDir",
+      "shadowDepth"
+   ],
+   "vert": "note_vert.glsl",
+   "geom": "explode_geom.glsl"
 }

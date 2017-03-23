@@ -1,17 +1,20 @@
 {
-  "attributes": [
-    "vertPos",
-    "vertNor",
-    "vertTex"
-  ],
-  "frag": "dropping_plat_down.glsl",
-  "name": "moving_platform_prog",
-  "uniforms": [
-    "P",
-    "V",
-    "MV",
-    "Texture0",
-    "SkyTexture0"
-  ],
-  "vert": "moving_platform_vert.glsl"
+   "attributes": [
+      "vertPos",
+      "vertNor",
+      "vertTex"
+   ],
+   "frag": "dropping_plat_down.glsl",
+   "name": "moving_platform_prog",
+   "uniforms": [
+      "P",
+      "V",
+      "MV",
+      "Texture0",
+      "SkyTexture0",
+      "LS",
+      "lightDir",
+      "shadowDepth"
+   ],
+   "vert": "moving_platform_vert.glsl"
 }

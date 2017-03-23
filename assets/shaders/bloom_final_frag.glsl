@@ -9,13 +9,13 @@ uniform float exposure;
 
 void main()
 {
-  const float gamma = 1.2;
-  vec3 hdrColor = texture(scene, fragTexCoord).rgb;
-  vec3 bloomColor = texture(bloomBlur, fragTexCoord).rgb;
-  if(bloom)
-    hdrColor += bloomColor * exposure; // additive blending
-  // tone mapping
-  vec3 result = vec3(1.0) - exp(-hdrColor);
-  result = pow(result, vec3(1.0 / gamma));
-  color = vec4(result, 1.0f);
+   const float gamma = 1.2;
+   vec3 hdrColor = texture(scene, fragTexCoord).rgb;
+   vec3 bloomColor = texture(bloomBlur, fragTexCoord).rgb;
+   if(bloom)
+      hdrColor += bloomColor * exposure; // additive blending
+   // tone mapping
+   vec3 result = vec3(1.0) - exp(-hdrColor);
+   result = pow(result, vec3(1.0 / gamma));
+   color = vec4(result, 1.0f);
 }

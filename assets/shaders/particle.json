@@ -1,17 +1,20 @@
 {
-  "attributes": [
-    "vertPos"
-  ],
-  "frag": "particle_frag.glsl",
-  "name": "particle_prog",
-  "uniforms": [
-    "P",
-    "V",
-    "CamUp",
-    "CamRight",
-    "Offset",
-    "Color",
-    "Texture0"
-  ],
-  "vert": "particle_vert.glsl"
+   "attributes": [
+      "vertPos"
+   ],
+   "frag": "particle_frag.glsl",
+   "name": "particle_prog",
+   "uniforms": [
+      "P",
+      "V",
+      "CamUp",
+      "CamRight",
+      "Offset",
+      "Color",
+      "Texture0",
+      "LS",
+      "lightDir",
+      "shadowDepth"
+   ],
+   "vert": "particle_vert.glsl"
 }
