@@ -58,9 +58,17 @@
     <p><a href="https://github.com/bbeck13/RhythmRunner/releases/latest">Download Latest Release</a></p>
     <p><a href="https://github.com/bbeck13/RhythmRunner">Github Repo</a></p>
     <h2>Thanks for Running!</h2>
-    <img src="team2.jpg">
+    <img id="team-footer" onmouseover="footerOver()" onmouseout="footerOut()" src="team2.jpg">
   </div>
   <script src="jquery.min.js"></script>
   <script src="bootstrap.min.js"></script>
+  <script>
+    function footerOver() {
+      $('#team-footer').attr('src', 'team3.jpg');
+    }
+    function footerOut() {
+      $('#team-footer').attr('src', 'team2.jpg');
+    }
+  </script>
 </body>
 </html>
