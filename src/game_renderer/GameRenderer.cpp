@@ -227,7 +227,7 @@ MainProgramMode GameRenderer::RenderCameraSetup(
   RenderObjects(window, game_state);
   glClear(GL_DEPTH_BUFFER_BIT);
   ImGuiRenderBegin(game_state);
-  RendererSetup::ImGuiTopLeftCornerWindow(0.3, RendererSetup::STATIC);
+  RendererSetup::ImGuiTopLeftCornerWindow(0.4, RendererSetup::STATIC);
   ImGui::Begin("Adjust Camera", NULL, RendererSetup::STATIC_WINDOW_FLAGS);
   ImGui::Text("[Enter] To start");
   ImGui::Text("1, 2 for default views");
