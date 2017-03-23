@@ -102,6 +102,8 @@ int main(int argc, char** argv) {
         game_renderer.RenderCameraSetup(window, game_state);
         if (InputBindings::KeyDown(GLFW_KEY_ENTER)) {
           program_mode = MainProgramMode::RESET_GAME;
+          // clear buffered keypresses when starting the game
+          InputBindings::ClearKeyPresses();
         }
         break;
       }
