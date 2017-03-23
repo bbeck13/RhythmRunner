@@ -1,18 +1,24 @@
 .asdf {
-  font-size: 18px;
+  font-size: 22px;
 }
 
 @media (min-width: 48em) {
   .asdf {
-    max-width: 72rem;
+    max-width: 100rem;
   }
 }
 
 .asdf img {
   width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 2px solid #4B57B7;
 }
 
-/* pink, blue, and yellow */
+.asdf iframe {
+  width: 100%;
+  height: 546px;
+}
 
 /* pink */
 /*.asdf p {
@@ -22,9 +28,12 @@
 /* yellow */
 .asdf h1 {
   color: #D2C213;
+  font-size: 80px;
 }
 
 /* blue */
 .asdf h2 {
-  color: #323A7A;
+  /*color: #323A7A;*/
+  color: #4B57B7;
+  font-size: 50px;
 }
