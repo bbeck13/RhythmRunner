@@ -4,6 +4,27 @@
 
 @media (min-width: 48em) {
   .asdf {
-    max-width: 70rem;
+    max-width: 72rem;
   }
+}
+
+.asdf img {
+  width: 100%;
+}
+
+/* pink, blue, and yellow */
+
+/* pink */
+/*.asdf p {
+  color: #CF27AE;
+}*/
+
+/* yellow */
+.asdf h1 {
+  color: #D2C213;
+}
+
+/* blue */
+.asdf h2 {
+  color: #323A7A;
 }
