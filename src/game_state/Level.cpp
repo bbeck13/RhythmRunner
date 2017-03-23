@@ -34,9 +34,13 @@ void Level::SetTree(std::shared_ptr<Octree> tree) {
 }
 
 double Level::GetPower(double progress) {
-  return mapRange(
-      range, std::make_pair(4.0f, 10.0f),
-      Aquila::power(sources->at((int)(((double)sources->size()) * progress))));
+  if ((int)progress < 0 || progress > sources->size()) {
+    return 0;
+  } else {
+    return mapRange(range, std::make_pair(4.0f, 10.0f),
+                    Aquila::power(sources->at(
+                        (int)(((double)sources->size()) * progress))));
+  }
 }
 
 double Level::mapRange(std::pair<double, double> a,

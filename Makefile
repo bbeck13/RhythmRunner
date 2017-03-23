@@ -2,7 +2,7 @@ ifeq ($(OS),Windows_NT)
 	CMAKE_ARGS = -G "Visual Studio 14 2015 Win64"
 	MAKE_CMD = echo windoze
 else
-	CMAKE_ARGS = 
+	CMAKE_ARGS =
 	MAKE_CMD = make
 endif
 
@@ -17,7 +17,12 @@ release_debug:
 
 xcode:
 	git submodule init && git submodule update
-	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=RelWithDebInfo .. -G Xcode && ${MAKE_CMD}
+	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=RelWithDebInfo .. -G Xcode
+	ln -sf build/compile_commands.json .
+
+xcode_release:
+	git submodule init && git submodule update
+	mkdir -p build && cd build && cmake ${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Release .. -G Xcode
 	ln -sf build/compile_commands.json .
 
 release:

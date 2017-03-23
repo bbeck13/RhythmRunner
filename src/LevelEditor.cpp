@@ -20,7 +20,8 @@
 #include "LevelEditorUpdater.h"
 #include "LevelEditorState.h"
 
-#define MUSIC "music/2.wav"
+#define MUSIC "music/4.wav"
+#define LEVEL "levels/level_2"
 
 int main(int argc, char** argv) {
   GLFWwindow* window = RendererSetup::InitOpenGL();
@@ -30,6 +31,7 @@ int main(int argc, char** argv) {
   LevelEditorUpdater updater;
   std::shared_ptr<MenuState> menu_state = std::make_shared<MenuState>();
   menu_state->SetMusicPath(ASSET_DIR "/" MUSIC);
+  menu_state->SetLevelPath(ASSET_DIR "/" LEVEL);
   std::shared_ptr<GameState> game_state;
   LevelProgramMode program_mode = LevelProgramMode::MENU_SCREEN;
   GameRenderer game_renderer;
