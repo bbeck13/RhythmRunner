@@ -23,8 +23,8 @@
 #include "FileSystemUtils.h"
 #include "ParticleGenerator.h"
 
-#define MUSIC "music/3.wav"
-#define LEVEL "levels/demo_level"
+#define MUSIC "music/4.wav"
+#define LEVEL "levels/level_2"
 
 void PrintStatus() {
 #ifdef DEBUG
