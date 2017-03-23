@@ -7,9 +7,11 @@ Rhythm Runner [![Build Status](https://travis-ci.org/bbeck13/RhythmRunner.svg?br
    - [Unix](#unix)
 - [Playing](#playing)
 
+
 About
 -----
 Rhythm Runner is a graphics project for Zoe Wood's [CPE 476 class](http://users.csc.calpoly.edu/~zwood/teaching/csc476/index.html)
+### More info on our [website](https://bbeck13.github.io/RhythmRunner/)
 
 Authors
 -------
@@ -17,7 +19,7 @@ Authors
 - Braden Beck (bbeck13, bnbeck)
 - Matthew Stewart (Matthew-Stewart)
 - Joseph "Joey" Arhar (josepharhar)
-- Alex Nguyen
+- Alex Nguyen (anguy134)
 
 Requirements
 ------------
@@ -53,17 +55,6 @@ A pull can be merged once two people CR it.
 If the feature is testable it should be QA'd, as in someone else compiles it
 and visually verifies that it works. (Test cases are nice too).
 To mark a pull as QA'd comment `QA :emoji:`.
-
-Playing
--------
-Press the spacebar to jump, press it again to double jump. Use A and D to move left and
-right to avoid obstacles. Collect the notes for points and the pills for "power ups".
-Run the Rhythm!
- 
-![Image](./assets/readme/rr.png?raw=true)
-
-**Warning**: Play with caution. 3 out of 5 doctors don't recommend running the rhythm to their
-family.
 
 Cover
 -----
