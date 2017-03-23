@@ -20,6 +20,7 @@ Authors
 - Matthew Stewart (Matthew-Stewart)
 - Joseph "Joey" Arhar (josepharhar)
 - Alex Nguyen (anguy134)
+- Ansley Chen (achen64)
 
 Requirements
 ------------
