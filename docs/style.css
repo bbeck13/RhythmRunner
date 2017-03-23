@@ -1,0 +1,9 @@
+.asdf {
+  font-size: 18px;
+}
+
+@media (min-width: 48em) {
+  .asdf {
+    max-width: 70rem;
+  }
+}
