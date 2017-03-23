@@ -28,9 +28,7 @@ class GameState {
             std::shared_ptr<GameCamera> camera,
             std::shared_ptr<Player> player,
             std::shared_ptr<Sky> sky,
-            GLFWwindow* window,
-            std::shared_ptr<ParticleGenerator> particles =
-                std::shared_ptr<ParticleGenerator>());
+            GLFWwindow* window);
   virtual ~GameState();
 
   std::shared_ptr<Level> GetLevel();
@@ -38,6 +36,7 @@ class GameState {
   std::shared_ptr<Player> GetPlayer();
   std::shared_ptr<Sky> GetSky();
   std::shared_ptr<ParticleGenerator> GetParticles();
+  std::shared_ptr<ParticleGenerator> GetJumpParticles();
   std::unordered_map<std::string, std::shared_ptr<VideoTexture>>
   GetVideoTextures();
   std::unordered_set<std::shared_ptr<GameObject>>* GetObjectsInView();
@@ -75,6 +74,7 @@ class GameState {
   std::shared_ptr<LevelEditorState> level_editor_state;
   GLFWwindow* window;
   std::shared_ptr<ParticleGenerator> particles;
+  std::shared_ptr<ParticleGenerator> jump_particles;
   SoundEffects effects;
 
   double elapsed_ticks;

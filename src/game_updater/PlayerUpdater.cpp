@@ -257,7 +257,9 @@ void PlayerUpdater::Jump(std::shared_ptr<GameState> game_state) {
     player->SetZVelocity(0);
     player->RemoveGround();
 
-    // TODO(jarhar): create a particle effect here?
+    // create a particle effect
+    game_state->GetJumpParticles()->SpawnAll(player, PLAYER_PARTICLE_OFFSET,
+                                             glm::vec3(0.2, 1.2, 0.2));
   }
 }
 
@@ -270,6 +272,10 @@ void PlayerUpdater::Land(std::shared_ptr<GameState> game_state,
   player->SetZVelocity(0);
   player->SetRotationAngle(0);
   ChangeAnimation(game_state, Player::Animation::GROUNDED);
+
+  // create a particle effect
+  game_state->GetJumpParticles()->SpawnAll(player, PLAYER_PARTICLE_OFFSET,
+                                           glm::vec3(1.2, 0.2, 1.2));
 }
 
 void PlayerUpdater::ChangeAnimation(std::shared_ptr<GameState> game_state,

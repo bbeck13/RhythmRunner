@@ -582,6 +582,9 @@ void GameRenderer::RenderObjects(GLFWwindow* window,
   if (game_state->GetParticles()) {
     RenderParticles(game_state->GetParticles(), P, V);
   }
+  if (game_state->GetJumpParticles()) {
+    RenderParticles(game_state->GetJumpParticles(), P, V);
+  }
 
   P->popMatrix();
   V->popMatrix();

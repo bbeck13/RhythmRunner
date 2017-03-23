@@ -283,9 +283,12 @@ uint64_t GameUpdater::CalculateTargetTicks(
 }
 
 void GameUpdater::UpdateParticles(std::shared_ptr<GameState> game_state) {
+  std::shared_ptr<Player> player = game_state->GetPlayer();
+
   game_state->GetParticles()->SortParticles(game_state->GetCamera());
-  game_state->GetParticles()->Update(
-      std::ceil(
-          game_state->GetLevel()->GetPower(game_state->GetProgressRatio())),
-      game_state->GetPlayer(), glm::vec3(-0.3, -1.1, -0.5));
+  game_state->GetParticles()->Update(std::ceil(game_state->GetLevel()->GetPower(
+                                         game_state->GetProgressRatio())),
+                                     player, PLAYER_PARTICLE_OFFSET);
+
+  game_state->GetJumpParticles()->Update(0, player, PLAYER_PARTICLE_OFFSET);
 }

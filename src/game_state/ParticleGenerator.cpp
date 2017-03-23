@@ -8,6 +8,16 @@
 
 #include "ParticleGenerator.h"
 
+#include <algorithm>
+
+static GLfloat RandomVelocity() {
+  return ((rand() % 10) - 5) / 100.0f;
+}
+
+static GLfloat RandomColor() {
+  return 0.1 + ((rand() % 100) / 100.0f);
+}
+
 ParticleGenerator::ParticleGenerator(GLuint amount) : amount(amount) {
   this->init();
 }
@@ -17,13 +27,20 @@ void ParticleGenerator::Update(GLuint newParticles,
                                glm::vec3 offset) {
   for (GLuint i = 0; i < newParticles; ++i) {
     int unusedParticle = this->firstUnusedParticle();
-    this->respawn(this->particles[unusedParticle], object, offset);
+
+    glm::vec3 new_velocity(std::abs(RandomVelocity() * 5),
+                           std::abs(RandomVelocity()),
+                           RandomVelocity() + object->GetZVelocity() * 0.5f);
+
+    this->respawn(this->particles[unusedParticle], object, new_velocity,
+                  glm::vec4(RandomColor(), RandomColor(), RandomColor(), 1.0f),
+                  offset);
   }
 
   for (GLuint i = 0; i < this->amount; ++i) {
     Particle& p = this->particles[i];
-    p.Life -= 1.0f;
     if (p.Life > 0.0f) {
+      p.Life -= 1.0f;
       p.Position -= p.Velocity;
       p.Color.a -= 2.5;
     }
@@ -96,29 +113,42 @@ GLuint ParticleGenerator::firstUnusedParticle() {
 }
 
 void ParticleGenerator::SortParticles(std::shared_ptr<GameCamera> camera) {
-  std::sort(particles.begin(), particles.end(), ParticleSort(camera->getPosition()));
+  std::sort(particles.begin(), particles.end(),
+            ParticleSort(camera->getPosition()));
 }
 
 void ParticleGenerator::respawn(Particle& particle,
                                 std::shared_ptr<Player> object,
+                                glm::vec3 velocity,
+                                glm::vec4 color,
                                 glm::vec3 offset) {
   GLfloat random = ((rand() % 11) - 5) / 10.0f;
-  GLfloat rV1 = ((rand() % 10) - 5) / 100.0f;
-  GLfloat rV2 = ((rand() % 10) - 5) / 100.0f;
-  GLfloat rV3 = ((rand() % 10) - 5) / 100.0f;
-  GLfloat rColor1 = 0.1 + ((rand() % 100) / 100.0f);
-  GLfloat rColor2 = 0.1 + ((rand() % 100) / 100.0f);
-  GLfloat rColor3 = 0.1 + ((rand() % 100) / 100.0f);
   particle.Position =
       glm::vec3(object->GetPosition().x + offset.x + random * 1.3 - 0.5,
                 object->GetPosition().y + offset.y + random,
                 object->GetPosition().z + offset.z + random);
-  particle.Color = glm::vec4(rColor1, rColor2, rColor3, 1.0f);
+  particle.Color = color;
   particle.Life = 80.0f;
-  particle.Velocity =
-      glm::vec3(rV1, std::abs(rV2), object->GetZVelocity() * 0.5f + rV3);
-  if (object->GetZVelocity() == 1) {
-    particle.Velocity = glm::vec3(rV1 * 5, std::abs(rV2), rV3 * 5);
-    particle.Color = glm::vec4(1.0f, rColor2, rColor3 / 2, 0.5f);
+  particle.Velocity = velocity;
+}
+
+// used for jumping and landing
+void ParticleGenerator::SpawnAll(std::shared_ptr<Player> player,
+                                 glm::vec3 offset,
+                                 glm::vec3 color_multiplier) {
+  for (Particle& particle : particles) {
+    float rotation = (rand() / (float)RAND_MAX) * M_PI * 2;
+    float magnitude = rand() / (float)RAND_MAX;
+    glm::vec3 new_velocity(magnitude * std::cos(rotation),
+                           std::abs(RandomVelocity()),
+                           magnitude * std::sin(rotation));
+    new_velocity *= 0.1f;
+    new_velocity +=
+        glm::vec3(-DELTA_X_PER_TICK / 2, 0, player->GetZVelocity() / 2);
+
+    glm::vec3 new_color(RandomColor(), RandomColor(), RandomColor());
+    new_color *= color_multiplier;
+
+    respawn(particle, player, new_velocity, glm::vec4(new_color, 1.0f), offset);
   }
 }
